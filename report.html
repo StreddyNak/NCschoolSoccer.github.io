@@ -9,19 +9,8 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
-        /* New Home Link Style */
-        .home-link {
-            display: inline-block;
-            margin-bottom: 15px;
-            color: #666;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        .home-link:hover {
-            color: #2ecc71;
-            text-decoration: underline;
-        }
+        .home-link { display: inline-block; margin-bottom: 15px; color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+        .home-link:hover { color: #2ecc71; text-decoration: underline; }
 
         h2 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #2ecc71; padding-bottom: 10px; margin-bottom: 20px;}
         .hidden { display: none; }
@@ -29,17 +18,20 @@
         /* Form Fields */
         label { font-weight: 600; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 0.9rem; }
         input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fff; }
-        input:focus, select:focus { border-color: #2ecc71; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: #2ecc71; outline: none; }
         
-        /* Radio Button Group (Game Level) */
-        .radio-group { display: flex; gap: 10px; margin-top: 5px; }
-        .radio-option { flex: 1; position: relative; }
+        /* Radio Groups */
+        .radio-group { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+        .radio-option { position: relative; }
         .radio-option input { opacity: 0; position: absolute; width: 0; height: 0; }
         .radio-option label { 
-            display: block; background: #eee; text-align: center; padding: 12px; 
-            border-radius: 6px; cursor: pointer; margin: 0; font-weight: normal; border: 1px solid #ddd;
+            display: block; background: #f9f9f9; padding: 12px; 
+            border-radius: 6px; cursor: pointer; border: 1px solid #ddd;
         }
-        .radio-option input:checked + label { background: #2ecc71; color: white; border-color: #27ae60; font-weight: bold; }
+        .radio-option input:checked + label { background: #e8f8f5; color: #1a1a1a; border-color: #2ecc71; font-weight: bold; }
+        /* Horizontal layout for simple yes/no or halves */
+        .radio-group.horizontal { flex-direction: row; }
+        .radio-group.horizontal .radio-option { flex: 1; text-align: center; }
 
         /* Buttons */
         .btn-group { margin-top: 25px; display: flex; gap: 10px; }
@@ -50,21 +42,19 @@
 
         /* Progress Bar */
         .progress-bar { height: 4px; background: #eee; margin-bottom: 20px; border-radius: 2px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #2ecc71; width: 50%; transition: width 0.3s ease; }
+        .progress-fill { height: 100%; background: #2ecc71; width: 33%; transition: width 0.3s ease; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <a href="index.html" class="home-link">← Back to Home</a>
-
         <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
 
         <form id="tsoaForm">
             
             <div id="section-1">
                 <h2>Step 1: Official Info</h2>
-                
                 <label>Referee Name</label>
                 <input type="text" id="refName" placeholder="Enter your full name" required>
 
@@ -93,7 +83,7 @@
                 <h2>Step 2: Game Details</h2>
                 
                 <label>Level of Game</label>
-                <div class="radio-group">
+                <div class="radio-group horizontal">
                     <div class="radio-option">
                         <input type="radio" name="gameLevel" id="varsity" value="Varsity">
                         <label for="varsity">Varsity</label>
@@ -104,18 +94,68 @@
                     </div>
                     <div class="radio-option">
                         <input type="radio" name="gameLevel" id="middle" value="Middle School">
-                        <label for="middle">Middle School</label>
+                        <label for="middle">Middle</label>
                     </div>
                 </div>
 
                 <label>Home Team</label>
                 <input type="text" id="homeTeam" placeholder="e.g. Apex High" required>
-
                 <label>Away Team</label>
                 <input type="text" id="awayTeam" placeholder="e.g. Holly Springs" required>
 
                 <div class="btn-group">
                     <button type="button" class="btn-back" onclick="nextSection(1)">Back</button>
+                    <button type="button" class="btn-next" onclick="nextSection(3)">Next Step</button>
+                </div>
+            </div>
+
+            <div id="section-3" class="hidden">
+                <h2>Step 3: CMI Details</h2>
+
+                <label>Type of CMI Reporting</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="cmiType" id="pk" value="Penalty Kick">
+                        <label for="pk">Penalty Kick</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="cmiType" id="red" value="Red Card">
+                        <label for="red">Red Card</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="cmiType" id="disallowFoul" value="Disallowed Goal (Foul)">
+                        <label for="disallowFoul">Disallowed goal for a foul</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="cmiType" id="disallowOff" value="Disallowed Goal (Offside)">
+                        <label for="disallowOff">Disallowed goal for offside</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="cmiType" id="other" value="Other (Use Notes)">
+                        <label for="other">Other (Use Notes)</label>
+                    </div>
+                </div>
+
+                <label>When did this occur?</label>
+                <div class="radio-group horizontal">
+                    <div class="radio-option">
+                        <input type="radio" name="half" id="h1" value="1st Half">
+                        <label for="h1">1st Half</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="half" id="h2" value="2nd Half">
+                        <label for="h2">2nd Half</label>
+                    </div>
+                </div>
+
+                <label>Time Remaining in Half</label>
+                <input type="text" id="timeRemaining" placeholder="e.g. 12:45 or 12 mins">
+
+                <label>Notes (Optional)</label>
+                <textarea id="notes" rows="4" placeholder="Describe the incident..."></textarea>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-back" onclick="nextSection(2)">Back</button>
                     <button type="button" class="btn-next" onclick="submitForm()">Submit Report</button>
                 </div>
             </div>
@@ -130,45 +170,67 @@
     </div>
 
     <script>
-        // *** REPLACE THIS URL BELOW WITH YOUR DEPLOYED SCRIPT URL ***
+        // *** PASTE YOUR DEPLOYED SCRIPT URL HERE ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
 
         function nextSection(step) {
-            if (step === 2) {
-                // Validation Step 1
+            // Navigation Logic
+            document.querySelectorAll('.container > form > div').forEach(div => div.classList.add('hidden'));
+            
+            if (step === 1) {
+                document.getElementById('section-1').classList.remove('hidden');
+                document.getElementById('progress').style.width = "33%";
+            } 
+            else if (step === 2) {
+                // Validate Step 1
                 if(!document.getElementById('refName').value || !document.getElementById('gameDate').value || !document.getElementById('supervisor').value) {
-                    alert("Please fill out all fields.");
+                    alert("Please fill out all fields in Step 1.");
+                    document.getElementById('section-1').classList.remove('hidden');
                     return;
                 }
-                document.getElementById('section-1').classList.add('hidden');
                 document.getElementById('section-2').classList.remove('hidden');
+                document.getElementById('progress').style.width = "66%";
+            } 
+            else if (step === 3) {
+                // Validate Step 2
+                const level = document.querySelector('input[name="gameLevel"]:checked');
+                if(!level || !document.getElementById('homeTeam').value || !document.getElementById('awayTeam').value) {
+                    alert("Please fill out Game Level and Team Names.");
+                    document.getElementById('section-2').classList.remove('hidden');
+                    return;
+                }
+                document.getElementById('section-3').classList.remove('hidden');
                 document.getElementById('progress').style.width = "100%";
-            } else {
-                document.getElementById('section-2').classList.add('hidden');
-                document.getElementById('section-1').classList.remove('hidden');
-                document.getElementById('progress').style.width = "50%";
             }
         }
 
         function submitForm() {
-            // Validation Step 2
-            const level = document.querySelector('input[name="gameLevel"]:checked');
-            if(!level || !document.getElementById('homeTeam').value || !document.getElementById('awayTeam').value) {
-                alert("Please fill out Game Level and Team Names.");
+            // Validate Step 3
+            const cmi = document.querySelector('input[name="cmiType"]:checked');
+            const half = document.querySelector('input[name="half"]:checked');
+            const timeRem = document.getElementById('timeRemaining').value;
+
+            if(!cmi || !half || !timeRem) {
+                alert("Please fill out the CMI Type, Half, and Time Remaining.");
                 return;
             }
 
-            const btn = document.querySelector('#section-2 .btn-next');
+            const btn = document.querySelector('#section-3 .btn-next');
             btn.textContent = "Submitting...";
             btn.disabled = true;
 
+            // Gather ALL Data
             const formData = {
                 refName: document.getElementById('refName').value,
                 gameDate: document.getElementById('gameDate').value,
                 supervisor: document.getElementById('supervisor').value,
-                gameLevel: level.value,
+                gameLevel: document.querySelector('input[name="gameLevel"]:checked').value,
                 homeTeam: document.getElementById('homeTeam').value,
-                awayTeam: document.getElementById('awayTeam').value
+                awayTeam: document.getElementById('awayTeam').value,
+                cmiType: cmi.value,
+                half: half.value,
+                timeRemaining: timeRem,
+                notes: document.getElementById('notes').value
             };
 
             fetch(SCRIPT_URL, {
@@ -176,7 +238,7 @@
                 body: JSON.stringify(formData)
             })
             .then(response => {
-                document.getElementById('section-2').classList.add('hidden');
+                document.getElementById('section-3').classList.add('hidden');
                 document.getElementById('success-view').classList.remove('hidden');
             })
             .catch(error => {
