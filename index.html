@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triangle Soccer Officials Association Presents...</title>
+    <title>TSOA Resources</title>
     <style>
         /* --- RESET & VARIABLES --- */
         :root {
@@ -40,19 +40,21 @@
         .logo-area {
             display: flex;
             flex-direction: column;
+            max-width: 70%; /* Prevent overlapping with admin button on small screens */
         }
 
         h1 {
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem; /* Slightly smaller to accommodate longer text */
             font-weight: 700;
             letter-spacing: 0.5px;
+            line-height: 1.2;
         }
 
         .subtitle {
             font-size: 0.75rem;
             opacity: 0.8;
-            margin-top: 2px;
+            margin-top: 4px;
             font-weight: 300;
         }
 
@@ -67,6 +69,7 @@
             text-decoration: none;
             transition: background 0.2s;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .admin-btn:hover {
@@ -140,8 +143,8 @@
 
     <header>
         <div class="logo-area">
-            <h1>TSOA Portal</h1>
-            <span class="subtitle">Triangle Soccer Officials • Wake County</span>
+            <h1>Triangle Soccer Officials Association Presents...</h1>
+            <span class="subtitle">North Carolina High School Referee Resources</span>
         </div>
         <a class="admin-btn" onclick="triggerAdmin()">Admin Login</a>
     </header>
