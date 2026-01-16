@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triangle Soccer Officials Association</title>
+    <title>Triangle Soccer Officials Association Presents...</title>
     <style>
         /* --- RESET & VARIABLES --- */
         :root {
@@ -115,41 +115,18 @@
             overflow: hidden;
         }
 
-        /* Hover Effects */
         .action-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
-        /* Specific Card Styling */
-        .card-form {
-            border-bottom-color: var(--primary-green);
-        }
+        .card-form { border-bottom-color: var(--primary-green); }
+        .card-jersey { border-bottom-color: #3498db; }
 
-        .card-jersey {
-            border-bottom-color: #3498db;
-        }
+        .icon { font-size: 3rem; margin-bottom: 15px; display: block; }
+        .card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; display: block; }
+        .card-desc { font-size: 0.9rem; color: #666; line-height: 1.4; }
 
-        .icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .card-desc {
-            font-size: 0.9rem;
-            color: #666;
-            line-height: 1.4;
-        }
-
-        /* --- FOOTER --- */
         footer {
             text-align: center;
             padding: 15px;
@@ -157,9 +134,6 @@
             color: #888;
             border-top: 1px solid #e1e1e1;
         }
-
-        /* --- UTILITY CLASSES --- */
-        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -177,8 +151,8 @@
             
             <div class="action-card card-form" onclick="triggerForm()">
                 <span class="icon">📝</span>
-                <span class="card-title">Submit Report</span>
-                <span class="card-desc">Fill out the official match report or evaluation form.</span>
+                <span class="card-title">Submit CMI Form</span>
+                <span class="card-desc">Click here to fill out the CMI form for the 2026 Girl's high school season</span>
             </div>
 
             <div class="action-card card-jersey" onclick="triggerJersey()">
@@ -189,30 +163,25 @@
 
         </div>
     </main>
-
+    
     <footer>
         &copy; 2026 Triangle Soccer Officials Association
     </footer>
 
     <script>
-        // These are placeholders to show where your logic connects
         function triggerForm() {
-    // Navigate to the new report page
-    window.location.href = "report.html"; 
-}
+            window.location.href = "report.html"; 
+        }
 
         function triggerJersey() {
-            // Logic to hide home-view and show jersey-view
+            // Logic for Jersey App (Coming Soon)
             console.log("Going to Jersey App...");
         }
 
         function triggerAdmin() {
-            // Logic to open admin modal or view
             console.log("Opening Admin...");
         }
     </script>
 
 </body>
-
 </html>
-
