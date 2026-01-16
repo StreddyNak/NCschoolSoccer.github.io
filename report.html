@@ -9,6 +9,20 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
+        /* New Home Link Style */
+        .home-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .home-link:hover {
+            color: #2ecc71;
+            text-decoration: underline;
+        }
+
         h2 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #2ecc71; padding-bottom: 10px; margin-bottom: 20px;}
         .hidden { display: none; }
         
@@ -42,6 +56,8 @@
 <body>
 
     <div class="container">
+        <a href="index.html" class="home-link">← Back to Home</a>
+
         <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
 
         <form id="tsoaForm">
@@ -108,8 +124,6 @@
                 <h2 style="border:none; color: #2ecc71;">✓ Success!</h2>
                 <p>Your match report has been filed.</p>
                 <button type="button" class="btn-back" onclick="location.reload()">Submit Another</button>
-                <br><br>
-                <a href="index.html" style="text-decoration:none; color:#888; font-size:0.9rem;">Back to Home</a>
             </div>
 
         </form>
