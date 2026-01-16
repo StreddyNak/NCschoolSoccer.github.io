@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSOA Match Report</title>
+    <style>
+        /* --- TSOA Branding & Mobile Styles --- */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        h2 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #2ecc71; padding-bottom: 10px; margin-bottom: 20px;}
+        .hidden { display: none; }
+        
+        /* Form Fields */
+        label { font-weight: 600; display: block; margin-top: 15px; margin-bottom: 5px; font-size: 0.9rem; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fff; }
+        input:focus, select:focus { border-color: #2ecc71; outline: none; }
+        
+        /* Buttons */
+        .btn-group { margin-top: 25px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-next { background-color: #2ecc71; color: white; }
+        .btn-back { background-color: #e0e0e0; color: #333; }
+        button:hover { opacity: 0.9; }
+
+        /* Progress Bar */
+        .progress-bar { height: 4px; background: #eee; margin-bottom: 20px; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #2ecc71; width: 50%; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+        <form id="tsoaForm">
+            
+            <div id="section-1">
+                <h2>Step 1: Official Info</h2>
+                
+                <label>Referee Name</label>
+                <input type="text" id="refName" placeholder="Enter your full name" required>
+
+                <label>Date of Game</label>
+                <input type="date" id="gameDate" required>
+
+                <label>Regional Supervisor</label>
+                <select id="supervisor" required>
+                    <option value="" disabled selected>Select Supervisor...</option>
+                    <option value="Ben Wooten (Foothills)">Ben Wooten (Foothills)</option>
+                    <option value="Cliff Clement (Eastern)">Cliff Clement (Eastern)</option>
+                    <option value="Darren Dawson (Eastern Plains)">Darren Dawson (Eastern Plains)</option>
+                    <option value="Eric Usher (Western NC)">Eric Usher (Western NC)</option>
+                    <option value="Ernie Fisher (Southeastern)">Ernie Fisher (Southeastern)</option>
+                    <option value="Mark Kadlecik (Triangle)">Mark Kadlecik (Triangle)</option>
+                    <option value="Roger Morgan (Albemarle)">Roger Morgan (Albemarle)</option>
+                    <option value="Roger Morton (Piedmont)">Roger Morton (Piedmont)</option>
+                </select>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-next" onclick="nextSection(2)">Next Step</button>
+                </div>
+            </div>
+
+            <div id="section-2" class="hidden">
+                <h2>Step 2: Game Details</h2>
+                <p style="color:#666; font-style:italic;">(Additional questions will go here...)</p>
+                
+                <label>Notes (Optional)</label>
+                <textarea id="section2" rows="4"></textarea>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-back" onclick="nextSection(1)">Back</button>
+                    <button type="button" class="btn-next" onclick="submitForm()">Submit Report</button>
+                </div>
+            </div>
+
+            <div id="success-view" class="hidden" style="text-align: center;">
+                <h2 style="border:none; color: #2ecc71;">✓ Success!</h2>
+                <p>Your match report has been filed.</p>
+                <button type="button" class="btn-back" onclick="location.reload()">Submit Another</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        // *** IMPORTANT: PASTE YOUR GOOGLE SCRIPT URL HERE ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
+
+        function nextSection(step) {
+            // Simple logic to toggle visibility
+            if (step === 2) {
+                // Validation for Step 1
+                if(!document.getElementById('refName').value || !document.getElementById('gameDate').value || !document.getElementById('supervisor').value) {
+                    alert("Please fill out all fields.");
+                    return;
+                }
+                document.getElementById('section-1').classList.add('hidden');
+                document.getElementById('section-2').classList.remove('hidden');
+                document.getElementById('progress').style.width = "100%";
+            } else {
+                document.getElementById('section-2').classList.add('hidden');
+                document.getElementById('section-1').classList.remove('hidden');
+                document.getElementById('progress').style.width = "50%";
+            }
+        }
+
+        function submitForm() {
+            const btn = document.querySelector('#section-2 .btn-next');
+            btn.textContent = "Submitting...";
+            btn.disabled = true;
+
+            // Gather Data
+            const formData = {
+                refName: document.getElementById('refName').value,
+                gameDate: document.getElementById('gameDate').value,
+                supervisor: document.getElementById('supervisor').value,
+                section2: document.getElementById('section2').value
+            };
+
+            // Send to Google Sheet
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                document.getElementById('section-2').classList.add('hidden');
+                document.getElementById('success-view').classList.remove('hidden');
+            })
+            .catch(error => {
+                alert("Error submitting form. Please try again.");
+                btn.textContent = "Submit Report";
+                btn.disabled = false;
+            });
+        }
+    </script>
+
+</body>
+</html>
