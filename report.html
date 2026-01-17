@@ -34,8 +34,8 @@
         }
         input:focus, select:focus, textarea:focus { border-color: #2ecc71; outline: none; }
         
-        /* --- Subtext Styling (NEW) --- */
-        .subtext { font-size: 0.85rem; color: #666; margin-top: 8px; line-height: 1.4; }
+        /* --- Subtext Styling (Adjusted for placement above input) --- */
+        .subtext { font-size: 0.85rem; color: #666; margin-bottom: 10px; line-height: 1.4; }
         .subtext ul { margin: 5px 0 0 20px; padding: 0; }
         .subtext li { margin-bottom: 3px; }
 
@@ -199,7 +199,6 @@
                 </div>
 
                 <label>Time Remaining in Half</label>
-                <input type="text" id="timeRemaining">
                 <div class="subtext">
                     As much information as you can provide is valuable. Any of the below are useful:
                     <ul>
@@ -209,12 +208,13 @@
                         <li>"Late in the 1st half"</li>
                     </ul>
                 </div>
+                <input type="text" id="timeRemaining">
 
                 <label>Notes (Optional)</label>
-                <textarea id="notes" rows="3"></textarea>
                 <div class="subtext">
                     This is not required and is only needed if you are trying to provide relevant information.
                 </div>
+                <textarea id="notes" rows="3"></textarea>
 
                 <div class="btn-group">
                     <button type="button" class="btn-back" onclick="nextSection(2)">Back</button>
