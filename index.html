@@ -40,12 +40,12 @@
         .logo-area {
             display: flex;
             flex-direction: column;
-            max-width: 70%; /* Prevent overlapping with admin button on small screens */
+            max-width: 70%;
         }
 
         h1 {
             margin: 0;
-            font-size: 1.1rem; /* Slightly smaller to accommodate longer text */
+            font-size: 1.1rem;
             font-weight: 700;
             letter-spacing: 0.5px;
             line-height: 1.2;
@@ -90,16 +90,16 @@
         /* --- ACTION CARDS --- */
         .card-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 1000px; /* Increased width to fit 3 cards */
             display: grid;
             grid-template-columns: 1fr; /* Default mobile: stacked */
             gap: 20px;
         }
 
-        /* Tablet/Desktop: Side by Side */
-        @media (min-width: 768px) {
+        /* Desktop: 3 Columns */
+        @media (min-width: 900px) {
             .card-container {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 1fr 1fr;
             }
         }
 
@@ -116,6 +116,11 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
         }
 
         .action-card:hover {
@@ -123,8 +128,10 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
 
+        /* Card Accent Colors */
         .card-form { border-bottom-color: var(--primary-green); }
         .card-jersey { border-bottom-color: #3498db; }
+        .card-vault { border-bottom-color: #9b59b6; } /* Premium Purple */
 
         .icon { font-size: 3rem; margin-bottom: 15px; display: block; }
         .card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; display: block; }
@@ -155,7 +162,7 @@
             <div class="action-card card-form" onclick="triggerForm()">
                 <span class="icon">📝</span>
                 <span class="card-title">Submit CMI Form</span>
-                <span class="card-desc">Click here to fill out the CMI form for the 2026 Girl's high school season</span>
+                <span class="card-desc">Fill out the official CMI form for the 2026 Girl's season.</span>
             </div>
 
             <div class="action-card card-jersey" onclick="triggerJersey()">
@@ -164,11 +171,17 @@
                 <span class="card-desc">Check school colors and kit conflicts.</span>
             </div>
 
+            <div class="action-card card-vault" onclick="triggerVault()">
+                <span class="icon">🎥</span>
+                <span class="card-title">Video Vault</span>
+                <span class="card-desc">Browse our library of 800+ educational clips.</span>
+            </div>
+
         </div>
     </main>
     
     <footer>
-        &copy; NickNak Productions -and- Triangle Soccer Officials Association
+        &copy; 2026 Triangle Soccer Officials Association
     </footer>
 
     <script>
@@ -177,14 +190,17 @@
         }
 
         function triggerJersey() {
-    window.location.href = "jersey.html"; 
-}
+            window.location.href = "jersey.html";
+        }
+
+        function triggerVault() {
+            window.location.href = "vault.html";
+        }
 
         function triggerAdmin() {
-            console.log("Opening Admin...");
+            window.location.href = "admin.html";
         }
     </script>
 
 </body>
 </html>
-
