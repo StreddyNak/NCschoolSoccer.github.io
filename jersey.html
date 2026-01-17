@@ -5,50 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Triangle Soccer Officials - Kit Search</title>
     <style>
-        /* --- General Styles --- */
         body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; padding: 20px; background-color: #f3f4f6; color: #1f2937; }
         .container { max-width: 800px; margin: 0 auto; }
-
-        /* --- Navigation --- */
         .nav-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
         .nav-link { text-decoration: none; color: #4b5563; font-weight: 500; padding: 8px 12px; border-radius: 6px; font-size: 14px; }
         .nav-link:hover { background-color: #e5e7eb; color: #111827; }
         .nav-link.active { background-color: #2563eb; color: white; }
 
-        /* --- Search Section --- */
         .search-wrapper { text-align: center; margin-bottom: 20px; }
-        #searchInput { width: 100%; max-width: 400px; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 18px; outline: none; transition: border-color 0.2s; }
+        #searchInput { width: 100%; max-width: 400px; padding: 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 18px; outline: none; }
         #searchInput:focus { border-color: #2563eb; }
         
         #searchResults { max-width: 400px; margin: 10px auto; background: white; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); overflow: hidden; display: none; }
         .result-item { padding: 12px 20px; border-bottom: 1px solid #f3f4f6; cursor: pointer; text-align: left; }
         .result-item:hover { background-color: #eff6ff; color: #2563eb; }
-        
-        /* --- Detail Card --- */
-        #schoolDetail { display: none; background: white; border-radius: 16px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; animation: fadeIn 0.3s ease-out; }
+
+        #schoolDetail { display: none; background: white; border-radius: 16px; padding: 30px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; }
         .school-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; color: #111827; }
-        .school-association { font-size: 14px; color: #6b7280; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .school-association { font-size: 14px; color: #6b7280; margin-bottom: 30px; text-transform: uppercase; }
 
         .kits-container { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-bottom: 30px; }
         .kit-box { width: 130px; display: flex; flex-direction: column; align-items: center; }
         .kit-label { margin-top: 10px; font-weight: 600; font-size: 14px; color: #6b7280; text-transform: uppercase; }
-        
-        /* SVG Styling */
         .kit-svg { width: 100%; height: auto; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.15)); }
         .kit-number { font-family: sans-serif; font-weight: bold; font-size: 22px; text-anchor: middle; dominant-baseline: middle; }
 
-        /* Edit Modal */
         .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background-color: white; padding: 24px; border-radius: 12px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
         .input-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .input-group label { display: block; font-size: 10px; font-weight: 700; color: #374151; margin-bottom: 4px; text-transform: uppercase; }
         .input-group input { width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; box-sizing: border-box; }
         
-        .back-btn { background: none; border: none; color: #6b7280; cursor: pointer; margin-bottom: 20px; }
-        .edit-trigger { background-color: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 20px; }
         .btn-submit { background: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Debug Box */
+        #debugBox { font-family: monospace; font-size: 12px; color: red; text-align: center; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
@@ -68,13 +59,13 @@
                 <div id="searchResults"></div>
             </div>
             <p id="loadingText" style="text-align: center; color: #9ca3af; font-size: 14px;">Loading database...</p>
+            <div id="debugBox"></div>
         </div>
 
         <div id="schoolDetail">
-            <button class="back-btn" onclick="showSearch()">← Back to Search</button>
-            
+            <button onclick="showSearch()" style="background:none; border:none; cursor:pointer; margin-bottom:20px; color:#666;">← Back</button>
             <div class="school-title" id="displaySchoolName">School Name</div>
-            <div class="school-association" id="displayAssociation">Association</div>
+            <div class="school-association" id="displayAssociation"></div>
 
             <div class="kits-container">
                 <div class="kit-box">
@@ -86,7 +77,6 @@
                     </svg>
                     <div class="kit-label">Home</div>
                 </div>
-
                 <div class="kit-box">
                     <svg class="kit-svg" viewBox="0 0 100 140">
                         <path id="svgAwayShirt" d="M20 10 L30 5 L70 5 L80 10 L95 30 L85 40 L75 30 L75 80 L25 80 L25 30 L15 40 L5 30 Z" fill="#ccc" stroke="#333" stroke-width="1"/>
@@ -96,8 +86,7 @@
                     </svg>
                     <div class="kit-label">Away</div>
                 </div>
-
-                 <div class="kit-box" id="kitBox3rd" style="display:none;">
+                <div class="kit-box" id="kitBox3rd" style="display:none;">
                     <svg class="kit-svg" viewBox="0 0 100 140">
                         <path id="svg3rdShirt" d="M20 10 L30 5 L70 5 L80 10 L95 30 L85 40 L75 30 L75 80 L25 80 L25 30 L15 40 L5 30 Z" fill="#ccc" stroke="#333" stroke-width="1"/>
                         <text id="svg3rdNumber" x="50" y="45" class="kit-number" fill="#000">10</text>
@@ -107,76 +96,72 @@
                     <div class="kit-label">Alternate</div>
                 </div>
             </div>
-
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 20px;">
-                Last Updated: <span id="displayLastUpdated">-</span>
-            </div>
-
-            <button class="edit-trigger" onclick="openEditModal()">Request Correction</button>
+            
+            <button onclick="openEditModal()" style="margin-top:20px; background:#f3f4f6; border:1px solid #ccc; padding:10px; width:100%; cursor:pointer;">Request Correction</button>
         </div>
     </div>
 
     <div id="editModal" class="modal-overlay">
         <div class="modal-content">
-            <h2 style="margin-top:0;">Edit Kit: <span id="modalSchoolName"></span></h2>
+            <h3>Edit Kit: <span id="modalSchoolName"></span></h3>
             <form id="editForm">
                 <input type="hidden" id="modalSchoolNameInput">
-
-                <div style="background:#f9fafb; padding:10px; border-radius:6px; margin-bottom:10px;">
-                    <h3 style="margin:0 0 5px 0; font-size:12px; color:#555;">HOME</h3>
-                    <div class="input-row">
-                        <div class="input-group"><label>Shirt</label><input type="text" id="inHomeShirt"></div>
-                        <div class="input-group"><label>Accent</label><input type="text" id="inHomeAccent"></div>
-                        <div class="input-group"><label>Shorts</label><input type="text" id="inHomeShort"></div>
-                        <div class="input-group"><label>Socks</label><input type="text" id="inHomeSock"></div>
-                    </div>
+                <div class="input-row">
+                    <div class="input-group"><label>Home Shirt</label><input type="text" id="inHomeShirt"></div>
+                    <div class="input-group"><label>Home Acc</label><input type="text" id="inHomeAccent"></div>
+                    <div class="input-group"><label>Home Short</label><input type="text" id="inHomeShort"></div>
+                    <div class="input-group"><label>Home Sock</label><input type="text" id="inHomeSock"></div>
                 </div>
-
-                <div style="background:#f9fafb; padding:10px; border-radius:6px; margin-bottom:10px;">
-                    <h3 style="margin:0 0 5px 0; font-size:12px; color:#555;">AWAY</h3>
-                    <div class="input-row">
-                        <div class="input-group"><label>Shirt</label><input type="text" id="inAwayShirt"></div>
-                        <div class="input-group"><label>Accent</label><input type="text" id="inAwayAccent"></div>
-                        <div class="input-group"><label>Shorts</label><input type="text" id="inAwayShort"></div>
-                        <div class="input-group"><label>Socks</label><input type="text" id="inAwaySock"></div>
-                    </div>
+                <div class="input-row">
+                    <div class="input-group"><label>Away Shirt</label><input type="text" id="inAwayShirt"></div>
+                    <div class="input-group"><label>Away Acc</label><input type="text" id="inAwayAccent"></div>
+                    <div class="input-group"><label>Away Short</label><input type="text" id="inAwayShort"></div>
+                    <div class="input-group"><label>Away Sock</label><input type="text" id="inAwaySock"></div>
                 </div>
-
-                 <div style="background:#f9fafb; padding:10px; border-radius:6px; margin-bottom:15px;">
-                    <h3 style="margin:0 0 5px 0; font-size:12px; color:#555;">3RD / ALT</h3>
-                    <div class="input-row">
-                        <div class="input-group"><label>Shirt</label><input type="text" id="in3rdShirt"></div>
-                        <div class="input-group"><label>Accent</label><input type="text" id="in3rdAccent"></div>
-                        <div class="input-group"><label>Shorts</label><input type="text" id="in3rdShort"></div>
-                        <div class="input-group"><label>Socks</label><input type="text" id="in3rdSock"></div>
-                    </div>
-                </div>
-
-                <button type="submit" id="submitBtn" class="btn-submit">Submit Request</button>
-                <button type="button" onclick="document.getElementById('editModal').style.display='none'" style="background:none; border:none; color:#666; width:100%; margin-top:10px; cursor:pointer;">Cancel</button>
+                <button type="submit" id="submitBtn" class="btn-submit">Submit</button>
+                <button type="button" onclick="document.getElementById('editModal').style.display='none'" style="margin-top:10px; width:100%; background:none; border:none; cursor:pointer;">Cancel</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- PASTE YOUR DEPLOYED SCRIPT URL HERE ---
+        // REPLACE WITH YOUR URL
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec";
 
         let allSchools = [];
         let currentSchool = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log("Fetching from:", SCRIPT_URL);
             fetch(SCRIPT_URL)
                 .then(res => res.json())
                 .then(data => {
+                    console.log("Data received:", data);
+                    
+                    // Handle different JSON structures
                     allSchools = Array.isArray(data) ? data : (data.data || []);
-                    document.getElementById('loadingText').style.display = 'none';
+                    
+                    // DEBUGGING CHECK
+                    if (allSchools.length === 0) {
+                        showDebug("Received 0 schools. Check your Google Sheet tab name ('Jerseys') and ensure it has data.");
+                    } else if (!allSchools[0].hasOwnProperty('School')) {
+                        showDebug("Data loaded, but 'School' column is missing. Found keys: " + Object.keys(allSchools[0]).join(", "));
+                    } else {
+                        document.getElementById('loadingText').style.display = 'none';
+                    }
                 })
                 .catch(err => {
-                    console.error(err);
-                    document.getElementById('loadingText').innerText = "Error loading data.";
+                    console.error("Fetch error:", err);
+                    showDebug("Error loading data: " + err.message);
                 });
         });
+
+        function showDebug(msg) {
+            const dbg = document.getElementById('debugBox');
+            dbg.style.display = 'block';
+            dbg.innerText = "DEBUG: " + msg;
+            document.getElementById('loadingText').innerText = "Failed to load.";
+        }
 
         function handleSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase();
@@ -189,7 +174,8 @@
             }
 
             const matches = allSchools.filter(s => {
-                const name = s.School || s.name || "";
+                // Ensure s.School exists before lowercasing
+                const name = s.School ? s.School.toString() : ""; 
                 return name.toLowerCase().includes(query);
             });
 
@@ -198,7 +184,7 @@
                 matches.forEach(school => {
                     const div = document.createElement('div');
                     div.className = 'result-item';
-                    div.innerText = school.School || school.name;
+                    div.innerText = school.School;
                     div.onclick = () => showDetail(school);
                     resultsDiv.appendChild(div);
                 });
@@ -212,36 +198,31 @@
             document.getElementById('searchView').style.display = 'none';
             document.getElementById('schoolDetail').style.display = 'block';
             
-            // Set Text Fields
-            document.getElementById('displaySchoolName').innerText = school.School || school.name || "Unknown";
+            document.getElementById('displaySchoolName').innerText = school.School || "Unknown";
             document.getElementById('displayAssociation').innerText = school.Association || "";
-            document.getElementById('displayLastUpdated').innerText = school['Last Updated'] || "";
 
-            // Helper to get color safely (default to gray #eee if missing)
-            const getCol = (key, fallback = "#eeeeee") => {
+            const getCol = (key, fallback = "#eee") => {
                 let val = school[key];
-                return (val && val !== "" && val !== "undefined") ? val : fallback;
+                return (val && val !== "") ? val : fallback;
             };
 
-            // --- HOME ---
+            // Home
             document.getElementById('svgHomeShirt').style.fill = getCol('Home Shirt');
-            document.getElementById('svgHomeNumber').style.fill = getCol('Home Shirt Accent', '#000000'); // Default number to black
+            document.getElementById('svgHomeNumber').style.fill = getCol('Home Shirt Accent', '#000');
             document.getElementById('svgHomeShort').style.fill = getCol('Home Shorts');
             document.getElementById('svgHomeSock').style.fill =  getCol('Home Socks');
 
-            // --- AWAY ---
+            // Away
             document.getElementById('svgAwayShirt').style.fill = getCol('Away Shirt');
-            document.getElementById('svgAwayNumber').style.fill = getCol('Away Shirt Accent', '#000000');
+            document.getElementById('svgAwayNumber').style.fill = getCol('Away Shirt Accent', '#000');
             document.getElementById('svgAwayShort').style.fill = getCol('Away Shorts');
             document.getElementById('svgAwaySock').style.fill =  getCol('Away Socks');
 
-            // --- 3RD / ALT ---
-            // Only show 3rd kit if "3rd Shirt" has a value
-            const thirdShirt = school['3rd Shirt'];
-            if (thirdShirt && thirdShirt !== "") {
+            // 3rd
+            if (school['3rd Shirt']) {
                 document.getElementById('kitBox3rd').style.display = 'flex';
                 document.getElementById('svg3rdShirt').style.fill = getCol('3rd Shirt');
-                document.getElementById('svg3rdNumber').style.fill = getCol('3rd Shirt Accent', '#000000');
+                document.getElementById('svg3rdNumber').style.fill = getCol('3rd Shirt Accent', '#000');
                 document.getElementById('svg3rdShort').style.fill = getCol('3rd Shorts');
                 document.getElementById('svg3rdSock').style.fill =  getCol('3rd Socks');
             } else {
@@ -256,13 +237,11 @@
             document.getElementById('searchResults').style.display = 'none';
         }
 
-        // --- EDIT MODAL LOGIC ---
         function openEditModal() {
             if(!currentSchool) return;
             document.getElementById('modalSchoolName').innerText = currentSchool.School;
             document.getElementById('modalSchoolNameInput').value = currentSchool.School;
             
-            // Prefill standard fields
             document.getElementById('inHomeShirt').value = currentSchool['Home Shirt'] || "";
             document.getElementById('inHomeAccent').value = currentSchool['Home Shirt Accent'] || "";
             document.getElementById('inHomeShort').value = currentSchool['Home Shorts'] || "";
@@ -272,12 +251,7 @@
             document.getElementById('inAwayAccent').value = currentSchool['Away Shirt Accent'] || "";
             document.getElementById('inAwayShort').value = currentSchool['Away Shorts'] || "";
             document.getElementById('inAwaySock').value =  currentSchool['Away Socks'] || "";
-
-            document.getElementById('in3rdShirt').value = currentSchool['3rd Shirt'] || "";
-            document.getElementById('in3rdAccent').value = currentSchool['3rd Shirt Accent'] || "";
-            document.getElementById('in3rdShort').value = currentSchool['3rd Shorts'] || "";
-            document.getElementById('in3rdSock').value =  currentSchool['3rd Socks'] || "";
-
+            
             document.getElementById('editModal').style.display = 'flex';
         }
 
@@ -290,21 +264,14 @@
             const payload = {
                 submittedBy: "Nicholas Strednak",
                 schoolName: document.getElementById('modalSchoolNameInput').value,
-                
                 homeShirt: document.getElementById('inHomeShirt').value,
                 homeAccent: document.getElementById('inHomeAccent').value,
                 homeShort: document.getElementById('inHomeShort').value,
                 homeSock: document.getElementById('inHomeSock').value,
-                
                 awayShirt: document.getElementById('inAwayShirt').value,
                 awayAccent: document.getElementById('inAwayAccent').value,
                 awayShort: document.getElementById('inAwayShort').value,
-                awaySock: document.getElementById('inAwaySock').value,
-
-                thirdShirt: document.getElementById('in3rdShirt').value,
-                thirdAccent: document.getElementById('in3rdAccent').value,
-                thirdShort: document.getElementById('in3rdShort').value,
-                thirdSock: document.getElementById('in3rdSock').value
+                awaySock: document.getElementById('inAwaySock').value
             };
 
             fetch(SCRIPT_URL, {
@@ -312,13 +279,12 @@
                 mode: 'no-cors',
                 body: JSON.stringify(payload)
             }).then(() => {
-                alert("Correction submitted! An admin will review it.");
+                alert("Request Sent!");
                 document.getElementById('editModal').style.display = 'none';
-                btn.innerText = "Submit Request";
+                btn.innerText = "Submit";
                 btn.disabled = false;
             }).catch(err => {
-                console.error(err);
-                alert("Error sending request.");
+                alert("Error sending request");
                 btn.disabled = false;
             });
         });
