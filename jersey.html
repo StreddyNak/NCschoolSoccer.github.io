@@ -126,29 +126,28 @@
             document.getElementById('schoolSearch').value = data.school;
             document.getElementById('kitDisplay').style.display = 'block';
             
-            // Text Details
             document.getElementById('displaySchoolName').textContent = data.school;
             document.getElementById('displayAssoc').textContent = data.association || "";
 
             // --- RENDER KITS ---
             
-            // Home (Pass the Accent color for the number 10)
+            // Home (With Accent)
             document.getElementById('home-svg').innerHTML = generateSVG(
                 data.home.shirt, data.home.short, data.home.sock, data.home.accent
             );
             document.getElementById('home-date').textContent = "Updated: " + formatDate(data.home.updated);
 
-            // Away (No accent number)
+            // Away (With Accent)
             document.getElementById('away-svg').innerHTML = generateSVG(
-                data.away.shirt, data.away.short, data.away.sock, null
+                data.away.shirt, data.away.short, data.away.sock, data.away.accent
             );
             document.getElementById('away-date').textContent = "Updated: " + formatDate(data.away.updated);
 
-            // 3rd Kit
+            // 3rd Kit (With Accent)
             if(data.third.shirt && data.third.shirt !== "") {
                 document.getElementById('third-card').style.display = 'block';
                 document.getElementById('third-svg').innerHTML = generateSVG(
-                    data.third.shirt, data.third.short, data.third.sock, null
+                    data.third.shirt, data.third.short, data.third.sock, data.third.accent
                 );
                 document.getElementById('third-date').textContent = "Updated: " + formatDate(data.third.updated);
             } else {
@@ -156,7 +155,6 @@
             }
         }
 
-        // Helper to format date
         function formatDate(dateString) {
             if (!dateString) return "Unknown";
             const d = new Date(dateString);
@@ -164,15 +162,13 @@
         }
 
         // SVG GENERATOR
-        // Now accepts 'accentColor'. If present, it draws the "10".
         function generateSVG(shirtColor, shortColor, sockColor, accentColor) {
-            // Default grey if missing
             if(!shirtColor || shirtColor.trim() === "") shirtColor = "#eee";
             if(!shortColor || shortColor.trim() === "") shortColor = "#eee";
             if(!sockColor || sockColor.trim() === "") sockColor = "#eee";
 
-            // If we have an accent color, create the number "10" text element
             let numberSVG = "";
+            // Draw "10" if accentColor exists
             if (accentColor && accentColor.trim() !== "") {
                 numberSVG = `<text x="50" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="${accentColor}">10</text>`;
             }
