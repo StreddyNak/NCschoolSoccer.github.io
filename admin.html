@@ -73,7 +73,7 @@
     </div>
 
     <script>
-        // *** PASTE YOUR APPS SCRIPT URL HERE (The one from your Jersey/Form backend) ***
+        // *** YOUR VERIFIED SCRIPT URL ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec"; 
 
         // This function runs automatically when Google successfully logs the user in
@@ -106,8 +106,17 @@
         function loadDashboard(data) {
             document.getElementById('login-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
-            document.getElementById('welcome-msg').textContent = "Welcome, " + data.supervisor;
-            renderCards(data.data);
+            
+            // Customize Welcome Message
+            if (data.supervisor === 'MASTER') {
+                 document.getElementById('welcome-msg').textContent = "Welcome, Super Admin (Viewing All Regions)";
+            } else {
+                 document.getElementById('welcome-msg').textContent = "Welcome, " + data.supervisor;
+            }
+            
+            // Save data for sorting
+            currentData = data.data;
+            renderCards(currentData);
         }
 
         function renderCards(data) {
@@ -128,7 +137,7 @@
                 // Format Date
                 const dateStr = item.gameDate ? new Date(item.gameDate).toLocaleDateString() : 'No Date';
 
-                // Video Button
+                // Video Button Logic
                 const vidBtn = item.video && item.video.length > 5 
                     ? `<a href="${item.video}" target="_blank" class="video-btn">▶ Watch Video</a>`
                     : `<span class="video-btn disabled">No Video Attached</span>`;
@@ -141,6 +150,11 @@
                     </div>
                     <h3>${item.home} vs ${item.away}</h3>
                     <h4>Ref: ${item.refName}</h4>
+                    
+                    <div style="font-size:0.75rem; color:#888; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
+                        ${item.supervisor}
+                    </div>
+
                     <span class="tag ${tagClass}">${item.cmi}</span>
                     <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">${item.half} • ${item.time} remaining</div>
                     <div class="details">${item.notes || "No additional notes."}</div>
@@ -150,10 +164,12 @@
             });
         }
 
-        let currentData = []; // Store data for sorting if needed later
+        let currentData = [];
         function sortCards(criteria) {
-           // Sorting logic matches earlier implementation
-           alert("Sorting refreshed");
+            if (criteria === 'date') {
+                currentData.sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
+            }
+            renderCards(currentData);
         }
     </script>
 </body>
