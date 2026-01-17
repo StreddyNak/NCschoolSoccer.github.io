@@ -3,191 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jersey Search</title>
+    <title>Triangle Soccer Officials - Jersey Database</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-height: 80vh; }
+        /* --- General Styles --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f9fafb; color: #1f2937; }
+        h1 { text-align: center; color: #111827; margin-bottom: 20px; }
+
+        /* --- Navigation --- */
+        .nav-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .nav-link { text-decoration: none; color: #4b5563; font-weight: 500; padding: 8px 16px; border-radius: 6px; transition: background 0.2s; }
+        .nav-link:hover { background-color: #e5e7eb; color: #111827; }
+        .nav-link.active { background-color: #2563eb; color: white; }
+
+        /* --- Search Bar --- */
+        .search-container { max-width: 600px; margin: 0 auto 20px auto; }
+        #searchInput { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+
+        /* --- Table Styles --- */
+        .table-container { overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 8px; background: white; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #f3f4f6; font-weight: 600; color: #374151; }
+        tr:hover { background-color: #f9fafb; }
         
-        .home-link { display: inline-block; margin-bottom: 20px; color: #666; text-decoration: none; font-weight: 500; }
-        .home-link:hover { color: #2ecc71; }
-
-        h1 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #3498db; padding-bottom: 15px; }
-
-        .search-container { position: relative; margin-bottom: 30px; }
-        input#schoolSearch { width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        input#schoolSearch:focus { border-color: #3498db; outline: none; }
-
-        #searchResults {
-            position: absolute; width: 100%; background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
-            max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none;
+        /* Edit Button in Table */
+        .edit-btn {
+            background-color: white; border: 1px solid #d1d5db; color: #4b5563;
+            border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer;
+            margin-left: 10px; transition: all 0.2s;
         }
-        .result-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; }
-        .result-item:hover { background-color: #f0f8ff; color: #3498db; }
+        .edit-btn:hover { background-color: #2563eb; color: white; border-color: #2563eb; }
 
-        #kitDisplay { display: none; margin-top: 20px; }
-        .school-title { font-size: 1.8rem; text-align: center; margin-bottom: 5px; color: #2c3e50; }
-        .assoc-subtitle { font-size: 1rem; text-align: center; margin-bottom: 30px; color: #7f8c8d; font-weight: 400; }
+        /* --- Loading State --- */
+        #loading { text-align: center; padding: 20px; color: #6b7280; font-style: italic; }
 
-        .kits-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 600px) { .kits-grid { grid-template-columns: 1fr 1fr 1fr; } }
-
-        .kit-card { background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
-        .kit-label { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; }
+        /* --- MODAL STYLES --- */
+        .modal-overlay {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background-color: white; padding: 24px; border-radius: 12px;
+            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header { font-size: 20px; font-weight: bold; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #e5e7eb; }
         
-        .kit-visual { height: 220px; width: 100%; position: relative; }
-        svg { drop-shadow: 2px 4px 6px rgba(0,0,0,0.2); }
+        .form-section { margin-bottom: 20px; }
+        .form-section h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7280; margin-bottom: 10px; }
+        
+        .input-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .input-group label { display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 4px; }
+        .input-group input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+        .input-group input:focus { outline: none; border-color: #2563eb; ring: 2px solid #93c5fd; }
 
-        .last-update { font-size: 0.8rem; color: #888; margin-top: 15px; font-style: italic; }
-        .loader { text-align: center; color: #888; padding: 20px; }
+        .btn-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+        .btn-cancel { background: #f3f4f6; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn-submit { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <a href="index.html" class="home-link">← Back to Home</a>
-        <h1>School Jersey Search</h1>
+    <div class="nav-bar">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="jersey.html" class="nav-link active">Jersey Database</a>
+        <a href="vault.html" class="nav-link">The Vault</a>
+        <a href="report.html" class="nav-link">Match Report</a>
+        <a href="admin.html" class="nav-link">Admin</a>
+    </div>
 
-        <div class="search-container">
-            <input type="text" id="schoolSearch" placeholder="Type school name..." onkeyup="filterSchools()">
-            <div id="searchResults"></div>
-        </div>
+    <h1>Official Jersey Colors</h1>
 
-        <div id="loading" class="loader">Loading School Data...</div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search for a school..." onkeyup="filterTable()">
+    </div>
 
-        <div id="kitDisplay">
-            <h2 id="displaySchoolName" class="school-title"></h2>
-            <div id="displayAssoc" class="assoc-subtitle"></div>
+    <div class="table-container">
+        <table id="jerseyTable">
+            <thead>
+                <tr>
+                    <th style="width: 40%;">School</th>
+                    <th style="width: 30%;">Home Kit</th>
+                    <th style="width: 30%;">Away Kit</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+        <div id="loading">Loading official data...</div>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">Edit Request: <span id="modalSchoolName"></span></div>
             
-            <div class="kits-grid">
-                <div class="kit-card">
-                    <span class="kit-label" style="color:#2c3e50;">Home</span>
-                    <div class="kit-visual" id="home-svg"></div>
-                    <div class="last-update" id="home-date"></div>
+            <form id="editForm">
+                <input type="hidden" id="modalSchoolNameInput">
+
+                <div class="form-section">
+                    <h3>Home Kit</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Shirt</label>
+                            <input type="text" id="homeShirt" placeholder="Color">
+                        </div>
+                        <div class="input-group">
+                            <label>Short</label>
+                            <input type="text" id="homeShort" placeholder="Color">
+                        </div>
+                        <div class="input-group">
+                            <label>Sock</label>
+                            <input type="text" id="homeSock" placeholder="Color">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="kit-card">
-                    <span class="kit-label" style="color:#2c3e50;">Away</span>
-                    <div class="kit-visual" id="away-svg"></div>
-                    <div class="last-update" id="away-date"></div>
+                <div class="form-section">
+                    <h3>Away Kit</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Shirt</label>
+                            <input type="text" id="awayShirt" placeholder="Color">
+                        </div>
+                        <div class="input-group">
+                            <label>Short</label>
+                            <input type="text" id="awayShort" placeholder="Color">
+                        </div>
+                        <div class="input-group">
+                            <label>Sock</label>
+                            <input type="text" id="awaySock" placeholder="Color">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="kit-card" id="third-card">
-                    <span class="kit-label" style="color:#2c3e50;">3rd Kit</span>
-                    <div class="kit-visual" id="third-svg"></div>
-                    <div class="last-update" id="third-date"></div>
+                <div class="btn-row">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" id="submitBtn" class="btn-submit">Submit Request</button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
     <script>
-        // *** VERIFIED SCRIPT URL ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec";
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec"; 
 
+        // Global variable to store fetched data
         let allSchools = [];
 
-        window.onload = function() {
+        // 1. Fetch Data on Page Load
+        document.addEventListener('DOMContentLoaded', function() {
             fetch(SCRIPT_URL)
-                .then(res => res.json())
+                .then(response => response.json())
                 .then(data => {
-                    allSchools = data;
+                    // Check if data is wrapped in a 'data' property or is a direct array
+                    // Adjust based on your specific doGet return structure
+                    allSchools = Array.isArray(data) ? data : (data.data || []);
+                    renderTable(allSchools);
                     document.getElementById('loading').style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('loading').innerText = "Error loading data. Please try again.";
                 });
-        };
+        });
 
-        function filterSchools() {
-            const query = document.getElementById('schoolSearch').value.toLowerCase();
-            const resultsBox = document.getElementById('searchResults');
-            resultsBox.innerHTML = '';
+        // 2. Render Table Function
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = ''; // Clear existing
 
-            if (query.length < 2) {
-                resultsBox.style.display = 'none';
-                return;
-            }
-
-            const matches = allSchools.filter(s => s.school.toLowerCase().includes(query));
-
-            if (matches.length > 0) {
-                resultsBox.style.display = 'block';
-                matches.forEach(s => {
-                    const div = document.createElement('div');
-                    div.className = 'result-item';
-                    div.textContent = s.school;
-                    div.onclick = () => selectSchool(s);
-                    resultsBox.appendChild(div);
-                });
-            } else {
-                resultsBox.style.display = 'none';
-            }
-        }
-
-        function selectSchool(data) {
-            document.getElementById('searchResults').style.display = 'none';
-            document.getElementById('schoolSearch').value = data.school;
-            document.getElementById('kitDisplay').style.display = 'block';
-            
-            document.getElementById('displaySchoolName').textContent = data.school;
-            document.getElementById('displayAssoc').textContent = data.association || "";
-
-            // --- RENDER KITS ---
-            
-            // Home (With Accent)
-            document.getElementById('home-svg').innerHTML = generateSVG(
-                data.home.shirt, data.home.short, data.home.sock, data.home.accent
-            );
-            document.getElementById('home-date').textContent = "Updated: " + formatDate(data.home.updated);
-
-            // Away (With Accent)
-            document.getElementById('away-svg').innerHTML = generateSVG(
-                data.away.shirt, data.away.short, data.away.sock, data.away.accent
-            );
-            document.getElementById('away-date').textContent = "Updated: " + formatDate(data.away.updated);
-
-            // 3rd Kit (With Accent)
-            if(data.third.shirt && data.third.shirt !== "") {
-                document.getElementById('third-card').style.display = 'block';
-                document.getElementById('third-svg').innerHTML = generateSVG(
-                    data.third.shirt, data.third.short, data.third.sock, data.third.accent
-                );
-                document.getElementById('third-date').textContent = "Updated: " + formatDate(data.third.updated);
-            } else {
-                document.getElementById('third-card').style.display = 'none';
-            }
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return "Unknown";
-            const d = new Date(dateString);
-            return d.toLocaleDateString();
-        }
-
-        // SVG GENERATOR
-        function generateSVG(shirtColor, shortColor, sockColor, accentColor) {
-            if(!shirtColor || shirtColor.trim() === "") shirtColor = "#eee";
-            if(!shortColor || shortColor.trim() === "") shortColor = "#eee";
-            if(!sockColor || sockColor.trim() === "") sockColor = "#eee";
-
-            let numberSVG = "";
-            // Draw "10" if accentColor exists
-            if (accentColor && accentColor.trim() !== "") {
-                numberSVG = `<text x="50" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="${accentColor}">10</text>`;
-            }
-
-            return `
-            <svg width="150" height="220" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 5 L35 0 L65 0 L80 5 L90 25 L80 30 L75 25 L75 60 L25 60 L25 25 L20 30 L10 25 Z" 
-                      fill="${shirtColor}" stroke="#333" stroke-width="1"/>
+            data.forEach((school, index) => {
+                const row = document.createElement('tr');
                 
-                ${numberSVG}
+                // Flexible mapping in case headers have minor changes
+                const name = school.School || school.name || school.schoolName || "Unknown";
+                const hShirt = school['Home Shirt'] || school.homeShirt || "-";
+                const hShort = school['Home Short'] || school.homeShort || "-";
+                const hSock =  school['Home Sock']  || school.homeSock  || "-";
+                const aShirt = school['Away Shirt'] || school.awayShirt || "-";
+                const aShort = school['Away Short'] || school.awayShort || "-";
+                const aSock =  school['Away Sock']  || school.awaySock  || "-";
 
-                <path d="M25 60 L75 60 L80 95 L50 90 L20 95 Z" 
-                      fill="${shortColor}" stroke="#333" stroke-width="1"/>
-                
-                <rect x="25" y="100" width="15" height="40" rx="2" fill="${sockColor}" stroke="#333" stroke-width="1"/>
-                <rect x="60" y="100" width="15" height="40" rx="2" fill="${sockColor}" stroke="#333" stroke-width="1"/>
-            </svg>
-            `;
+                // We pass the 'index' to openModal so we can look up the data cleanly
+                row.innerHTML = `
+                    <td>
+                        <strong>${name}</strong>
+                        <button class="edit-btn" onclick="openModal(${index})">Edit</button>
+                    </td>
+                    <td>${hShirt} / ${hShort} / ${hSock}</td>
+                    <td>${aShirt} / ${aShort} / ${aSock}</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
+
+        // 3. Search Filter Logic
+        function filterTable() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('jerseyTable');
+            const tr = table.getElementsByTagName('tr');
+
+            // Start loop at 1 to skip header
+            for (let i = 0; i < tr.length; i++) { // Adjusted loop to ensure we catch all rows
+                const td = tr[i].getElementsByTagName('td')[0];
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // 4. Modal Functions
+        function openModal(index) {
+            const school = allSchools[index];
+            if (!school) return;
+
+            // Handle varied key names safely
+            const name = school.School || school.name || school.schoolName || "";
+            
+            document.getElementById('modalSchoolName').innerText = name;
+            document.getElementById('modalSchoolNameInput').value = name;
+            
+            // Pre-fill inputs
+            document.getElementById('homeShirt').value = school['Home Shirt'] || school.homeShirt || "";
+            document.getElementById('homeShort').value = school['Home Short'] || school.homeShort || "";
+            document.getElementById('homeSock').value =  school['Home Sock']  || school.homeSock  || "";
+            
+            document.getElementById('awayShirt').value = school['Away Shirt'] || school.awayShirt || "";
+            document.getElementById('awayShort').value = school['Away Short'] || school.awayShort || "";
+            document.getElementById('awaySock').value =  school['Away Sock']  || school.awaySock  || "";
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Close if clicking outside modal content
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // 5. Submit Form Logic
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+
+            const payload = {
+                submittedBy: "Nicholas Strednak", // Hardcoded per request
+                schoolName: document.getElementById('modalSchoolNameInput').value,
+                homeShirt: document.getElementById('homeShirt').value,
+                homeShort: document.getElementById('homeShort').value,
+                homeSock:  document.getElementById('homeSock').value,
+                awayShirt: document.getElementById('awayShirt').value,
+                awayShort: document.getElementById('awayShort').value,
+                awaySock:  document.getElementById('awaySock').value
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Critical for Google Scripts
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert("Request submitted successfully!");
+                closeModal();
+                btn.disabled = false;
+                btn.innerText = originalText;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error submitting request. Check console for details.");
+                btn.disabled = false;
+                btn.innerText = originalText;
+            });
+        });
     </script>
 </body>
 </html>
