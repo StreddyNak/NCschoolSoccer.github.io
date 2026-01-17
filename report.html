@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NCHSAA CMI Form</title>
+    <title>North Carolina High School CMI Form</title>
     <style>
         /* --- STYLING --- */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
@@ -34,6 +34,11 @@
         }
         input:focus, select:focus, textarea:focus { border-color: #2ecc71; outline: none; }
         
+        /* --- Subtext Styling (NEW) --- */
+        .subtext { font-size: 0.85rem; color: #666; margin-top: 8px; line-height: 1.4; }
+        .subtext ul { margin: 5px 0 0 20px; padding: 0; }
+        .subtext li { margin-bottom: 3px; }
+
         /* --- NEW: CLASSIC RADIO LIST STYLES --- */
         .radio-list {
             display: flex;
@@ -143,9 +148,10 @@
                 </div>
 
                 <label>Home Team</label>
-                <input type="text" id="homeTeam" placeholder="e.g. Apex High" required>
+                <input type="text" id="homeTeam" required>
+
                 <label>Away Team</label>
-                <input type="text" id="awayTeam" placeholder="e.g. Holly Springs" required>
+                <input type="text" id="awayTeam" required>
 
                 <div class="btn-group">
                     <button type="button" class="btn-back" onclick="nextSection(1)">Back</button>
@@ -193,10 +199,22 @@
                 </div>
 
                 <label>Time Remaining in Half</label>
-                <input type="text" id="timeRemaining" placeholder="e.g. 12:45 or 12 mins">
+                <input type="text" id="timeRemaining">
+                <div class="subtext">
+                    As much information as you can provide is valuable. Any of the below are useful:
+                    <ul>
+                        <li>"NFHS Network stream timestamp - 1:12:47"</li>
+                        <li>"21:49 remaining in 1st half"</li>
+                        <li>"5 minutes into the 2nd half"</li>
+                        <li>"Late in the 1st half"</li>
+                    </ul>
+                </div>
 
                 <label>Notes (Optional)</label>
-                <textarea id="notes" rows="3" placeholder="Describe the incident..."></textarea>
+                <textarea id="notes" rows="3"></textarea>
+                <div class="subtext">
+                    This is not required and is only needed if you are trying to provide relevant information.
+                </div>
 
                 <div class="btn-group">
                     <button type="button" class="btn-back" onclick="nextSection(2)">Back</button>
