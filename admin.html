@@ -11,7 +11,7 @@
 
         /* Login Screen */
         #login-view { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-        .error { color: red; margin-top: 20px; font-size: 0.9rem; display: none; }
+        .error { color: #d32f2f; margin-top: 20px; font-size: 0.9rem; display: none; background: #ffebee; padding: 10px; border-radius: 4px; border: 1px solid #ffcdd2; }
         
         /* Dashboard */
         .hidden { display: none; }
@@ -73,49 +73,58 @@
     </div>
 
     <script>
-        // *** YOUR VERIFIED SCRIPT URL ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec"; 
+        // *** UPDATED SCRIPT URL ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec"; 
 
-        // This function runs automatically when Google successfully logs the user in
+        // 1. Handle Google Login Response
         function handleCredentialResponse(response) {
-            const idToken = response.credential; // The Google JWT Token
+            const idToken = response.credential;
             const err = document.getElementById('login-error');
             
             // Show loading state
             err.style.display = 'block';
             err.style.color = '#666';
-            err.textContent = "Verifying authorization...";
+            err.style.background = '#f5f5f5';
+            err.style.borderColor = '#ddd';
+            err.textContent = "Verifying credentials...";
 
-            // Send token to backend for verification
+            // Send to Google Apps Script
             fetch(`${SCRIPT_URL}?action=googleLogin&token=${idToken}`)
                 .then(res => res.json())
                 .then(serverResp => {
+                    console.log("Server says:", serverResp); // Debugging line
+
                     if (serverResp.status === 'success') {
                         loadDashboard(serverResp);
                     } else {
-                        err.style.color = 'red';
-                        err.textContent = "Access Denied: " + serverResp.message;
+                        showError("Access Denied: " + (serverResp.message || "Unknown error"));
                     }
                 })
                 .catch(e => {
-                    err.style.color = 'red';
-                    err.textContent = "Connection Error. Try again.";
+                    console.error(e);
+                    showError("Connection Failed. Please try again.");
                 });
+        }
+
+        function showError(msg) {
+            const err = document.getElementById('login-error');
+            err.style.display = 'block';
+            err.style.color = '#d32f2f';
+            err.style.background = '#ffebee';
+            err.style.borderColor = '#ffcdd2';
+            err.textContent = msg;
         }
 
         function loadDashboard(data) {
             document.getElementById('login-view').classList.add('hidden');
             document.getElementById('dashboard-view').classList.remove('hidden');
             
-            // Customize Welcome Message
-            if (data.supervisor === 'MASTER') {
-                 document.getElementById('welcome-msg').textContent = "Welcome, Super Admin (Viewing All Regions)";
-            } else {
-                 document.getElementById('welcome-msg').textContent = "Welcome, " + data.supervisor;
-            }
+            // Welcome Msg
+            const role = data.supervisor === 'MASTER' ? "Super Admin" : data.supervisor;
+            document.getElementById('welcome-msg').textContent = `Logged in as: ${role}`;
             
-            // Save data for sorting
-            currentData = data.data;
+            // Save & Render
+            currentData = data.data || [];
             renderCards(currentData);
         }
 
@@ -123,22 +132,32 @@
             const grid = document.getElementById('card-grid');
             grid.innerHTML = '';
 
-            if (data.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No submissions found for your account.</p>';
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1; color:#666;">No submissions found for your region.</p>';
                 return;
             }
 
             data.forEach(item => {
-                // Determine Tag Color
+                // Determine Tag Style
                 let tagClass = 'pk';
-                if(item.cmi && item.cmi.includes('Red')) tagClass = 'red';
-                if(item.cmi && item.cmi.includes('Goal')) tagClass = 'goal';
+                const type = (item.cmi || "").toLowerCase();
+                if(type.includes('red') || type.includes('send-off')) tagClass = 'red';
+                if(type.includes('goal')) tagClass = 'goal';
 
-                // Format Date
-                const dateStr = item.gameDate ? new Date(item.gameDate).toLocaleDateString() : 'No Date';
+                // Format Date safely
+                let dateStr = 'No Date';
+                if (item.gameDate) {
+                    // Try to parse standard date
+                    const d = new Date(item.gameDate);
+                    if (!isNaN(d.getTime())) {
+                        dateStr = d.toLocaleDateString();
+                    } else {
+                        dateStr = item.gameDate; // Fallback to raw string
+                    }
+                }
 
-                // Video Button Logic
-                const vidBtn = item.video && item.video.length > 5 
+                // Video Button Logic (Checks if video field exists and has content)
+                const vidBtn = (item.video && item.video.length > 5)
                     ? `<a href="${item.video}" target="_blank" class="video-btn">▶ Watch Video</a>`
                     : `<span class="video-btn disabled">No Video Attached</span>`;
 
@@ -146,17 +165,17 @@
                 <div class="card">
                     <div class="card-header">
                         <span>${dateStr}</span>
-                        <span>${item.level}</span>
+                        <span>${item.level || "N/A"}</span>
                     </div>
                     <h3>${item.home} vs ${item.away}</h3>
-                    <h4>Ref: ${item.refName}</h4>
+                    <h4 style="margin:5px 0; color:#555; font-weight:500;">Ref: ${item.refName}</h4>
                     
                     <div style="font-size:0.75rem; color:#888; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
-                        ${item.supervisor}
+                        ${item.supervisor || "Unassigned"}
                     </div>
 
-                    <span class="tag ${tagClass}">${item.cmi}</span>
-                    <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">${item.half} • ${item.time} remaining</div>
+                    <span class="tag ${tagClass}">${item.cmi || "Report"}</span>
+                    <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">${item.half || "?"} • ${item.time || "-"} remaining</div>
                     <div class="details">${item.notes || "No additional notes."}</div>
                     ${vidBtn}
                 </div>`;
@@ -167,6 +186,7 @@
         let currentData = [];
         function sortCards(criteria) {
             if (criteria === 'date') {
+                // Sort Descending (Newest First)
                 currentData.sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
             }
             renderCards(currentData);
