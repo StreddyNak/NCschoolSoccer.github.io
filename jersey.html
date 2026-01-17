@@ -33,14 +33,14 @@
         .kit-label { margin-top: 10px; font-weight: 600; font-size: 14px; color: #6b7280; text-transform: uppercase; }
         .kit-svg { width: 100%; height: auto; filter: drop-shadow(0 4px 3px rgba(0,0,0,0.15)); }
         .kit-number { font-family: sans-serif; font-weight: bold; font-size: 22px; text-anchor: middle; dominant-baseline: middle; }
-
-        .last-updated { font-size: 12px; color: #9ca3af; font-style: italic; margin-top: 10px; margin-bottom: 20px; border-top: 1px solid #f3f4f6; padding-top: 10px; }
+        
+        /* NEW: Specific Date Style */
+        .kit-updated { font-size: 11px; color: #9ca3af; margin-top: 4px; font-style: italic; }
 
         /* --- Edit Modal --- */
         .modal-overlay { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         .modal-content { background-color: white; padding: 24px; border-radius: 12px; width: 95%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
         
-        /* Disclaimer Text */
         .disclaimer-box { background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 10px; margin-bottom: 15px; font-size: 12px; color: #1e3a8a; text-align: left; }
         .disclaimer-box p { margin: 2px 0; }
 
@@ -85,6 +85,7 @@
                         <path id="svgHomeSock" d="M28 115 L45 115 L43 135 L28 135 Z M55 115 L72 115 L72 135 L57 135 Z" fill="#ccc" stroke="#333" stroke-width="1"/>
                     </svg>
                     <div class="kit-label">Home</div>
+                    <div class="kit-updated" id="dateHome"></div>
                 </div>
 
                 <div class="kit-box">
@@ -95,6 +96,7 @@
                         <path id="svgAwaySock" d="M28 115 L45 115 L43 135 L28 135 Z M55 115 L72 115 L72 135 L57 135 Z" fill="#ccc" stroke="#333" stroke-width="1"/>
                     </svg>
                     <div class="kit-label">Away</div>
+                    <div class="kit-updated" id="dateAway"></div>
                 </div>
 
                 <div class="kit-box" id="kitBox3rd" style="display:none;">
@@ -105,11 +107,8 @@
                         <path id="svg3rdSock" d="M28 115 L45 115 L43 135 L28 135 Z M55 115 L72 115 L72 135 L57 135 Z" fill="#ccc" stroke="#333" stroke-width="1"/>
                     </svg>
                     <div class="kit-label">Alternate</div>
+                    <div class="kit-updated" id="date3rd"></div>
                 </div>
-            </div>
-
-            <div class="last-updated">
-                Latest Update: <span id="displayLastUpdated">-</span>
             </div>
 
             <button onclick="openEditModal()" style="margin-top:10px; background:#f9fafb; border:1px solid #d1d5db; color:#4b5563; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:500;">
@@ -218,52 +217,44 @@
             document.getElementById('displaySchoolName').innerText = school.School || "Unknown";
             document.getElementById('displayAssociation').innerText = school.Association || "";
             
-            // --- NEW: LAST UPDATED LOGIC ---
-            // Grabs the 3 dates, filters out empty ones, and finds the most recent
-            const dates = [
-                school['Home Last Updated'],
-                school['Away Last Updated'],
-                school['3rd Last Updated']
-            ].filter(d => d); // remove null/undefined/empty string
-
-            let displayDate = "-";
-            if (dates.length > 0) {
-                // Sort by date descending (newest first)
-                dates.sort((a, b) => new Date(b) - new Date(a));
-                displayDate = dates[0];
-            }
-
-            // Format simple date (remove T...)
-            if (typeof displayDate === 'string' && displayDate.includes("T")) {
-                 displayDate = displayDate.split('T')[0];
-            }
-            document.getElementById('displayLastUpdated').innerText = displayDate;
-            // -------------------------------
-
+            // Helper to get color safely
             const getCol = (key, fallback = "#eee") => {
                 let val = school[key];
                 return (val && val !== "") ? val : fallback;
             };
 
-            // Home Visuals
+            // Helper to format specific dates
+            const formatDate = (dateStr) => {
+                if (!dateStr) return "";
+                if (dateStr.includes("T")) dateStr = dateStr.split('T')[0];
+                return "Updated: " + dateStr;
+            };
+
+            // --- HOME KIT ---
             document.getElementById('svgHomeShirt').style.fill = getCol('Home Shirt');
             document.getElementById('svgHomeNumber').style.fill = getCol('Home Shirt Accent', '#000');
             document.getElementById('svgHomeShort').style.fill = getCol('Home Shorts');
             document.getElementById('svgHomeSock').style.fill =  getCol('Home Socks');
+            // Specific Date
+            document.getElementById('dateHome').innerText = formatDate(school['Home Last Updated']);
 
-            // Away Visuals
+            // --- AWAY KIT ---
             document.getElementById('svgAwayShirt').style.fill = getCol('Away Shirt');
             document.getElementById('svgAwayNumber').style.fill = getCol('Away Shirt Accent', '#000');
             document.getElementById('svgAwayShort').style.fill = getCol('Away Shorts');
             document.getElementById('svgAwaySock').style.fill =  getCol('Away Socks');
+            // Specific Date
+            document.getElementById('dateAway').innerText = formatDate(school['Away Last Updated']);
 
-            // 3rd Kit Logic
+            // --- 3RD KIT ---
             if (school['3rd Shirt']) {
                 document.getElementById('kitBox3rd').style.display = 'flex';
                 document.getElementById('svg3rdShirt').style.fill = getCol('3rd Shirt');
                 document.getElementById('svg3rdNumber').style.fill = getCol('3rd Shirt Accent', '#000');
                 document.getElementById('svg3rdShort').style.fill = getCol('3rd Shorts');
                 document.getElementById('svg3rdSock').style.fill =  getCol('3rd Socks');
+                // Specific Date
+                document.getElementById('date3rd').innerText = formatDate(school['3rd Last Updated']);
             } else {
                 document.getElementById('kitBox3rd').style.display = 'none';
             }
