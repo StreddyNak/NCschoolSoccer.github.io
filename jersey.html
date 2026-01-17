@@ -109,7 +109,7 @@
             </div>
 
             <div class="last-updated">
-                Last Updated: <span id="displayLastUpdated">-</span>
+                Latest Update: <span id="displayLastUpdated">-</span>
             </div>
 
             <button onclick="openEditModal()" style="margin-top:10px; background:#f9fafb; border:1px solid #d1d5db; color:#4b5563; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:500;">
@@ -125,14 +125,14 @@
             <form id="editForm">
                 <input type="hidden" id="modalSchoolNameInput">
 
-                <div style="margin-bottom:15px;">
-                    <label style="display:block; font-size:11px; font-weight:bold; color:#374151; margin-bottom:4px;">YOUR NAME</label>
-                    <input type="text" id="inSubmittedBy" placeholder="Required for verification" required style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:4px;">
-                </div>
-
                 <div class="disclaimer-box">
                     <p>If you know the hex code for the color, please enter it (e.g., #003366).</p>
                     <p>If not, please enter a close descriptor (e.g., Forest Green, Maroon, Carolina Blue).</p>
+                </div>
+
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-size:11px; font-weight:bold; color:#374151; margin-bottom:4px;">YOUR NAME</label>
+                    <input type="text" id="inSubmittedBy" required style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:4px;">
                 </div>
                 
                 <div style="background:#f9fafb; padding:10px; border-radius:6px; margin-bottom:10px;">
@@ -218,12 +218,27 @@
             document.getElementById('displaySchoolName').innerText = school.School || "Unknown";
             document.getElementById('displayAssociation').innerText = school.Association || "";
             
-            // Format Last Updated Date
-            let dateStr = school['Last Updated'] || "-";
-            if (dateStr.includes("T")) {
-                 dateStr = dateStr.split('T')[0];
+            // --- NEW: LAST UPDATED LOGIC ---
+            // Grabs the 3 dates, filters out empty ones, and finds the most recent
+            const dates = [
+                school['Home Last Updated'],
+                school['Away Last Updated'],
+                school['3rd Last Updated']
+            ].filter(d => d); // remove null/undefined/empty string
+
+            let displayDate = "-";
+            if (dates.length > 0) {
+                // Sort by date descending (newest first)
+                dates.sort((a, b) => new Date(b) - new Date(a));
+                displayDate = dates[0];
             }
-            document.getElementById('displayLastUpdated').innerText = dateStr;
+
+            // Format simple date (remove T...)
+            if (typeof displayDate === 'string' && displayDate.includes("T")) {
+                 displayDate = displayDate.split('T')[0];
+            }
+            document.getElementById('displayLastUpdated').innerText = displayDate;
+            // -------------------------------
 
             const getCol = (key, fallback = "#eee") => {
                 let val = school[key];
@@ -286,7 +301,6 @@
             btn.innerText = "Sending...";
             btn.disabled = true;
 
-            // Grab the user name input or default to Anonymous
             const userName = document.getElementById('inSubmittedBy').value || "Anonymous";
 
             const payload = {
@@ -311,7 +325,6 @@
                 document.getElementById('editModal').style.display = 'none';
                 btn.innerText = "Submit Request";
                 btn.disabled = false;
-                // Clear name field for next time
                 document.getElementById('inSubmittedBy').value = "";
             }).catch(err => {
                 alert("Error sending request");
