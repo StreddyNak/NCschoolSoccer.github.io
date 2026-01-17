@@ -13,14 +13,10 @@
 
         h1 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #3498db; padding-bottom: 15px; }
 
-        /* --- SEARCH BAR --- */
         .search-container { position: relative; margin-bottom: 30px; }
-        input#schoolSearch {
-            width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;
-        }
+        input#schoolSearch { width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         input#schoolSearch:focus { border-color: #3498db; outline: none; }
 
-        /* --- DROPDOWN RESULTS --- */
         #searchResults {
             position: absolute; width: 100%; background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px;
             max-height: 200px; overflow-y: auto; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: none;
@@ -28,27 +24,20 @@
         .result-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #eee; }
         .result-item:hover { background-color: #f0f8ff; color: #3498db; }
 
-        /* --- KIT DISPLAY GRID --- */
         #kitDisplay { display: none; margin-top: 20px; }
-        .school-title { font-size: 1.8rem; text-align: center; margin-bottom: 30px; color: #2c3e50; }
+        .school-title { font-size: 1.8rem; text-align: center; margin-bottom: 5px; color: #2c3e50; }
+        .assoc-subtitle { font-size: 1rem; text-align: center; margin-bottom: 30px; color: #7f8c8d; font-weight: 400; }
 
-        .kits-grid {
-            display: grid; grid-template-columns: 1fr; gap: 20px;
-        }
+        .kits-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         @media (min-width: 600px) { .kits-grid { grid-template-columns: 1fr 1fr 1fr; } }
 
-        .kit-card {
-            background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #eee;
-        }
+        .kit-card { background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
         .kit-label { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; display: block; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* The SVG Container */
         .kit-visual { height: 220px; width: 100%; position: relative; }
         svg { drop-shadow: 2px 4px 6px rgba(0,0,0,0.2); }
 
         .last-update { font-size: 0.8rem; color: #888; margin-top: 15px; font-style: italic; }
-
-        /* Loading Spinner */
         .loader { text-align: center; color: #888; padding: 20px; }
     </style>
 </head>
@@ -67,6 +56,7 @@
 
         <div id="kitDisplay">
             <h2 id="displaySchoolName" class="school-title"></h2>
+            <div id="displayAssoc" class="assoc-subtitle"></div>
             
             <div class="kits-grid">
                 <div class="kit-card">
@@ -91,12 +81,11 @@
     </div>
 
     <script>
-        // *** PASTE YOUR SCRIPT URL HERE ***
+        // *** VERIFIED SCRIPT URL ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec";
 
         let allSchools = [];
 
-        // 1. Fetch Data on Load
         window.onload = function() {
             fetch(SCRIPT_URL)
                 .then(res => res.json())
@@ -106,7 +95,6 @@
                 });
         };
 
-        // 2. Search Logic
         function filterSchools() {
             const query = document.getElementById('schoolSearch').value.toLowerCase();
             const resultsBox = document.getElementById('searchResults');
@@ -133,44 +121,69 @@
             }
         }
 
-        // 3. Render Selection
         function selectSchool(data) {
             document.getElementById('searchResults').style.display = 'none';
             document.getElementById('schoolSearch').value = data.school;
             document.getElementById('kitDisplay').style.display = 'block';
-            document.getElementById('displaySchoolName').textContent = data.school;
-
-            // Render Kits
-            document.getElementById('home-svg').innerHTML = generateSVG(data.home.shirt, data.home.short, data.home.sock);
-            document.getElementById('away-svg').innerHTML = generateSVG(data.away.shirt, data.away.short, data.away.sock);
             
-            // Format Date
-            const dateStr = data.updated ? new Date(data.updated).toLocaleDateString() : 'Unknown';
-            document.getElementById('home-date').textContent = "Last Edit: " + dateStr;
-            document.getElementById('away-date').textContent = "Last Edit: " + dateStr;
+            // Text Details
+            document.getElementById('displaySchoolName').textContent = data.school;
+            document.getElementById('displayAssoc').textContent = data.association || "";
 
-            // Handle 3rd Kit (Hide if empty)
+            // --- RENDER KITS ---
+            
+            // Home (Pass the Accent color for the number 10)
+            document.getElementById('home-svg').innerHTML = generateSVG(
+                data.home.shirt, data.home.short, data.home.sock, data.home.accent
+            );
+            document.getElementById('home-date').textContent = "Updated: " + formatDate(data.home.updated);
+
+            // Away (No accent number)
+            document.getElementById('away-svg').innerHTML = generateSVG(
+                data.away.shirt, data.away.short, data.away.sock, null
+            );
+            document.getElementById('away-date').textContent = "Updated: " + formatDate(data.away.updated);
+
+            // 3rd Kit
             if(data.third.shirt && data.third.shirt !== "") {
                 document.getElementById('third-card').style.display = 'block';
-                document.getElementById('third-svg').innerHTML = generateSVG(data.third.shirt, data.third.short, data.third.sock);
-                document.getElementById('third-date').textContent = "Last Edit: " + dateStr;
+                document.getElementById('third-svg').innerHTML = generateSVG(
+                    data.third.shirt, data.third.short, data.third.sock, null
+                );
+                document.getElementById('third-date').textContent = "Updated: " + formatDate(data.third.updated);
             } else {
                 document.getElementById('third-card').style.display = 'none';
             }
         }
 
-        // 4. SVG Generator (Draws the kit)
-        function generateSVG(shirtColor, shortColor, sockColor) {
-            // Default to grey if hex is missing
-            if(!shirtColor) shirtColor = "#ccc";
-            if(!shortColor) shortColor = "#ccc";
-            if(!sockColor) sockColor = "#ccc";
+        // Helper to format date
+        function formatDate(dateString) {
+            if (!dateString) return "Unknown";
+            const d = new Date(dateString);
+            return d.toLocaleDateString();
+        }
+
+        // SVG GENERATOR
+        // Now accepts 'accentColor'. If present, it draws the "10".
+        function generateSVG(shirtColor, shortColor, sockColor, accentColor) {
+            // Default grey if missing
+            if(!shirtColor || shirtColor.trim() === "") shirtColor = "#eee";
+            if(!shortColor || shortColor.trim() === "") shortColor = "#eee";
+            if(!sockColor || sockColor.trim() === "") sockColor = "#eee";
+
+            // If we have an accent color, create the number "10" text element
+            let numberSVG = "";
+            if (accentColor && accentColor.trim() !== "") {
+                numberSVG = `<text x="50" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="28" fill="${accentColor}">10</text>`;
+            }
 
             return `
             <svg width="150" height="220" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 5 L35 0 L65 0 L80 5 L90 25 L80 30 L75 25 L75 60 L25 60 L25 25 L20 30 L10 25 Z" 
                       fill="${shirtColor}" stroke="#333" stroke-width="1"/>
                 
+                ${numberSVG}
+
                 <path d="M25 60 L75 60 L80 95 L50 90 L20 95 Z" 
                       fill="${shortColor}" stroke="#333" stroke-width="1"/>
                 
