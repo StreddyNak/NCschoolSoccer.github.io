@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Portal</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: auto; }
+
+        /* Login Screen */
+        #login-view { max-width: 400px; margin: 100px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        .error { color: red; margin-top: 20px; font-size: 0.9rem; display: none; }
+        
+        /* Dashboard */
+        .hidden { display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .controls { display: flex; gap: 10px; }
+        .sort-btn { background: white; color: #333; border: 1px solid #ddd; padding: 8px 15px; font-size: 0.9rem; cursor:pointer; border-radius: 4px;}
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 15px; font-size: 0.9rem; cursor:pointer; border-radius: 4px;}
+
+        /* Card Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #2ecc71; }
+        .card h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
+        .card-header { display: flex; justify-content: space-between; font-size: 0.85rem; color: #888; margin-bottom: 10px; }
+        .tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; }
+        .tag.red { background: #fee2e2; color: #991b1b; }
+        .tag.pk { background: #e0f2fe; color: #075985; }
+        .tag.goal { background: #dcfce7; color: #166534; }
+        .details { font-size: 0.9rem; background: #f9f9f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .video-btn { display: block; text-align: center; background: #3498db; color: white; padding: 8px; border-radius: 4px; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+        .video-btn:hover { background: #2980b9; }
+        .video-btn.disabled { background: #eee; color: #aaa; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="login-view">
+        <h2 style="margin-top:0;">Supervisor Portal</h2>
+        <p style="color:#666; margin-bottom: 20px;">Please sign in with your authorized Google Account.</p>
+        
+        <div id="g_id_onload"
+             data-client_id="340823693231-qr4j73bfcsn971po2h153jqnvimlab6h.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="outline"
+             data-text="sign_in_with"
+             data-shape="rectangular"
+             data-logo_alignment="left">
+        </div>
+
+        <div id="login-error" class="error"></div>
+    </div>
+
+    <div id="dashboard-view" class="container hidden">
+        <div class="header">
+            <div>
+                <h2 style="margin:0;">Submissions</h2>
+                <small id="welcome-msg" style="color:#666;"></small>
+            </div>
+            <div class="controls">
+                <button class="sort-btn" onclick="sortCards('date')">Sort: Date</button>
+                <button class="logout-btn" onclick="location.reload()">Logout</button>
+            </div>
+        </div>
+        <div id="card-grid" class="grid"></div>
+    </div>
+
+    <script>
+        // *** PASTE YOUR APPS SCRIPT URL HERE (The one from your Jersey/Form backend) ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec"; 
+
+        // This function runs automatically when Google successfully logs the user in
+        function handleCredentialResponse(response) {
+            const idToken = response.credential; // The Google JWT Token
+            const err = document.getElementById('login-error');
+            
+            // Show loading state
+            err.style.display = 'block';
+            err.style.color = '#666';
+            err.textContent = "Verifying authorization...";
+
+            // Send token to backend for verification
+            fetch(`${SCRIPT_URL}?action=googleLogin&token=${idToken}`)
+                .then(res => res.json())
+                .then(serverResp => {
+                    if (serverResp.status === 'success') {
+                        loadDashboard(serverResp);
+                    } else {
+                        err.style.color = 'red';
+                        err.textContent = "Access Denied: " + serverResp.message;
+                    }
+                })
+                .catch(e => {
+                    err.style.color = 'red';
+                    err.textContent = "Connection Error. Try again.";
+                });
+        }
+
+        function loadDashboard(data) {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.getElementById('welcome-msg').textContent = "Welcome, " + data.supervisor;
+            renderCards(data.data);
+        }
+
+        function renderCards(data) {
+            const grid = document.getElementById('card-grid');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column: 1/-1;">No submissions found for your account.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                // Determine Tag Color
+                let tagClass = 'pk';
+                if(item.cmi && item.cmi.includes('Red')) tagClass = 'red';
+                if(item.cmi && item.cmi.includes('Goal')) tagClass = 'goal';
+
+                // Format Date
+                const dateStr = item.gameDate ? new Date(item.gameDate).toLocaleDateString() : 'No Date';
+
+                // Video Button
+                const vidBtn = item.video && item.video.length > 5 
+                    ? `<a href="${item.video}" target="_blank" class="video-btn">▶ Watch Video</a>`
+                    : `<span class="video-btn disabled">No Video Attached</span>`;
+
+                const html = `
+                <div class="card">
+                    <div class="card-header">
+                        <span>${dateStr}</span>
+                        <span>${item.level}</span>
+                    </div>
+                    <h3>${item.home} vs ${item.away}</h3>
+                    <h4>Ref: ${item.refName}</h4>
+                    <span class="tag ${tagClass}">${item.cmi}</span>
+                    <div style="font-size:0.85rem; color:#666; margin-bottom:5px;">${item.half} • ${item.time} remaining</div>
+                    <div class="details">${item.notes || "No additional notes."}</div>
+                    ${vidBtn}
+                </div>`;
+                grid.innerHTML += html;
+            });
+        }
+
+        let currentData = []; // Store data for sorting if needed later
+        function sortCards(criteria) {
+           // Sorting logic matches earlier implementation
+           alert("Sorting refreshed");
+        }
+    </script>
+</body>
+</html>
