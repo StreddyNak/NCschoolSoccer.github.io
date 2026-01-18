@@ -14,7 +14,7 @@
         .error { color: #d32f2f; margin-top: 20px; font-size: 0.9rem; display: none; background: #ffebee; padding: 10px; border-radius: 4px; border: 1px solid #ffcdd2; }
         
         /* Dashboard & Navigation */
-        .hidden { display: none; }
+        .hidden { display: none !important; } /* Force hide */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 15px; font-size: 0.9rem; cursor:pointer; border-radius: 4px;}
         
@@ -27,7 +27,7 @@
         .season-btn:hover { background: #f0f0f0; border-color: #bbb; }
         .season-btn.active { background: #2ecc71; color: white; border-color: #2ecc71; box-shadow: 0 2px 5px rgba(46, 204, 113, 0.3); }
 
-        /* --- NEW: FILTER BAR --- */
+        /* Filter Bar */
         .filter-bar {
             display: flex; gap: 10px; margin-bottom: 20px; background: white;
             padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -37,7 +37,15 @@
         .filter-select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; cursor: pointer; }
         .filter-label { font-size: 12px; font-weight: bold; color: #666; margin-right: 5px; }
 
-        /* --- NEW: LIST VIEW STYLES --- */
+        /* --- NEW: IMPERSONATION BAR --- */
+        #impersonate-wrapper {
+            display: flex; align-items: center; 
+            background: #fff3cd; border: 1px solid #ffeeba; 
+            padding: 8px 15px; border-radius: 6px; margin-left: auto;
+        }
+        .impersonate-select { padding: 6px; border: 1px solid #e0c46c; border-radius: 4px; font-size: 13px; background: white; margin-left: 10px;}
+
+        /* List View Styles */
         .list-header {
             display: grid; 
             grid-template-columns: 90px 2fr 1.5fr 140px 2fr 110px; 
@@ -54,7 +62,7 @@
         }
         .list-row:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
 
-        /* Row Color Coding based on Type */
+        /* Row Color Coding */
         .row-red { border-left-color: #e74c3c; }
         .row-pk { border-left-color: #3498db; }
         .row-goal { border-left-color: #2ecc71; }
@@ -88,12 +96,12 @@
         /* Loading Overlay */
         #loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 100; align-items: center; justify-content: center; font-weight: bold; color: #555; }
         
-        /* Mobile adjustment */
         @media (max-width: 800px) {
             .list-header { display: none; }
             .list-row { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
             .col-date, .col-action, .col-tag { width: 100%; text-align: left; }
             .col-tag span { width: auto; }
+            #impersonate-wrapper { width: 100%; margin-top: 10px; box-sizing: border-box; }
         }
     </style>
 </head>
@@ -142,7 +150,6 @@
         <div class="filter-bar">
             <input type="text" id="searchInput" class="search-input" placeholder="Search Referee, School, or Notes..." onkeyup="applyFilters()">
             
-            <span class="filter-label">Filter:</span>
             <select id="tagFilter" class="filter-select" onchange="applyFilters()">
                 <option value="">All Types</option>
                 <option value="Red">Red Cards</option>
@@ -151,13 +158,19 @@
                 <option value="Other">Other</option>
             </select>
 
-            <span class="filter-label" style="margin-left: 10px;">Sort:</span>
             <select id="sortSelect" class="filter-select" onchange="applyFilters()">
                 <option value="dateDesc">Newest First</option>
                 <option value="dateAsc">Oldest First</option>
                 <option value="ref">Referee Name</option>
                 <option value="type">Event Type</option>
             </select>
+
+            <div id="impersonate-wrapper" class="hidden">
+                <span style="font-size:12px; font-weight:bold; color:#856404;">👁 View As:</span>
+                <select id="impersonateSelect" class="impersonate-select" onchange="applyFilters()">
+                    <option value="">-- Myself (Super Admin) --</option>
+                </select>
+            </div>
         </div>
 
         <div class="list-header">
@@ -173,11 +186,11 @@
     </div>
 
     <script>
-        // *** PASTE YOUR DEPLOYED SCRIPT URL HERE ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec"; 
 
         let userToken = null;
-        let masterData = []; // Stores all data fetched for the season
+        let masterData = []; 
+        let currentUserRole = "";
 
         function handleCredentialResponse(response) {
             userToken = response.credential;
@@ -209,12 +222,20 @@
                         document.getElementById('login-view').classList.add('hidden');
                         document.getElementById('dashboard-view').classList.remove('hidden');
                         
-                        const role = serverResp.supervisor === 'MASTER' ? "Super Admin" : serverResp.supervisor;
-                        document.getElementById('welcome-msg').textContent = `Logged in as: ${role}`;
-
+                        currentUserRole = serverResp.supervisor;
                         masterData = serverResp.data || [];
-                        applyFilters(); // Initial Render
+                        
+                        // SETUP UI
+                        const roleLabel = currentUserRole === 'MASTER' ? "Super Admin" : currentUserRole;
+                        document.getElementById('welcome-msg').textContent = `Logged in as: ${roleLabel}`;
+                        
+                        // SETUP IMPERSONATION (Only if MASTER)
+                        setupImpersonation();
+
+                        // RENDER
+                        applyFilters(); 
                     } else {
+                        // Handle Errors
                         if (!document.getElementById('login-view').classList.contains('hidden')) {
                             const err = document.getElementById('login-error');
                             err.style.display = 'block';
@@ -231,25 +252,55 @@
                 });
         }
 
+        function setupImpersonation() {
+            const wrapper = document.getElementById('impersonate-wrapper');
+            const select = document.getElementById('impersonateSelect');
+
+            if (currentUserRole !== 'MASTER') {
+                wrapper.classList.add('hidden');
+                return;
+            }
+
+            // Show wrapper
+            wrapper.classList.remove('hidden');
+            
+            // Collect unique supervisors from the current data
+            const supervisors = [...new Set(masterData.map(item => item.supervisor))].filter(s => s).sort();
+
+            // Populate dropdown
+            select.innerHTML = '<option value="">-- Myself (Super Admin) --</option>';
+            supervisors.forEach(sup => {
+                const opt = document.createElement('option');
+                opt.value = sup;
+                opt.innerText = sup;
+                select.appendChild(opt);
+            });
+        }
+
         function applyFilters() {
             const searchText = document.getElementById('searchInput').value.toLowerCase();
             const tagFilter = document.getElementById('tagFilter').value;
             const sortMode = document.getElementById('sortSelect').value;
+            const impersonateVal = document.getElementById('impersonateSelect').value;
 
             // 1. Filter Data
             let filtered = masterData.filter(item => {
-                // Text Search
-                const searchStr = `${item.refName} ${item.home} ${item.away} ${item.notes} ${item.supervisor}`.toLowerCase();
-                const matchesSearch = searchStr.includes(searchText);
-                
-                // Tag Filter
-                let matchesTag = true;
-                if (tagFilter) {
-                    const cmi = (item.cmi || "").toString();
-                    matchesTag = cmi.includes(tagFilter);
+                // Impersonation Filter
+                if (impersonateVal && item.supervisor !== impersonateVal) {
+                    return false;
                 }
 
-                return matchesSearch && matchesTag;
+                // Text Search
+                const searchStr = `${item.refName} ${item.home} ${item.away} ${item.notes} ${item.supervisor}`.toLowerCase();
+                if (!searchStr.includes(searchText)) return false;
+                
+                // Tag Filter
+                if (tagFilter) {
+                    const cmi = (item.cmi || "").toString();
+                    if (!cmi.includes(tagFilter)) return false;
+                }
+
+                return true;
             });
 
             // 2. Sort Data
@@ -301,7 +352,6 @@
                     const d = new Date(item.gameDate);
                     if (!isNaN(d.getTime())) {
                         dateStr = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: '2-digit' });
-                        // Add Time if available in date string (optional)
                     } else {
                         dateStr = item.gameDate;
                     }
