@@ -22,14 +22,24 @@
         
         .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; margin-bottom: 15px; }
 
-        /* Quiz List */
+        /* Quiz List Items */
         .quiz-list-item { 
             padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; 
             display: flex; justify-content: space-between; align-items: center; text-align: left;
         }
         .quiz-list-item:hover { border-color: #2ecc71; background: #f0fdf4; }
-        .quiz-title { font-weight: bold; font-size: 1.1rem; }
-        .quiz-count { font-size: 0.85rem; color: #6b7280; background: #f3f4f6; padding: 4px 8px; border-radius: 12px; }
+        
+        .quiz-info { display: flex; flex-direction: column; }
+        .quiz-title { font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
+        .quiz-meta { font-size: 0.85rem; color: #666; margin-top: 4px; }
+        
+        /* Score Badge */
+        .score-badge { 
+            font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 20px; 
+            background: #eee; color: #777; 
+        }
+        .score-badge.good { background: #dcfce7; color: #166534; } /* Green for passing */
+        .score-badge.none { display: none; }
 
         /* Questions */
         .question-block { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px; text-align: left; }
@@ -102,6 +112,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCKkdHudV8CA1hcdV_KN2KEyOeZ5nmaQ_5-fWO40BPpIZwjMO1z3F4lalyP3wMYRf7lQ/exec";
 
         let allQuizzes = {};
+        let userScores = {}; // Stores high scores
         let currentQuizData = [];
         let currentQuizName = "";
         let score = 0;
@@ -129,11 +140,10 @@
                         return;
                     }
 
-                    // Success
                     allQuizzes = data.quizzes;
-                    currentUser = data.user || { firstName: "", lastName: "", email: email }; // Fallback if not in roster
+                    userScores = data.scores || {}; // Load scores
+                    currentUser = data.user || { firstName: "", lastName: "", email: email }; 
                     
-                    // Populate hidden fields for later
                     document.getElementById('userEmail').value = email;
                     document.getElementById('firstName').value = currentUser.firstName;
                     document.getElementById('lastName').value = currentUser.lastName;
@@ -168,11 +178,22 @@
 
             titles.forEach(title => {
                 const count = allQuizzes[title].length;
+                const highScore = userScores[title]; // Get Score
+                
+                // Determine Badge HTML
+                let badgeHtml = "";
+                if (highScore !== undefined) {
+                    badgeHtml = `<span class="score-badge good">Best: ${highScore}%</span>`;
+                }
+
                 const div = document.createElement('div');
                 div.className = 'quiz-list-item';
                 div.innerHTML = `
-                    <span class="quiz-title">${title}</span>
-                    <span class="quiz-count">${count} Questions</span>
+                    <div class="quiz-info">
+                        <span class="quiz-title">${title}</span>
+                        <span class="quiz-meta">${count} Questions</span>
+                    </div>
+                    ${badgeHtml}
                 `;
                 div.onclick = () => showIntro(title);
                 container.appendChild(div);
