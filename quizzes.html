@@ -215,12 +215,27 @@
             renderQuestions();
         }
 
+        // --- IMPROVED VIDEO PARSER ---
         function getEmbedHtml(url) {
             if (!url || url.length < 5) return "";
+            
+            // Clean up the URL (remove extra spaces)
+            url = url.trim();
+
+            // 1. YouTube (Standard, Short, or Embed links)
             const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-            if (ytMatch && ytMatch[1]) return `<div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
-            const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/i);
-            if (vimeoMatch && vimeoMatch[1]) return `<div class="video-wrapper"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
+            if (ytMatch && ytMatch[1]) {
+                return `<div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+            }
+
+            // 2. Vimeo (Standard, Player, or Event links)
+            // This regex looks for the last numeric ID in the URL
+            const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)([0-9]+)/);
+            if (vimeoMatch && vimeoMatch[1]) {
+                return `<div class="video-wrapper"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
+            }
+
+            // 3. Fallback: Generic Button for anything else
             return `<div class="video-container"><a href="${url}" target="_blank" style="color:#2ecc71; font-weight:bold; text-decoration:none;">▶ Watch Video Clip (External Link)</a></div>`;
         }
 
