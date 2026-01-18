@@ -191,7 +191,8 @@
             <div>Match</div>
             <div>Referee</div>
             <div style="text-align:center;">Type</div>
-            <div>Notes</div> <div style="text-align:right;">Video</div>
+            <div>Notes</div>
+            <div style="text-align:right;">Video</div>
         </div>
 
         <div id="data-list" class="list-container"></div>
@@ -285,16 +286,19 @@
             const tagFilter = document.getElementById('tagFilter').value;
             const sortMode = document.getElementById('sortSelect').value;
             const impersonateVal = document.getElementById('impersonateSelect').value;
-            const showVideoOnly = document.getElementById('videoToggle').checked; // Check Toggle
+            const showVideoOnly = document.getElementById('videoToggle').checked;
 
             // 1. Filter Data
             let filtered = masterData.filter(item => {
                 // Impersonation
                 if (impersonateVal && item.supervisor !== impersonateVal) return false;
 
-                // Video Toggle Check
-                if (showVideoOnly) {
-                    if (!item.video || item.video.length < 5) return false;
+                // Video Toggle Check (Robust)
+                const videoUrl = (item.video || "").toString().toLowerCase();
+                const hasValidVideo = videoUrl.startsWith("http");
+
+                if (showVideoOnly && !hasValidVideo) {
+                    return false;
                 }
 
                 // Text Search
@@ -362,9 +366,12 @@
                     }
                 }
 
-                const hasVideo = (item.video && item.video.length > 5);
-                const vidBtn = hasVideo 
-                    ? `<a href="${item.video}" target="_blank" class="video-btn">Watch</a>` 
+                // STRICT VIDEO CHECK
+                const videoUrl = (item.video || "").toString().trim();
+                const hasValidVideo = videoUrl.toLowerCase().startsWith("http");
+
+                const vidBtn = hasValidVideo
+                    ? `<a href="${videoUrl}" target="_blank" class="video-btn">Watch</a>` 
                     : `<span class="video-btn disabled">No Video</span>`;
 
                 const html = `
