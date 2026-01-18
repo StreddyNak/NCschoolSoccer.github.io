@@ -5,315 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>North Carolina High School CMI Form</title>
     <style>
-        /* --- STYLING --- */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
-        .home-link { display: inline-block; margin-bottom: 15px; color: #666; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
-        .home-link:hover { color: #2ecc71; text-decoration: underline; }
+        .container { max-width: 800px; margin: 0 auto; }
 
-        h2 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #2ecc71; padding-bottom: 10px; margin-bottom: 20px;}
-        .hidden { display: none; }
-        
-        /* Disclaimer Box */
-        .disclaimer { 
-            background-color: #fff3cd; 
-            border: 1px solid #ffeeba; 
-            color: #856404; 
-            padding: 15px; 
-            border-radius: 6px; 
-            font-size: 0.9rem; 
-            margin-bottom: 25px; 
-            line-height: 1.5;
+        /* --- Navigation Menu --- */
+        .nav-bar { 
+            position: relative; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            margin-bottom: 40px; 
+            padding: 10px 0;
         }
 
-        /* Standard Input Fields */
-        label { font-weight: 600; display: block; margin-top: 20px; margin-bottom: 8px; font-size: 0.95rem; }
-        input[type="text"], input[type="date"], select, textarea { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fff; 
+        /* Center Group for Main Tools */
+        .nav-center {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 16px; transition: 0.2s; }
+        .nav-link:hover { background-color: #e5e7eb; color: #111827; }
+        .nav-link.active { background-color: #2ecc71; color: white; }
+
+        /* Supervisor Login - Pushed to Far Right */
+        .supervisor-link {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            text-decoration: none;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid #d1d5db;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: white;
+            transition: all 0.2s;
+        }
+        .supervisor-link:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        @media (max-width: 800px) {
+            .nav-bar { flex-direction: column; gap: 15px; }
+            .supervisor-link { position: static; transform: none; margin-left: auto; }
+            .nav-center { flex-wrap: wrap; justify-content: center; }
+        }
+
+        /* --- Form Styles --- */
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { text-align: center; color: #2c3e50; margin-top: 0; }
+        p.subtitle { text-align: center; color: #7f8c8d; margin-bottom: 30px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
+        
+        input, select, textarea {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;
+            font-size: 16px; box-sizing: border-box; transition: border-color 0.2s;
         }
         input:focus, select:focus, textarea:focus { border-color: #2ecc71; outline: none; }
-        
-        /* --- Subtext Styling (Adjusted for placement above input) --- */
-        .subtext { font-size: 0.85rem; color: #666; margin-bottom: 10px; line-height: 1.4; }
-        .subtext ul { margin: 5px 0 0 20px; padding: 0; }
-        .subtext li { margin-bottom: 3px; }
 
-        /* --- NEW: CLASSIC RADIO LIST STYLES --- */
-        .radio-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* Space between options */
+        /* Grid for smaller inputs */
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+
+        button {
+            width: 100%; background-color: #2ecc71; color: white; padding: 15px;
+            border: none; border-radius: 6px; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: background-color 0.2s;
         }
+        button:hover { background-color: #27ae60; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
 
-        .radio-item {
-            display: flex;
-            align-items: center;
-            background: #fff;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-
-        /* The actual radio circle */
-        .radio-item input[type="radio"] {
-            margin-right: 12px;
-            transform: scale(1.2); /* Make the dot slightly easier to see */
-            cursor: pointer;
-            width: auto; /* Reset width so it's not 100% like text inputs */
-        }
-
-        .radio-item label {
-            margin: 0; /* Remove default label margin */
-            font-weight: 400; /* Normal text weight */
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        
-        /* Optional: Hover effect for the row */
-        .radio-item:hover label { color: #2ecc71; }
-
-        /* Buttons */
-        .btn-group { margin-top: 30px; display: flex; gap: 10px; }
-        button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-next { background-color: #2ecc71; color: white; }
-        .btn-back { background-color: #e0e0e0; color: #333; }
-        button:hover { opacity: 0.9; }
-
-        /* Progress Bar */
-        .progress-bar { height: 4px; background: #eee; margin-bottom: 20px; border-radius: 2px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #2ecc71; width: 33%; transition: width 0.3s ease; }
-        
-        /* Success Screen Buttons */
-        .success-btn { display: block; width: 100%; margin-top: 10px; text-decoration: none; padding: 12px; border-radius: 6px; text-align: center; box-sizing: border-box;}
-        .primary-link { background: #2ecc71; color: white; font-weight: bold; }
-        .secondary-link { background: #eee; color: #333; }
+        #message { margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; display: none; }
+        .success { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <a href="index.html" class="home-link">← Back to Home</a>
-        <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-
-        <form id="tsoaForm">
-            
-            <div id="section-1">
-                
-                <div class="disclaimer">
-                    <strong>Note:</strong> This form is to be used for the 2026 Girls NC high school season. Please only submit 1 CMI per form. There will be an option for you to submit another form at the end. Thank you for your assistance in growing the referee education for our high school associations!
-                </div>
-
-                <h2>Step 1: Official Info</h2>
-                <label>Referee Name</label>
-                <input type="text" id="refName" placeholder="Enter your full name" required>
-
-                <label>Date of Game</label>
-                <input type="date" id="gameDate" required>
-
-                <label>Regional Supervisor</label>
-                <select id="supervisor" required>
-                    <option value="" disabled selected>Select Supervisor...</option>
-                    <option value="Ben Wooten (Foothills)">Ben Wooten (Foothills)</option>
-                    <option value="Cliff Clement (Eastern)">Cliff Clement (Eastern)</option>
-                    <option value="Darren Dawson (Eastern Plains)">Darren Dawson (Eastern Plains)</option>
-                    <option value="Eric Usher (Western NC)">Eric Usher (Western NC)</option>
-                    <option value="Ernie Fisher (Southeastern)">Ernie Fisher (Southeastern)</option>
-                    <option value="Mark Kadlecik (Triangle)">Mark Kadlecik (Triangle)</option>
-                    <option value="Roger Morgan (Albemarle)">Roger Morgan (Albemarle)</option>
-                    <option value="Roger Morton (Piedmont)">Roger Morton (Piedmont)</option>
-                </select>
-
-                <div class="btn-group">
-                    <button type="button" class="btn-next" onclick="nextSection(2)">Next Step</button>
-                </div>
+        <div class="nav-bar">
+            <div class="nav-center">
+                <a href="index.html" class="nav-link">Home</a>
+                <span class="nav-link active">CMI Form</span>
+                <a href="jersey.html" class="nav-link">Kit Search</a>
+                <a href="quizzes.html" class="nav-link">Training Quizzes</a>
             </div>
 
-            <div id="section-2" class="hidden">
-                <h2>Step 2: Game Details</h2>
-                
-                <label>Level of Game</label>
-                <div class="radio-list">
-                    <div class="radio-item">
-                        <input type="radio" name="gameLevel" id="varsity" value="Varsity">
-                        <label for="varsity">Varsity</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="gameLevel" id="jv" value="JV">
-                        <label for="jv">JV</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="gameLevel" id="middle" value="Middle School">
-                        <label for="middle">Middle School</label>
-                    </div>
-                </div>
+            <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
+        </div>
 
-                <label>Home Team</label>
-                <input type="text" id="homeTeam" required>
+        <div class="card">
+            <h1>Critical Match Incident Report</h1>
+            <p class="subtitle">Please fill out all details accurately for review.</p>
 
-                <label>Away Team</label>
-                <input type="text" id="awayTeam" required>
-
-                <div class="btn-group">
-                    <button type="button" class="btn-back" onclick="nextSection(1)">Back</button>
-                    <button type="button" class="btn-next" onclick="nextSection(3)">Next Step</button>
-                </div>
-            </div>
-
-            <div id="section-3" class="hidden">
-                <h2>Step 3: CMI Details</h2>
-
-                <label>Type of CMI Reporting</label>
-                <div class="radio-list">
-                    <div class="radio-item">
-                        <input type="radio" name="cmiType" id="pk" value="Penalty Kick">
-                        <label for="pk">Penalty Kick</label>
+            <form id="cmiForm">
+                <div class="row">
+                    <div class="form-group">
+                        <label>Referee Name</label>
+                        <input type="text" name="refName" required placeholder="John Doe">
                     </div>
-                    <div class="radio-item">
-                        <input type="radio" name="cmiType" id="red" value="Red Card">
-                        <label for="red">Red Card</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="cmiType" id="disallowFoul" value="Disallowed Goal (Foul)">
-                        <label for="disallowFoul">Disallowed Goal (Foul)</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="cmiType" id="disallowOff" value="Disallowed Goal (Offside)">
-                        <label for="disallowOff">Disallowed Goal (Offside)</label>
-                    </div>
-                    <div class="radio-item">
-                        <input type="radio" name="cmiType" id="other" value="Other (Use Notes)">
-                        <label for="other">Other (Use Notes)</label>
+                    <div class="form-group">
+                        <label>Game Date</label>
+                        <input type="date" name="gameDate" required>
                     </div>
                 </div>
 
-                <label>When did this occur?</label>
-                <div class="radio-list">
-                    <div class="radio-item">
-                        <input type="radio" name="half" id="h1" value="1st Half">
-                        <label for="h1">1st Half</label>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Supervisor / Assessor</label>
+                        <select name="supervisor" required>
+                            <option value="">Select Supervisor...</option>
+                            <option value="Abbas Piran">Abbas Piran</option>
+                            <option value="Mark Kadlecik">Mark Kadlecik</option>
+                            <option value="Paul James">Paul James</option>
+                            <option value="Roger Morton">Roger Morton</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
-                    <div class="radio-item">
-                        <input type="radio" name="half" id="h2" value="2nd Half">
-                        <label for="h2">2nd Half</label>
+                    <div class="form-group">
+                        <label>Game Level</label>
+                        <select name="gameLevel" required>
+                            <option value="Varsity Boys">Varsity Boys</option>
+                            <option value="Varsity Girls">Varsity Girls</option>
+                            <option value="JV Boys">JV Boys</option>
+                            <option value="JV Girls">JV Girls</option>
+                        </select>
                     </div>
                 </div>
 
-                <label>Time Remaining in Half</label>
-                <div class="subtext">
-                    As much information as you can provide is valuable. Any of the below are useful:
-                    <ul>
-                        <li>"NFHS Network stream timestamp - 1:12:47"</li>
-                        <li>"21:49 remaining in 1st half"</li>
-                        <li>"5 minutes into the 2nd half"</li>
-                        <li>"Late in the 1st half"</li>
-                    </ul>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Home Team</label>
+                        <input type="text" name="homeTeam" required placeholder="e.g. Apex High">
+                    </div>
+                    <div class="form-group">
+                        <label>Away Team</label>
+                        <input type="text" name="awayTeam" required placeholder="e.g. Holly Springs">
+                    </div>
                 </div>
-                <input type="text" id="timeRemaining">
 
-                <label>Notes (Optional)</label>
-                <div class="subtext">
-                    This is not required and is only needed if you are trying to provide relevant information.
+                <div class="form-group">
+                    <label>Incident Type</label>
+                    <select name="cmiType" required>
+                        <option value="Red Card">Red Card / Send Off</option>
+                        <option value="Penalty Kick">Penalty Kick</option>
+                        <option value="Disallowed Goal">Disallowed Goal</option>
+                        <option value="Mass Confrontation">Mass Confrontation</option>
+                        <option value="Serious Injury">Serious Injury</option>
+                        <option value="Other">Other</option>
+                    </select>
                 </div>
-                <textarea id="notes" rows="3"></textarea>
 
-                <div class="btn-group">
-                    <button type="button" class="btn-back" onclick="nextSection(2)">Back</button>
-                    <button type="button" class="btn-next" onclick="submitForm()">Submit Report</button>
+                <div class="row">
+                    <div class="form-group">
+                        <label>Half</label>
+                        <select name="half">
+                            <option value="1st">1st Half</option>
+                            <option value="2nd">2nd Half</option>
+                            <option value="OT">Overtime</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Time Remaining (approx)</label>
+                        <input type="text" name="timeRemaining" placeholder="e.g. 15:00">
+                    </div>
                 </div>
-            </div>
 
-            <div id="success-view" class="hidden" style="text-align: center; padding: 20px 0;">
-                <h2 style="border:none; color: #2ecc71; font-size: 2rem; margin-bottom: 10px;">✓ Success!</h2>
-                <p style="margin-bottom: 30px; line-height: 1.5; color: #555;">
-                    Thank you for filing out the 2026 Girls NCHSAA CMI form. <br>
-                    If you have any more CMI's to report, please fill out another form.
-                </p>
-                
-                <a href="#" onclick="location.reload()" class="success-btn primary-link">Fill out another form</a>
-                <a href="index.html" class="success-btn secondary-link">Return back home</a>
-            </div>
+                <div class="form-group">
+                    <label>Video Clip Link (URL)</label>
+                    <input type="url" name="video" placeholder="https://vimeo.com/..." required>
+                    <small style="color:#666;">Please ensure the link is publicly accessible.</small>
+                </div>
 
-        </form>
+                <div class="form-group">
+                    <label>Description / Notes</label>
+                    <textarea name="notes" rows="4" placeholder="Briefly describe what happened..." required></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn">Submit Report</button>
+            </form>
+
+            <div id="message"></div>
+        </div>
     </div>
 
     <script>
-        // *** GOOGLE SCRIPT URL ***
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
+        // MAIN SCRIPT (CMI/Admin Backend)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec"; 
 
-        function nextSection(step) {
-            // Navigation Logic
-            document.querySelectorAll('.container > form > div').forEach(div => div.classList.add('hidden'));
+        document.getElementById('cmiForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            if (step === 1) {
-                document.getElementById('section-1').classList.remove('hidden');
-                document.getElementById('progress').style.width = "33%";
-            } 
-            else if (step === 2) {
-                // Validate Step 1
-                if(!document.getElementById('refName').value || !document.getElementById('gameDate').value || !document.getElementById('supervisor').value) {
-                    alert("Please fill out all fields in Step 1.");
-                    document.getElementById('section-1').classList.remove('hidden');
-                    return;
-                }
-                document.getElementById('section-2').classList.remove('hidden');
-                document.getElementById('progress').style.width = "66%";
-            } 
-            else if (step === 3) {
-                // Validate Step 2
-                const level = document.querySelector('input[name="gameLevel"]:checked');
-                if(!level || !document.getElementById('homeTeam').value || !document.getElementById('awayTeam').value) {
-                    alert("Please fill out Game Level and Team Names.");
-                    document.getElementById('section-2').classList.remove('hidden');
-                    return;
-                }
-                document.getElementById('section-3').classList.remove('hidden');
-                document.getElementById('progress').style.width = "100%";
-            }
-        }
-
-        function submitForm() {
-            // Validate Step 3
-            const cmi = document.querySelector('input[name="cmiType"]:checked');
-            const half = document.querySelector('input[name="half"]:checked');
-            const timeRem = document.getElementById('timeRemaining').value;
-
-            if(!cmi || !half || !timeRem) {
-                alert("Please fill out the CMI Type, Half, and Time Remaining.");
-                return;
-            }
-
-            const btn = document.querySelector('#section-3 .btn-next');
-            btn.textContent = "Submitting...";
+            const btn = document.getElementById('submitBtn');
+            const msg = document.getElementById('message');
+            
             btn.disabled = true;
+            btn.innerText = "Submitting...";
+            msg.style.display = 'none';
 
-            const formData = {
-                refName: document.getElementById('refName').value,
-                gameDate: document.getElementById('gameDate').value,
-                supervisor: document.getElementById('supervisor').value,
-                gameLevel: document.querySelector('input[name="gameLevel"]:checked').value,
-                homeTeam: document.getElementById('homeTeam').value,
-                awayTeam: document.getElementById('awayTeam').value,
-                cmiType: cmi.value,
-                half: half.value,
-                timeRemaining: timeRem,
-                notes: document.getElementById('notes').value
-            };
+            // Collect Data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            data.type = "cmi_report"; // Tagging for Backend
 
             fetch(SCRIPT_URL, {
-                method: "POST",
-                body: JSON.stringify(formData)
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
             })
-            .then(response => {
-                document.getElementById('section-3').classList.add('hidden');
-                document.getElementById('success-view').classList.remove('hidden');
+            .then(() => {
+                msg.innerText = "Report submitted successfully!";
+                msg.className = "success";
+                msg.style.display = "block";
+                btn.innerText = "Submitted";
+                document.getElementById('cmiForm').reset();
+                setTimeout(() => { btn.disabled = false; btn.innerText = "Submit Report"; }, 3000);
             })
             .catch(error => {
-                alert("Error submitting. Please try again.");
-                btn.textContent = "Submit Report";
+                console.error('Error:', error);
+                msg.innerText = "Error submitting report. Please try again.";
+                msg.className = "error";
+                msg.style.display = "block";
                 btn.disabled = false;
+                btn.innerText = "Submit Report";
             });
-        }
+        });
     </script>
-
 </body>
 </html>
