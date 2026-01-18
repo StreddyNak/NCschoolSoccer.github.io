@@ -14,7 +14,7 @@
         .error { color: #d32f2f; margin-top: 20px; font-size: 0.9rem; display: none; background: #ffebee; padding: 10px; border-radius: 4px; border: 1px solid #ffcdd2; }
         
         /* Dashboard & Navigation */
-        .hidden { display: none !important; } /* Force hide */
+        .hidden { display: none !important; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .logout-btn { background: #e74c3c; color: white; border: none; padding: 8px 15px; font-size: 0.9rem; cursor:pointer; border-radius: 4px;}
         
@@ -36,8 +36,16 @@
         .search-input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; min-width: 200px; }
         .filter-select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background: white; cursor: pointer; }
         .filter-label { font-size: 12px; font-weight: bold; color: #666; margin-right: 5px; }
+        
+        /* Toggle Checkbox Style */
+        .toggle-wrapper {
+            display: flex; align-items: center; font-size: 13px; font-weight: 600; color: #333; cursor: pointer;
+            background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd;
+        }
+        .toggle-wrapper:hover { background: #e9ecef; }
+        .toggle-wrapper input { margin-right: 8px; transform: scale(1.2); cursor: pointer; }
 
-        /* --- NEW: IMPERSONATION BAR --- */
+        /* Impersonation Bar */
         #impersonate-wrapper {
             display: flex; align-items: center; 
             background: #fff3cd; border: 1px solid #ffeeba; 
@@ -165,6 +173,11 @@
                 <option value="type">Event Type</option>
             </select>
 
+            <label class="toggle-wrapper">
+                <input type="checkbox" id="videoToggle" onchange="applyFilters()">
+                Has Video
+            </label>
+
             <div id="impersonate-wrapper" class="hidden">
                 <span style="font-size:12px; font-weight:bold; color:#856404;">👁 View As:</span>
                 <select id="impersonateSelect" class="impersonate-select" onchange="applyFilters()">
@@ -178,8 +191,7 @@
             <div>Match</div>
             <div>Referee</div>
             <div style="text-align:center;">Type</div>
-            <div>Notes / Time</div>
-            <div style="text-align:right;">Video</div>
+            <div>Notes</div> <div style="text-align:right;">Video</div>
         </div>
 
         <div id="data-list" class="list-container"></div>
@@ -225,17 +237,12 @@
                         currentUserRole = serverResp.supervisor;
                         masterData = serverResp.data || [];
                         
-                        // SETUP UI
                         const roleLabel = currentUserRole === 'MASTER' ? "Super Admin" : currentUserRole;
                         document.getElementById('welcome-msg').textContent = `Logged in as: ${roleLabel}`;
                         
-                        // SETUP IMPERSONATION (Only if MASTER)
                         setupImpersonation();
-
-                        // RENDER
                         applyFilters(); 
                     } else {
-                        // Handle Errors
                         if (!document.getElementById('login-view').classList.contains('hidden')) {
                             const err = document.getElementById('login-error');
                             err.style.display = 'block';
@@ -261,13 +268,9 @@
                 return;
             }
 
-            // Show wrapper
             wrapper.classList.remove('hidden');
-            
-            // Collect unique supervisors from the current data
             const supervisors = [...new Set(masterData.map(item => item.supervisor))].filter(s => s).sort();
 
-            // Populate dropdown
             select.innerHTML = '<option value="">-- Myself (Super Admin) --</option>';
             supervisors.forEach(sup => {
                 const opt = document.createElement('option');
@@ -282,12 +285,16 @@
             const tagFilter = document.getElementById('tagFilter').value;
             const sortMode = document.getElementById('sortSelect').value;
             const impersonateVal = document.getElementById('impersonateSelect').value;
+            const showVideoOnly = document.getElementById('videoToggle').checked; // Check Toggle
 
             // 1. Filter Data
             let filtered = masterData.filter(item => {
-                // Impersonation Filter
-                if (impersonateVal && item.supervisor !== impersonateVal) {
-                    return false;
+                // Impersonation
+                if (impersonateVal && item.supervisor !== impersonateVal) return false;
+
+                // Video Toggle Check
+                if (showVideoOnly) {
+                    if (!item.video || item.video.length < 5) return false;
                 }
 
                 // Text Search
@@ -326,7 +333,6 @@
             }
 
             data.forEach(item => {
-                // Determine Styles based on data
                 const type = (item.cmi || "").toString();
                 let rowClass = '';
                 let tagClass = 'tag-other';
@@ -346,7 +352,6 @@
                     typeLabel = 'No Goal';
                 }
 
-                // Date Formatting
                 let dateStr = 'No Date';
                 if (item.gameDate) {
                     const d = new Date(item.gameDate);
@@ -357,7 +362,6 @@
                     }
                 }
 
-                // Video
                 const hasVideo = (item.video && item.video.length > 5);
                 const vidBtn = hasVideo 
                     ? `<a href="${item.video}" target="_blank" class="video-btn">Watch</a>` 
@@ -378,8 +382,6 @@
                         <span class="${tagClass}">${typeLabel}</span>
                     </div>
                     <div class="col-notes">
-                        <strong>${item.half || ""} ${item.time ? "("+item.time+")" : ""}</strong>
-                        <span style="color:#ccc; margin:0 5px;">|</span>
                         ${item.notes || "No notes"}
                     </div>
                     <div class="col-action">
