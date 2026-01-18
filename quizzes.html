@@ -27,10 +27,19 @@
         .quiz-title { font-weight: bold; font-size: 1.1rem; }
         .quiz-count { font-size: 0.85rem; color: #6b7280; background: #f3f4f6; padding: 4px 8px; border-radius: 12px; }
 
+        /* Input Fields */
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 0.9rem; margin-bottom: 5px; font-weight: 600; color: #444; }
+        .input-field { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
+
         /* Question Styles */
         .question-block { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px; }
         .q-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
-        .video-container { margin-bottom: 15px; }
+        
+        /* Video Embed */
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; background: #000; margin-bottom: 15px; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        
         .option-btn { 
             display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; 
             background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 1rem;
@@ -73,10 +82,26 @@
 
         <div id="intro-view" class="card hidden" style="text-align:center;">
             <h2 id="intro-title">Quiz Title</h2>
-            <p>Enter your name to begin.</p>
-            <input type="text" id="userName" placeholder="Your Name" style="padding:10px; width:80%; margin-bottom:20px; font-size:16px;">
-            <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
-            <button onclick="location.reload()" style="background:none; border:none; color:#666; margin-top:10px; cursor:pointer;">Cancel</button>
+            <p style="color:#666; margin-bottom:20px;">Please enter your details to begin.</p>
+            
+            <div class="input-group">
+                <label>First Name *</label>
+                <input type="text" id="firstName" class="input-field" placeholder="Jane">
+            </div>
+            
+            <div class="input-group">
+                <label>Last Name *</label>
+                <input type="text" id="lastName" class="input-field" placeholder="Doe">
+            </div>
+
+            <div class="input-group">
+                <label>Email Address *</label>
+                <input type="email" id="email" class="input-field" placeholder="jane@example.com">
+            </div>
+
+            <button class="btn-primary" onclick="startQuiz()" style="margin-top:10px;">Start Quiz</button>
+            <br>
+            <button onclick="location.reload()" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">Cancel</button>
         </div>
 
         <div id="quiz-view" class="card hidden">
@@ -102,7 +127,6 @@
         let currentQuizName = "";
         let score = 0;
 
-        // Load Quizzes on Page Load
         document.addEventListener('DOMContentLoaded', () => {
             fetch(`${SCRIPT_URL}?action=getQuizData`)
                 .then(res => res.json())
@@ -149,14 +173,40 @@
         }
 
         function startQuiz() {
-            const name = document.getElementById('userName').value;
-            if(!name) { alert("Please enter your name."); return; }
+            const fname = document.getElementById('firstName').value.trim();
+            const lname = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if(!fname || !lname || !email) { 
+                alert("Please fill in all required fields."); 
+                return; 
+            }
 
             document.getElementById('intro-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
             
             renderQuestions();
+        }
+
+        // --- NEW: Helper to convert URL to Embed Code ---
+        function getEmbedHtml(url) {
+            if (!url || url.length < 5) return "";
+
+            // 1. YouTube
+            const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+            if (ytMatch && ytMatch[1]) {
+                return `<div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
+            }
+
+            // 2. Vimeo
+            const vimeoMatch = url.match(/(?:vimeo\.com\/)(\d+)/i);
+            if (vimeoMatch && vimeoMatch[1]) {
+                return `<div class="video-wrapper"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
+            }
+
+            // 3. Fallback: Generic Button
+            return `<div class="video-container"><a href="${url}" target="_blank" style="color:#2ecc71; font-weight:bold; text-decoration:none;">▶ Watch Video Clip (External Link)</a></div>`;
         }
 
         function renderQuestions() {
@@ -168,16 +218,11 @@
                 qDiv.className = 'question-block';
                 qDiv.id = `q-block-${index}`;
 
-                // Video Logic (Strict check for valid URL)
-                let videoHtml = '';
-                if(q.video && q.video.toLowerCase().startsWith('http')) {
-                    videoHtml = `<div class="video-container"><a href="${q.video}" target="_blank" style="color:#2ecc71; font-weight:bold; text-decoration:none;">▶ Watch Related Video Clip</a></div>`;
-                }
+                // Use the new Embed Helper
+                const videoHtml = getEmbedHtml(q.video);
 
-                // Options Logic
                 let optionsHtml = '';
                 q.options.forEach(opt => {
-                    // Escaping quotes for safety
                     const safeOpt = opt.replace(/'/g, "\\'");
                     optionsHtml += `<button class="option-btn" onclick="checkAnswer(${index}, '${safeOpt}', this)">${opt}</button>`;
                 });
@@ -196,7 +241,6 @@
             const questionData = currentQuizData[index];
             const parent = document.getElementById(`q-block-${index}`);
             
-            // Prevent changing answer once clicked
             if(parent.getAttribute('data-answered') === 'true') return;
             parent.setAttribute('data-answered', 'true');
 
@@ -207,21 +251,18 @@
                 score++;
             } else {
                 btnElement.classList.add('wrong');
-                // Highlight the correct answer for learning
                 const allBtns = parent.querySelectorAll('.option-btn');
                 allBtns.forEach(b => {
                     if(b.innerText === questionData.answer) b.classList.add('correct');
                 });
             }
 
-            // Show explanation if it exists
             if(questionData.explanation) {
                 document.getElementById(`explain-${index}`).style.display = 'block';
             }
         }
 
         function submitQuiz() {
-            // Check if all answered
             const total = currentQuizData.length;
             const answered = document.querySelectorAll('[data-answered="true"]').length;
             
@@ -231,22 +272,22 @@
 
             const percentage = Math.round((score / total) * 100);
             
-            // UI Update
             document.getElementById('quiz-view').classList.add('hidden');
             document.getElementById('result-view').classList.remove('hidden');
             document.getElementById('score-display').innerText = `${percentage}%`;
             document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
 
-            // Send Results to Backend
+            // Updated Payload
             const payload = {
-                type: 'quiz_result', 
-                name: document.getElementById('userName').value,
+                type: 'quiz_result',
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
                 quizName: currentQuizName,
                 score: `${score}/${total}`,
                 percent: `${percentage}%`
             };
 
-            // Fire and forget
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
