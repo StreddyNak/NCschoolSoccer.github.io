@@ -5,53 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>North Carolina High School CMI Form</title>
     <style>
-        /* --- GLOBAL & NAVIGATION --- */
+        /* --- GLOBAL & NAV --- */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        
-        .nav-bar { position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 40px; padding: 10px 0; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .nav-center { display: flex; gap: 20px; }
-        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 16px; transition: 0.2s; }
+        .nav-bar { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; transition: 0.2s; }
         .nav-link:hover { background-color: #e5e7eb; color: #111827; }
         .nav-link.active { background-color: #2ecc71; color: white; }
-        .supervisor-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); text-decoration: none; color: #2c3e50; font-size: 0.9rem; font-weight: 600; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; background: white; transition: all 0.2s; }
-        .supervisor-link:hover { background: #f3f4f6; border-color: #9ca3af; }
-        
-        @media (max-width: 800px) {
-            .nav-bar { flex-direction: column; gap: 15px; }
-            .supervisor-link { position: static; transform: none; margin-left: auto; }
-            .nav-center { flex-wrap: wrap; justify-content: center; }
-        }
 
-        /* --- FORM STYLES --- */
+        /* --- YOUR FORM STYLES --- */
         .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #2ecc71; padding-bottom: 10px; margin-bottom: 20px;}
         .hidden { display: none; }
-        
         .disclaimer { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 15px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 25px; line-height: 1.5; }
-
         label { font-weight: 600; display: block; margin-top: 20px; margin-bottom: 8px; font-size: 0.95rem; }
         input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 1rem; background: #fff; }
         input:focus, select:focus, textarea:focus { border-color: #2ecc71; outline: none; }
-        
         .subtext { font-size: 0.85rem; color: #666; margin-bottom: 10px; line-height: 1.4; }
         .subtext ul { margin: 5px 0 0 20px; padding: 0; }
         .subtext li { margin-bottom: 3px; }
-
         .radio-list { display: flex; flex-direction: column; gap: 10px; }
         .radio-item { display: flex; align-items: center; background: #fff; padding: 8px 0; cursor: pointer; }
-        .radio-item input[type="radio"] { margin-right: 12px; transform: scale(1.2); cursor: pointer; width: auto; }
-        .radio-item label { margin: 0; font-weight: 400; cursor: pointer; font-size: 1rem; }
-        .radio-item:hover label { color: #2ecc71; }
-
+        .radio-item input { margin-right: 12px; transform: scale(1.2); }
         .btn-group { margin-top: 30px; display: flex; gap: 10px; }
         button { flex: 1; padding: 14px; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .btn-next { background-color: #2ecc71; color: white; }
         .btn-back { background-color: #e0e0e0; color: #333; }
-        button:hover { opacity: 0.9; }
-
         .progress-bar { height: 4px; background: #eee; margin-bottom: 20px; border-radius: 2px; overflow: hidden; }
         .progress-fill { height: 100%; background: #2ecc71; width: 33%; transition: width 0.3s ease; }
-        
         .success-btn { display: block; width: 100%; margin-top: 10px; text-decoration: none; padding: 12px; border-radius: 6px; text-align: center; box-sizing: border-box;}
         .primary-link { background: #2ecc71; color: white; font-weight: bold; }
         .secondary-link { background: #eee; color: #333; }
@@ -60,13 +40,10 @@
 <body>
 
     <div class="nav-bar">
-        <div class="nav-center">
-            <a href="index.html" class="nav-link">Home</a>
-            <span class="nav-link active">CMI Form</span>
-            <a href="jersey.html" class="nav-link">Kit Search</a>
-            <a href="quizzes.html" class="nav-link">Training Quizzes</a>
-        </div>
-        <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
+        <a href="index.html" class="nav-link">Home</a>
+        <span class="nav-link active">CMI Form</span>
+        <a href="jersey.html" class="nav-link">Kit Search</a>
+        <a href="admin.html" class="nav-link">Admin Portal</a>
     </div>
 
     <div class="container">
@@ -75,16 +52,13 @@
         <form id="tsoaForm">
             <div id="section-1">
                 <div class="disclaimer">
-                    <strong>Note:</strong> This form is to be used for the 2026 Girls NC high school season. Please only submit 1 CMI per form. There will be an option for you to submit another form at the end. Thank you for your assistance in growing the referee education for our high school associations!
+                    <strong>Note:</strong> This form is to be used for the 2026 Girls NC high school season. Please only submit 1 CMI per form.
                 </div>
-
                 <h2>Step 1: Official Info</h2>
                 <label>Referee Name</label>
                 <input type="text" id="refName" placeholder="Enter your full name" required>
-
                 <label>Date of Game</label>
                 <input type="date" id="gameDate" required>
-
                 <label>Regional Supervisor</label>
                 <select id="supervisor" required>
                     <option value="" disabled selected>Select Supervisor...</option>
@@ -97,28 +71,19 @@
                     <option value="Roger Morgan (Albemarle)">Roger Morgan (Albemarle)</option>
                     <option value="Roger Morton (Piedmont)">Roger Morton (Piedmont)</option>
                 </select>
-
-                <div class="btn-group">
-                    <button type="button" class="btn-next" onclick="nextSection(2)">Next Step</button>
-                </div>
+                <div class="btn-group"><button type="button" class="btn-next" onclick="nextSection(2)">Next Step</button></div>
             </div>
 
             <div id="section-2" class="hidden">
                 <h2>Step 2: Game Details</h2>
-                
                 <label>Level of Game</label>
                 <div class="radio-list">
                     <div class="radio-item"><input type="radio" name="gameLevel" id="varsity" value="Varsity"><label for="varsity">Varsity</label></div>
                     <div class="radio-item"><input type="radio" name="gameLevel" id="jv" value="JV"><label for="jv">JV</label></div>
                     <div class="radio-item"><input type="radio" name="gameLevel" id="middle" value="Middle School"><label for="middle">Middle School</label></div>
                 </div>
-
-                <label>Home Team</label>
-                <input type="text" id="homeTeam" required>
-
-                <label>Away Team</label>
-                <input type="text" id="awayTeam" required>
-
+                <label>Home Team</label><input type="text" id="homeTeam" required>
+                <label>Away Team</label><input type="text" id="awayTeam" required>
                 <div class="btn-group">
                     <button type="button" class="btn-back" onclick="nextSection(1)">Back</button>
                     <button type="button" class="btn-next" onclick="nextSection(3)">Next Step</button>
@@ -127,7 +92,6 @@
 
             <div id="section-3" class="hidden">
                 <h2>Step 3: CMI Details</h2>
-
                 <label>Type of CMI Reporting</label>
                 <div class="radio-list">
                     <div class="radio-item"><input type="radio" name="cmiType" id="pk" value="Penalty Kick"><label for="pk">Penalty Kick</label></div>
@@ -136,31 +100,17 @@
                     <div class="radio-item"><input type="radio" name="cmiType" id="disallowOff" value="Disallowed Goal (Offside)"><label for="disallowOff">Disallowed Goal (Offside)</label></div>
                     <div class="radio-item"><input type="radio" name="cmiType" id="other" value="Other (Use Notes)"><label for="other">Other (Use Notes)</label></div>
                 </div>
-
                 <label>When did this occur?</label>
                 <div class="radio-list">
                     <div class="radio-item"><input type="radio" name="half" id="h1" value="1st Half"><label for="h1">1st Half</label></div>
                     <div class="radio-item"><input type="radio" name="half" id="h2" value="2nd Half"><label for="h2">2nd Half</label></div>
                 </div>
-
-                <label>Time Remaining in Half</label>
-                <div class="subtext">
-                    As much information as you can provide is valuable. Any of the below are useful:
-                    <ul>
-                        <li>"NFHS Network stream timestamp - 1:12:47"</li>
-                        <li>"21:49 remaining in 1st half"</li>
-                        <li>"5 minutes into the 2nd half"</li>
-                        <li>"Late in the 1st half"</li>
-                    </ul>
-                </div>
+                <label>Time Remaining</label>
+                <div class="subtext">e.g., "21:49 remaining in 1st half" or "NFHS Timestamp 1:12:47"</div>
                 <input type="text" id="timeRemaining">
-
                 <label>Notes (Optional)</label>
-                <div class="subtext">
-                    This is not a required field. Feel free to use this to let us know of any further PERTINENT information.
-                </div>
+                <div class="subtext">This is not a required field. Feel free to use this to let us know of any further PERTINENT information.</div>
                 <textarea id="notes" rows="3"></textarea>
-
                 <div class="btn-group">
                     <button type="button" class="btn-back" onclick="nextSection(2)">Back</button>
                     <button type="button" class="btn-next" onclick="submitForm()">Submit Report</button>
@@ -169,10 +119,7 @@
 
             <div id="success-view" class="hidden" style="text-align: center; padding: 20px 0;">
                 <h2 style="border:none; color: #2ecc71; font-size: 2rem; margin-bottom: 10px;">✓ Success!</h2>
-                <p style="margin-bottom: 30px; line-height: 1.5; color: #555;">
-                    Thank you for filing out the 2026 Girls NCHSAA CMI form. <br>
-                    If you have any more CMI's to report, please fill out another form.
-                </p>
+                <p>Thank you for filing out the 2026 Girls NCHSAA CMI form.</p>
                 <a href="#" onclick="location.reload()" class="success-btn primary-link">Fill out another form</a>
                 <a href="index.html" class="success-btn secondary-link">Return back home</a>
             </div>
@@ -180,34 +127,22 @@
     </div>
 
     <script>
-        // CMI BACKEND URL
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
 
         function nextSection(step) {
             document.querySelectorAll('.container > form > div').forEach(div => div.classList.add('hidden'));
-            
-            if (step === 1) {
-                document.getElementById('section-1').classList.remove('hidden');
-                document.getElementById('progress').style.width = "33%";
-            } 
+            if (step === 1) { document.getElementById('section-1').classList.remove('hidden'); document.getElementById('progress').style.width = "33%"; }
             else if (step === 2) {
                 if(!document.getElementById('refName').value || !document.getElementById('gameDate').value || !document.getElementById('supervisor').value) {
-                    alert("Please fill out all fields in Step 1.");
-                    document.getElementById('section-1').classList.remove('hidden');
-                    return;
+                    alert("Please fill out all fields."); document.getElementById('section-1').classList.remove('hidden'); return;
                 }
-                document.getElementById('section-2').classList.remove('hidden');
-                document.getElementById('progress').style.width = "66%";
-            } 
+                document.getElementById('section-2').classList.remove('hidden'); document.getElementById('progress').style.width = "66%";
+            }
             else if (step === 3) {
-                const level = document.querySelector('input[name="gameLevel"]:checked');
-                if(!level || !document.getElementById('homeTeam').value || !document.getElementById('awayTeam').value) {
-                    alert("Please fill out Game Level and Team Names.");
-                    document.getElementById('section-2').classList.remove('hidden');
-                    return;
+                if(!document.querySelector('input[name="gameLevel"]:checked') || !document.getElementById('homeTeam').value || !document.getElementById('awayTeam').value) {
+                    alert("Please fill out all fields."); document.getElementById('section-2').classList.remove('hidden'); return;
                 }
-                document.getElementById('section-3').classList.remove('hidden');
-                document.getElementById('progress').style.width = "100%";
+                document.getElementById('section-3').classList.remove('hidden'); document.getElementById('progress').style.width = "100%";
             }
         }
 
@@ -216,10 +151,7 @@
             const half = document.querySelector('input[name="half"]:checked');
             const timeRem = document.getElementById('timeRemaining').value;
 
-            if(!cmi || !half || !timeRem) {
-                alert("Please fill out the CMI Type, Half, and Time Remaining.");
-                return;
-            }
+            if(!cmi || !half || !timeRem) { alert("Please fill out CMI Type, Half, and Time."); return; }
 
             const btn = document.querySelector('#section-3 .btn-next');
             btn.textContent = "Submitting..."; btn.disabled = true;
@@ -237,19 +169,13 @@
                 notes: document.getElementById('notes').value
             };
 
-            fetch(SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                body: JSON.stringify(formData)
-            })
-            .then(response => {
+            fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(formData) })
+            .then(() => {
                 document.getElementById('section-3').classList.add('hidden');
                 document.getElementById('success-view').classList.remove('hidden');
             })
-            .catch(error => {
-                alert("Error submitting. Please try again.");
-                btn.textContent = "Submit Report";
-                btn.disabled = false;
+            .catch(() => {
+                alert("Error submitting."); btn.textContent = "Submit Report"; btn.disabled = false;
             });
         }
     </script>
