@@ -174,7 +174,16 @@
             titles.forEach(title => {
                 const count = allQuizzes[title].length;
                 const highScore = userScores[title]; 
-                let badgeHtml = highScore !== undefined ? `<span class="score-badge good">Best: ${highScore}%</span>` : "";
+                let badgeHtml = "";
+                
+                // Display fractional score if available
+                if (highScore !== undefined && highScore.score) {
+                    badgeHtml = `<span class="score-badge good">Best: ${highScore.score}</span>`;
+                } else if (highScore !== undefined) {
+                    // Fallback for old percentage format (backward compatibility)
+                    badgeHtml = `<span class="score-badge good">Best: ${highScore}%</span>`;
+                }
+                
                 const div = document.createElement('div');
                 div.className = 'quiz-list-item';
                 div.innerHTML = `<div class="quiz-info"><span class="quiz-title">${title}</span><span class="quiz-meta">${count} Questions</span></div>${badgeHtml}`;
