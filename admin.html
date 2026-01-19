@@ -199,6 +199,13 @@
                 });
             } else {
                 // QUIZ VIEW - Show fractional scores
+                console.log("Quiz Data Received:", quizData); // Debug logging
+                
+                if (!quizData || quizData.length === 0) {
+                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p><p style="font-size:0.9rem; margin-top:20px;">Make sure the "Quiz Results" tab exists in your Form Responses sheet.</p></div>';
+                    return;
+                }
+                
                 const bestScores = {};
                 quizData.forEach(q => {
                     const key = `${q.email}_${q.quiz}`;
@@ -207,6 +214,11 @@
                 });
                 
                 const final = Object.values(bestScores).filter(q => q.name.toLowerCase().includes(term)).sort((a,b) => a.name.localeCompare(b.name));
+                
+                if (final.length === 0) {
+                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your search.</p></div>';
+                    return;
+                }
                 
                 final.forEach(q => {
                     const p = parseFloat(q.percent);
@@ -218,7 +230,7 @@
                     div.innerHTML = `
                         <div style="font-weight:bold;">${q.name}<br><small style="font-weight:normal; color:#888;">${q.email}</small></div>
                         <div style="font-weight:600; color:#2c3e50;">${q.quiz}</div>
-                        <div style="text-align:center;"><span class="score-fraction">${q.score}</span></div>
+                        <div style="text-align:center;"><span class="score-fraction">${q.score || 'N/A'}</span></div>
                         <div style="text-align:center;"><span class="score-badge ${bClass}">${q.percent}%</span></div>
                         <div style="color:#666; font-size:0.85rem;">${q.date}</div>
                     `;
