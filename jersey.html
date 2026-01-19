@@ -22,78 +22,35 @@
             .nav-center { flex-wrap: wrap; justify-content: center; }
         }
 
-        /* --- SEARCH STYLES --- */
+        /* Search Styles */
         .search-container { position: relative; max-width: 600px; margin: 0 auto 20px auto; }
-        
-        .search-box { 
-            width: 100%; padding: 15px 20px; font-size: 1.1rem; border: 2px solid #ddd; 
-            border-radius: 30px; outline: none; transition: border-color 0.2s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+        .search-box { width: 100%; padding: 15px 20px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 30px; outline: none; transition: border-color 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .search-box:focus { border-color: #2ecc71; }
 
-        /* Autocomplete Dropdown */
-        .search-results {
-            position: absolute; top: 110%; left: 0; right: 0; background: white;
-            border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
-            max-height: 300px; overflow-y: auto; z-index: 100; display: none;
-            border: 1px solid #eee;
-        }
-        .result-item {
-            padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0;
-            font-size: 1rem; color: #444; transition: background 0.1s;
-        }
+        .search-results { position: absolute; top: 110%; left: 0; right: 0; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 300px; overflow-y: auto; z-index: 100; display: none; border: 1px solid #eee; }
+        .result-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 1rem; color: #444; transition: background 0.1s; }
         .result-item:last-child { border-bottom: none; }
         .result-item:hover { background-color: #f0fdf4; color: #2ecc71; font-weight: 500; }
         .no-results { padding: 15px; text-align: center; color: #888; font-style: italic; }
 
-        /* --- LARGE DETAIL VIEW --- */
+        /* Detail View */
         #detailView { display: none; animation: fadeIn 0.3s ease; }
-        
         .school-header { text-align: center; margin-bottom: 30px; }
         .school-title { font-size: 2.5rem; color: #2c3e50; margin: 0; }
-        .school-subtitle { color: #7f8c8d; font-size: 1.1rem; margin-top: 5px; }
-
-        .kits-display { 
-            display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; 
-            background: white; padding: 40px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eee;
-        }
-
-        .kit-group { text-align: center; width: 180px; }
-        .kit-label { 
-            display: block; font-weight: 800; font-size: 1.2rem; color: #2c3e50; 
-            margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;
-        }
         
-        /* The SVG itself */
-        .kit-svg { 
-            width: 150px; height: 220px; 
-            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.15));
-            transition: transform 0.2s;
-        }
+        .kits-display { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .kit-group { text-align: center; width: 180px; }
+        .kit-label { display: block; font-weight: 800; font-size: 1.2rem; color: #2c3e50; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .kit-svg { width: 150px; height: 220px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.15)); transition: transform 0.2s; }
         .kit-svg:hover { transform: scale(1.05); }
 
-        .kit-updated { 
-            font-size: 0.85rem; color: #999; margin-top: 15px; 
-            font-style: italic; display: flex; align-items: center; justify-content: center; gap: 5px;
-        }
+        .kit-updated { font-size: 0.85rem; color: #999; margin-top: 15px; font-style: italic; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
-        /* Reset Button */
-        .reset-container { text-align: center; margin-top: 30px; }
-        .btn-reset { 
-            background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px; 
-            border-radius: 30px; cursor: pointer; font-weight: 600;
-        }
+        .reset-container { text-align: left; margin-bottom:20px; }
+        .btn-reset { background: #e2e8f0; color: #4a5568; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; }
         .btn-reset:hover { background: #cbd5e1; }
-
-        /* Edit Button */
-        .edit-link {
-            display: inline-block; margin-top: 20px; color: #3498db; text-decoration: underline; 
-            cursor: pointer; font-size: 0.9rem;
-        }
-
-        /* Loading */
+        .edit-link { display: inline-block; margin-top: 20px; color: #3498db; text-decoration: underline; cursor: pointer; font-size: 0.9rem; }
         #loading { text-align: center; color: #666; font-style: italic; margin-top: 20px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -133,17 +90,15 @@
         </div>
 
         <div id="detailView">
-            <div class="reset-container" style="text-align:left; margin-bottom:20px; margin-top:0;">
+            <div class="reset-container">
                 <button class="btn-reset" onclick="resetSearch()">← Back to Search</button>
             </div>
 
             <div class="school-header">
                 <h1 id="viewSchoolName" class="school-title">School Name</h1>
-                <div id="viewAssociation" class="school-subtitle">Association Name</div>
             </div>
 
-            <div id="kitsContainer" class="kits-display">
-                </div>
+            <div id="kitsContainer" class="kits-display"></div>
 
             <div style="text-align:center;">
                 <span class="edit-link" onclick="openModal()">Request an Update for this School</span>
@@ -191,16 +146,12 @@
                 });
         });
 
-        // 1. SEARCH LOGIC
         function handleTyping() {
             const input = document.getElementById('searchInput');
             const list = document.getElementById('resultsList');
             const term = input.value.toLowerCase();
             
-            if (term.length < 2) {
-                list.style.display = 'none';
-                return;
-            }
+            if (term.length < 2) { list.style.display = 'none'; return; }
 
             const matches = schoolsData.filter(s => (s.school || "").toLowerCase().includes(term));
             
@@ -209,6 +160,9 @@
                 list.innerHTML = '<div class="no-results">No schools found</div>';
             } else {
                 matches.forEach(school => {
+                    // Only show if we have at least one kit color to show
+                    if (!school.hShirt && !school.aShirt) return;
+                    
                     const item = document.createElement('div');
                     item.className = 'result-item';
                     item.innerText = school.school;
@@ -216,28 +170,23 @@
                     list.appendChild(item);
                 });
             }
-            list.style.display = 'block';
+            list.style.display = matches.length > 0 ? 'block' : 'none';
         }
 
-        // 2. SELECTION LOGIC
         function selectSchool(school) {
             currentSchool = school;
-            
-            // Populate View
             document.getElementById('viewSchoolName').innerText = school.school;
-            document.getElementById('viewAssociation').innerText = "Official Kit Colors";
 
             const container = document.getElementById('kitsContainer');
-            container.innerHTML = `
-                ${createKitSvg("Home", school.hShirt, school.hAccent, school.hShort, school.hSock, school.hUpdate)}
-                ${createKitSvg("Away", school.aShirt, school.aAccent, school.aShort, school.aSock, school.aUpdate)}
-            `;
+            container.innerHTML = '';
 
-            if(school.tShirt && school.tShirt !== "") {
-                container.innerHTML += createKitSvg("Alternate", school.tShirt, school.tAccent, school.tShort, school.tSock, school.tUpdate);
-            }
+            // ONLY Show Kits that exist (have a shirt color)
+            if (school.hShirt) container.innerHTML += createKitSvg("Home", school.hShirt, school.hAccent, school.hShort, school.hSock, school.hUpdate);
+            if (school.aShirt) container.innerHTML += createKitSvg("Away", school.aShirt, school.aAccent, school.aShort, school.aSock, school.aUpdate);
+            if (school.tShirt) container.innerHTML += createKitSvg("Alternate", school.tShirt, school.tAccent, school.tShort, school.tSock, school.tUpdate);
 
-            // Switch Views
+            if (container.innerHTML === '') container.innerHTML = '<p>No kit data available for this school.</p>';
+
             document.getElementById('searchView').style.display = 'none';
             document.getElementById('detailView').style.display = 'block';
         }
@@ -250,11 +199,9 @@
             document.getElementById('searchInput').focus();
         }
 
-        // 3. SVG GENERATOR (With Accent Number 10)
         function createKitSvg(label, shirt, accent, shorts, socks, updated) {
-            // Defaults
             const cShirt = shirt || "#ffffff";
-            const cAccent = accent || "#000000"; // The number 10 color
+            const cAccent = accent || "#000000"; 
             const cShort = shorts || "#ffffff";
             const cSock = socks || "#ffffff";
 
@@ -262,28 +209,23 @@
             <svg class="kit-svg" viewBox="0 0 100 160" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20,10 L80,10 L95,35 L80,45 L75,35 L75,90 L25,90 L25,35 L20,45 L5,35 Z" 
                       fill="${cShirt}" stroke="#333" stroke-width="0.5"/>
-                
                 <text x="50" y="60" font-family="Arial, sans-serif" font-size="30" font-weight="900" 
                       fill="${cAccent}" text-anchor="middle" dominant-baseline="middle">10</text>
-
                 <path d="M25,95 L75,95 L80,130 L50,130 L50,110 L50,130 L20,130 Z" 
                       fill="${cShort}" stroke="#333" stroke-width="0.5"/>
-
                 <rect x="25" y="135" width="15" height="25" fill="${cSock}" stroke="#333" stroke-width="0.5" rx="2"/>
                 <rect x="60" y="135" width="15" height="25" fill="${cSock}" stroke="#333" stroke-width="0.5" rx="2"/>
-            </svg>
-            `;
+            </svg>`;
 
             return `
                 <div class="kit-group">
                     <span class="kit-label" style="color:${cShirt === '#ffffff' ? '#333' : cShirt}">${label}</span>
                     ${svgHtml}
-                    <div class="kit-updated">📅 Updated: ${updated || "N/A"}</div>
+                    <div class="kit-updated">📅 Updated: ${updated}</div>
                 </div>
             `;
         }
 
-        // 4. MODAL LOGIC
         function openModal() {
             if(!currentSchool) return;
             document.getElementById('modalSchoolName').innerText = currentSchool.school;
