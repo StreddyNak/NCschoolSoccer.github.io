@@ -171,17 +171,24 @@
             const titles = Object.keys(allQuizzes);
             if (titles.length === 0) { container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; return; }
 
+            console.log("User Scores Object:", userScores); // Debug logging
+
             titles.forEach(title => {
                 const count = allQuizzes[title].length;
                 const highScore = userScores[title]; 
                 let badgeHtml = "";
                 
+                console.log(`Quiz: ${title}, High Score:`, highScore); // Debug logging
+                
                 // Display fractional score if available
                 if (highScore !== undefined && highScore.score) {
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.score}</span>`;
-                } else if (highScore !== undefined) {
+                } else if (highScore !== undefined && typeof highScore === 'number') {
                     // Fallback for old percentage format (backward compatibility)
                     badgeHtml = `<span class="score-badge good">Best: ${highScore}%</span>`;
+                } else if (highScore !== undefined && typeof highScore === 'object') {
+                    // If we have an object but score is missing, show percent
+                    badgeHtml = `<span class="score-badge good">Best: ${highScore.percent}%</span>`;
                 }
                 
                 const div = document.createElement('div');
