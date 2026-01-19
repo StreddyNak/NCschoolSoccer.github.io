@@ -6,7 +6,7 @@
     <title>Kit Search</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
 
         /* Navigation */
         .nav-bar { position: relative; display: flex; justify-content: center; align-items: center; margin-bottom: 40px; padding: 10px 0; }
@@ -16,36 +16,39 @@
         .nav-link.active { background-color: #2ecc71; color: white; }
         .supervisor-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); text-decoration: none; color: #2c3e50; font-size: 0.9rem; font-weight: 600; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; background: white; transition: all 0.2s; }
         .supervisor-link:hover { background: #f3f4f6; border-color: #9ca3af; }
-        
         @media (max-width: 800px) {
             .nav-bar { flex-direction: column; gap: 15px; }
             .supervisor-link { position: static; transform: none; margin-left: auto; }
             .nav-center { flex-wrap: wrap; justify-content: center; }
         }
 
-        /* Search & Grid */
+        /* Search Box */
         .search-box { width: 100%; padding: 15px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 30px; box-sizing: border-box; }
-        .jersey-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
         
-        .jersey-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 8px solid #ccc; position: relative; }
-        .school-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #2c3e50; min-height: 40px; display: flex; align-items: center;}
+        /* Grid Layout */
+        .jersey-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         
-        .kit-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
-        .kit-label { font-weight: 600; color: #666; }
-        
-        /* Hex Color Swatch */
-        .color-swatch { 
-            display: inline-block; width: 16px; height: 16px; border-radius: 50%; 
-            border: 1px solid #ccc; margin-right: 6px; vertical-align: middle;
-        }
-        .color-text { font-family: monospace; font-size: 0.9rem; color: #444; }
+        .jersey-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
+        .school-name { font-size: 1.25rem; font-weight: 800; margin-bottom: 20px; color: #2c3e50; text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
 
-        .edit-btn { background: none; border: none; color: #3498db; font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: 15px; display: block; width: 100%; text-align: right;}
+        /* Kit Visuals Container */
+        .kits-container { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 15px; }
+        
+        /* Individual Kit Column */
+        .kit-column { display: flex; flex-direction: column; align-items: center; width: 90px; }
+        .kit-label { font-size: 0.8rem; font-weight: bold; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        .last-updated { font-size: 0.7rem; color: #999; margin-top: 5px; font-style: italic; }
+
+        /* SVG Styles */
+        svg { filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1)); }
+        
+        /* Edit Button */
+        .edit-btn { background: none; border: none; color: #3498db; font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: auto; align-self: center; }
         .edit-btn:hover { color: #2980b9; }
 
         /* Modal */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal { background: white; width: 90%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal { background: white; width: 90%; max-width: 600px; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal h2 { margin-top: 0; color: #2c3e50; font-size: 1.5rem; }
         .modal-label { display: block; font-size: 0.85rem; font-weight: bold; color: #666; margin-top: 10px; }
         .modal-input { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
@@ -70,9 +73,9 @@
         </div>
 
         <h1 style="text-align:center; color:#2c3e50;">Kit Color Search</h1>
-        <p style="text-align:center; color:#7f8c8d; margin-bottom:30px;">Find home and away jersey colors for schools.</p>
+        <p style="text-align:center; color:#7f8c8d; margin-bottom:30px;">Find home, away, and alternate kits.</p>
 
-        <input type="text" id="searchInput" class="search-box" placeholder="Search for a school..." onkeyup="filterJerseys()">
+        <input type="text" id="searchInput" class="search-box" placeholder="Start typing a school name..." onkeyup="filterJerseys()">
         
         <div id="loading">Loading School Data...</div>
         <div id="results" class="jersey-grid"></div>
@@ -85,16 +88,18 @@
             <input type="hidden" id="modalSchoolInput">
             <label class="modal-label">Your Name</label>
             <input type="text" id="submitterName" class="modal-input" placeholder="e.g. John Doe">
+            
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                <div><label class="modal-label">Home Shirt</label><input type="text" id="hShirt" class="modal-input" placeholder="#HEX or Name"></div>
+                <div><label class="modal-label">Home Shirt</label><input type="text" id="hShirt" class="modal-input" placeholder="#HEX"></div>
                 <div><label class="modal-label">Home Short</label><input type="text" id="hShort" class="modal-input"></div>
                 <div><label class="modal-label">Home Sock</label><input type="text" id="hSock" class="modal-input"></div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                <div><label class="modal-label">Away Shirt</label><input type="text" id="aShirt" class="modal-input" placeholder="#HEX or Name"></div>
+                <div><label class="modal-label">Away Shirt</label><input type="text" id="aShirt" class="modal-input" placeholder="#HEX"></div>
                 <div><label class="modal-label">Away Short</label><input type="text" id="aShort" class="modal-input"></div>
                 <div><label class="modal-label">Away Sock</label><input type="text" id="aSock" class="modal-input"></div>
             </div>
+
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal()">Cancel</button>
                 <button class="btn-submit" onclick="submitEdit()">Submit Request</button>
@@ -103,7 +108,6 @@
     </div>
 
     <script>
-        // UPDATED URL
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec"; 
         
         let schoolsData = [];
@@ -114,7 +118,7 @@
                 .then(data => {
                     if (!Array.isArray(data)) {
                         console.error("Data received is not a list:", data);
-                        document.getElementById('loading').innerText = "Error: Invalid Data Format. Please check the backend script.";
+                        document.getElementById('loading').innerText = "Error: Invalid Data Format.";
                         return;
                     }
                     schoolsData = data;
@@ -129,70 +133,81 @@
 
         function filterJerseys() {
             const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = schoolsData.filter(s => {
-                // Match exact CSV Headers
-                const school = (s["School"] || "").toLowerCase();
-                return school.includes(term);
-            });
+            const filtered = schoolsData.filter(s => (s.school || "").toLowerCase().includes(term));
             renderList(filtered);
         }
 
         function renderList(data) {
             const container = document.getElementById('results');
             container.innerHTML = '';
+            
             if (data.length === 0) {
                 container.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No schools found.</p>';
                 return;
             }
-            data.forEach(item => {
-                // Get Raw Data
-                const schoolName = item["School"] || "Unknown";
-                const homeColor = item["Home Shirt"] || "#ccc";
-                const awayColor = item["Away Shirt"] || "#ccc";
-                
-                // Socks
-                const homeSocks = item["Home Socks"] || "";
-                const awaySocks = item["Away Socks"] || "";
-                let sockDisplay = homeSocks;
-                if(awaySocks) sockDisplay += " / " + awaySocks + " (A)";
-                if(!sockDisplay) sockDisplay = "N/A";
 
-                // Visual Elements
+            data.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'jersey-card';
-                
-                // Apply Hex directly to Border
-                div.style.borderLeftColor = homeColor;
+
+                // Build HTML for Kits
+                let kitsHtml = `
+                    <div class="kits-container">
+                        ${createKitHtml("Home", item.hShirt, item.hAccent, item.hShort, item.hSock, item.hUpdate)}
+                        ${createKitHtml("Away", item.aShirt, item.aAccent, item.aShort, item.aSock, item.aUpdate)}
+                `;
+
+                // Add 3rd Kit only if it exists
+                if(item.tShirt && item.tShirt !== "") {
+                    kitsHtml += createKitHtml("3rd", item.tShirt, item.tAccent, item.tShort, item.tSock, item.tUpdate);
+                }
+
+                kitsHtml += `</div>`;
 
                 div.innerHTML = `
-                    <div class="school-name">${schoolName}</div>
-                    
-                    <div class="kit-row">
-                        <span class="kit-label">🏠 Home:</span>
-                        <span>
-                            <span class="color-swatch" style="background-color:${homeColor}"></span>
-                            <span class="color-text">${homeColor}</span>
-                        </span>
-                    </div>
-
-                    <div class="kit-row">
-                        <span class="kit-label">✈️ Away:</span>
-                        <span>
-                            <span class="color-swatch" style="background-color:${awayColor}"></span>
-                            <span class="color-text">${awayColor}</span>
-                        </span>
-                    </div>
-
-                    <div class="kit-row" style="margin-top:10px; font-size:0.85rem; color:#888;">
-                        <span>🧦 Socks: ${sockDisplay}</span>
-                    </div>
-                    
-                    <button class="edit-btn" onclick="openModal('${schoolName.replace(/'/g, "\\'")}')">Request Edit</button>
+                    <div class="school-name">${item.school}</div>
+                    ${kitsHtml}
+                    <button class="edit-btn" onclick="openModal('${item.school.replace(/'/g, "\\'")}')">Request Edit</button>
                 `;
                 container.appendChild(div);
             });
         }
 
+        // --- SVG GENERATOR ---
+        function createKitHtml(label, shirtColor, accentColor, shortColor, sockColor, updatedDate) {
+            // Default colors if missing
+            if(!shirtColor) shirtColor = "#ffffff";
+            if(!accentColor) accentColor = "#000000";
+            if(!shortColor) shortColor = "#ffffff";
+            if(!sockColor) sockColor = "#ffffff";
+
+            // SVG Construction
+            const svg = `
+            <svg width="80" height="120" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20,10 L80,10 L95,35 L80,45 L75,35 L75,90 L25,90 L25,35 L20,45 L5,35 Z" 
+                      fill="${shirtColor}" stroke="#333" stroke-width="1"/>
+                
+                <text x="50" y="65" font-family="Arial, sans-serif" font-size="35" font-weight="bold" 
+                      fill="${accentColor}" text-anchor="middle" dominant-baseline="middle">10</text>
+
+                <path d="M25,95 L75,95 L80,130 L50,130 L50,110 L50,130 L20,130 Z" 
+                      fill="${shortColor}" stroke="#333" stroke-width="1"/>
+
+                <rect x="25" y="135" width="15" height="25" fill="${sockColor}" stroke="#333" stroke-width="1" rx="2"/>
+                <rect x="60" y="135" width="15" height="25" fill="${sockColor}" stroke="#333" stroke-width="1" rx="2"/>
+            </svg>
+            `;
+
+            return `
+                <div class="kit-column">
+                    <span class="kit-label">${label}</span>
+                    ${svg}
+                    <span class="last-updated">Updated: ${updatedDate || "N/A"}</span>
+                </div>
+            `;
+        }
+
+        // --- MODAL & SUBMIT LOGIC ---
         function openModal(name) {
             document.getElementById('modalSchoolName').innerText = name;
             document.getElementById('modalSchoolInput').value = name;
@@ -206,14 +221,13 @@
             const payload = {
                 type: 'jersey_edit',
                 submittedBy: document.getElementById('submitterName').value,
-                schoolName: document.getElementById('modalSchoolInput').value,
+                school: document.getElementById('modalSchoolInput').value,
                 homeShirt: document.getElementById('hShirt').value,
                 homeShort: document.getElementById('hShort').value,
                 homeSock: document.getElementById('hSock').value,
                 awayShirt: document.getElementById('aShirt').value,
                 awayShort: document.getElementById('aShort').value,
-                awaySock: document.getElementById('aSock').value,
-                homeAccent: "", awayAccent: "", thirdShirt: "", thirdAccent: "", thirdShort: "", thirdSock: ""
+                awaySock: document.getElementById('aSock').value
             };
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
             .then(() => { alert("Success! Request submitted."); closeModal(); btn.innerText = "Submit Request"; btn.disabled = false; })
