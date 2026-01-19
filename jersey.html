@@ -16,7 +16,7 @@
         .nav-link.active { background-color: #2ecc71; color: white; }
         .supervisor-link { position: absolute; right: 0; top: 50%; transform: translateY(-50%); text-decoration: none; color: #2c3e50; font-size: 0.9rem; font-weight: 600; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; background: white; transition: all 0.2s; }
         .supervisor-link:hover { background: #f3f4f6; border-color: #9ca3af; }
-
+        
         @media (max-width: 800px) {
             .nav-bar { flex-direction: column; gap: 15px; }
             .supervisor-link { position: static; transform: none; margin-left: auto; }
@@ -26,12 +26,21 @@
         /* Search & Grid */
         .search-box { width: 100%; padding: 15px; font-size: 16px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 30px; box-sizing: border-box; }
         .jersey-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .jersey-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ccc; position: relative; }
-        .school-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; color: #2c3e50; }
-        .kit-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; }
+        
+        .jersey-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 8px solid #ccc; position: relative; }
+        .school-name { font-size: 1.1rem; font-weight: bold; margin-bottom: 15px; color: #2c3e50; min-height: 40px; display: flex; align-items: center;}
+        
+        .kit-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
         .kit-label { font-weight: 600; color: #666; }
-        .kit-color { font-weight: 500; }
-        .edit-btn { background: none; border: none; color: #3498db; font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: 10px; display: block; }
+        
+        /* Hex Color Swatch */
+        .color-swatch { 
+            display: inline-block; width: 16px; height: 16px; border-radius: 50%; 
+            border: 1px solid #ccc; margin-right: 6px; vertical-align: middle;
+        }
+        .color-text { font-family: monospace; font-size: 0.9rem; color: #444; }
+
+        .edit-btn { background: none; border: none; color: #3498db; font-size: 0.8rem; text-decoration: underline; cursor: pointer; margin-top: 15px; display: block; width: 100%; text-align: right;}
         .edit-btn:hover { color: #2980b9; }
 
         /* Modal */
@@ -77,12 +86,12 @@
             <label class="modal-label">Your Name</label>
             <input type="text" id="submitterName" class="modal-input" placeholder="e.g. John Doe">
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                <div><label class="modal-label">Home Shirt</label><input type="text" id="hShirt" class="modal-input"></div>
+                <div><label class="modal-label">Home Shirt</label><input type="text" id="hShirt" class="modal-input" placeholder="#HEX or Name"></div>
                 <div><label class="modal-label">Home Short</label><input type="text" id="hShort" class="modal-input"></div>
                 <div><label class="modal-label">Home Sock</label><input type="text" id="hSock" class="modal-input"></div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                <div><label class="modal-label">Away Shirt</label><input type="text" id="aShirt" class="modal-input"></div>
+                <div><label class="modal-label">Away Shirt</label><input type="text" id="aShirt" class="modal-input" placeholder="#HEX or Name"></div>
                 <div><label class="modal-label">Away Short</label><input type="text" id="aShort" class="modal-input"></div>
                 <div><label class="modal-label">Away Sock</label><input type="text" id="aSock" class="modal-input"></div>
             </div>
@@ -94,8 +103,8 @@
     </div>
 
     <script>
-        // Use YOUR SCRIPT URL (Make sure this matches your deployed script)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec"; 
+        // UPDATED URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhPmP3cQQtep2d0uRgcSW9dPvVt9ppqk2KI2UBT0ZhKO4xOJx2ktMkvkzrotQNkBz-jg/exec"; 
         
         let schoolsData = [];
 
@@ -103,10 +112,9 @@
             fetch(`${SCRIPT_URL}?action=getJerseyData`)
                 .then(res => res.json())
                 .then(data => {
-                    // Safety check for invalid format
                     if (!Array.isArray(data)) {
                         console.error("Data received is not a list:", data);
-                        document.getElementById('loading').innerText = "Error: Invalid Data Format";
+                        document.getElementById('loading').innerText = "Error: Invalid Data Format. Please check the backend script.";
                         return;
                     }
                     schoolsData = data;
@@ -122,10 +130,9 @@
         function filterJerseys() {
             const term = document.getElementById('searchInput').value.toLowerCase();
             const filtered = schoolsData.filter(s => {
-                const school = (s.school || "").toLowerCase();
-                const home = (s.home || "").toLowerCase();
-                const away = (s.away || "").toLowerCase();
-                return school.includes(term) || home.includes(term) || away.includes(term);
+                // Match exact CSV Headers
+                const school = (s["School"] || "").toLowerCase();
+                return school.includes(term);
             });
             renderList(filtered);
         }
@@ -138,27 +145,49 @@
                 return;
             }
             data.forEach(item => {
-                // Border Color Logic
-                let borderColor = '#ccc';
-                const h = (item.home || "").toLowerCase();
-                if(h.includes('red') || h.includes('maroon')) borderColor = '#e74c3c';
-                else if(h.includes('blue') || h.includes('navy')) borderColor = '#3498db';
-                else if(h.includes('green') || h.includes('teal')) borderColor = '#2ecc71';
-                else if(h.includes('yellow') || h.includes('gold')) borderColor = '#f1c40f';
-                else if(h.includes('black')) borderColor = '#333';
-                else if(h.includes('white')) borderColor = '#ddd';
-                else if(h.includes('purple')) borderColor = '#9b59b6';
-                else if(h.includes('orange')) borderColor = '#e67e22';
+                // Get Raw Data
+                const schoolName = item["School"] || "Unknown";
+                const homeColor = item["Home Shirt"] || "#ccc";
+                const awayColor = item["Away Shirt"] || "#ccc";
+                
+                // Socks
+                const homeSocks = item["Home Socks"] || "";
+                const awaySocks = item["Away Socks"] || "";
+                let sockDisplay = homeSocks;
+                if(awaySocks) sockDisplay += " / " + awaySocks + " (A)";
+                if(!sockDisplay) sockDisplay = "N/A";
 
+                // Visual Elements
                 const div = document.createElement('div');
                 div.className = 'jersey-card';
-                div.style.borderLeftColor = borderColor;
+                
+                // Apply Hex directly to Border
+                div.style.borderLeftColor = homeColor;
+
                 div.innerHTML = `
-                    <div class="school-name">${item.school || "Unknown"}</div>
-                    <div class="kit-row"><span class="kit-label">🏠 Home:</span><span class="kit-color">${item.home || "N/A"}</span></div>
-                    <div class="kit-row"><span class="kit-label">✈️ Away:</span><span class="kit-color">${item.away || "N/A"}</span></div>
-                    <div class="kit-row" style="margin-top:10px; font-size:0.85rem; color:#888;"><span>🧦 Socks: ${item.socks || "N/A"}</span></div>
-                    <button class="edit-btn" onclick="openModal('${(item.school || "").replace(/'/g, "\\'")}')">Request Edit</button>
+                    <div class="school-name">${schoolName}</div>
+                    
+                    <div class="kit-row">
+                        <span class="kit-label">🏠 Home:</span>
+                        <span>
+                            <span class="color-swatch" style="background-color:${homeColor}"></span>
+                            <span class="color-text">${homeColor}</span>
+                        </span>
+                    </div>
+
+                    <div class="kit-row">
+                        <span class="kit-label">✈️ Away:</span>
+                        <span>
+                            <span class="color-swatch" style="background-color:${awayColor}"></span>
+                            <span class="color-text">${awayColor}</span>
+                        </span>
+                    </div>
+
+                    <div class="kit-row" style="margin-top:10px; font-size:0.85rem; color:#888;">
+                        <span>🧦 Socks: ${sockDisplay}</span>
+                    </div>
+                    
+                    <button class="edit-btn" onclick="openModal('${schoolName.replace(/'/g, "\\'")}')">Request Edit</button>
                 `;
                 container.appendChild(div);
             });
@@ -175,20 +204,20 @@
             const btn = document.querySelector('.btn-submit');
             btn.innerText = "Sending..."; btn.disabled = true;
             const payload = {
-                type: 'jersey_edit', // Matches doPost type check? No, doPost doesn't check type. It just appends.
-                // NOTE: Based on your doPost logic, "type" isn't checked, but we send the raw fields:
+                type: 'jersey_edit',
                 submittedBy: document.getElementById('submitterName').value,
-                school: document.getElementById('modalSchoolInput').value,
+                schoolName: document.getElementById('modalSchoolInput').value,
                 homeShirt: document.getElementById('hShirt').value,
                 homeShort: document.getElementById('hShort').value,
                 homeSock: document.getElementById('hSock').value,
                 awayShirt: document.getElementById('aShirt').value,
                 awayShort: document.getElementById('aShort').value,
-                awaySock: document.getElementById('aSock').value
+                awaySock: document.getElementById('aSock').value,
+                homeAccent: "", awayAccent: "", thirdShirt: "", thirdAccent: "", thirdShort: "", thirdSock: ""
             };
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
-            .then(() => { alert("Success!"); closeModal(); btn.innerText = "Submit Request"; btn.disabled = false; })
-            .catch(() => { alert("Error."); btn.innerText = "Submit Request"; btn.disabled = false; });
+            .then(() => { alert("Success! Request submitted."); closeModal(); btn.innerText = "Submit Request"; btn.disabled = false; })
+            .catch(() => { alert("Error sending request."); btn.innerText = "Submit Request"; btn.disabled = false; });
         }
     </script>
 </body>
