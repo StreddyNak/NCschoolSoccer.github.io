@@ -10,44 +10,19 @@
 
         /* --- Navigation Menu --- */
         .nav-bar { 
-            position: relative; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            margin-bottom: 40px; 
-            padding: 10px 0;
+            position: relative; display: flex; justify-content: center; 
+            align-items: center; margin-bottom: 40px; padding: 10px 0;
         }
-
-        /* Center Group for Main Tools */
-        .nav-center {
-            display: flex;
-            gap: 20px;
-        }
-
+        .nav-center { display: flex; gap: 20px; }
         .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 16px; transition: 0.2s; }
         .nav-link:hover { background-color: #e5e7eb; color: #111827; }
         .nav-link.active { background-color: #2ecc71; color: white; }
-
-        /* Supervisor Login - Pushed to Far Right */
         .supervisor-link {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            text-decoration: none;
-            color: #2c3e50;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: 1px solid #d1d5db;
-            padding: 6px 12px;
-            border-radius: 4px;
-            background: white;
-            transition: all 0.2s;
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+            text-decoration: none; color: #2c3e50; font-size: 0.9rem; font-weight: 600;
+            border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; background: white; transition: all 0.2s;
         }
-        .supervisor-link:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
+        .supervisor-link:hover { background: #f3f4f6; border-color: #9ca3af; }
 
         @media (max-width: 800px) {
             .nav-bar { flex-direction: column; gap: 15px; }
@@ -75,22 +50,18 @@
         .quiz-title { font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
         .quiz-meta { font-size: 0.85rem; color: #666; margin-top: 4px; }
         
-        /* Score Badge */
-        .score-badge { 
-            font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 20px; 
-            background: #eee; color: #777; 
-        }
+        .score-badge { font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 20px; background: #eee; color: #777; }
         .score-badge.good { background: #dcfce7; color: #166534; }
         
         /* Questions */
         .question-block { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px; text-align: left; }
         .q-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
         
-        /* Improved Video Wrapper */
-        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; background: #000; margin-bottom: 15px; }
+        /* Video */
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; background: #000; margin-bottom: 8px; }
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .video-container { margin-bottom: 15px; }
-
+        .backup-link { display: inline-block; font-size: 0.85rem; color: #666; text-decoration: underline; margin-bottom: 15px; }
+        
         .option-btn { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .option-btn:hover { background-color: #f9fafb; border-color: #d1d5db; }
         .option-btn.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; }
@@ -108,7 +79,6 @@
                 <a href="jersey.html" class="nav-link">Kit Search</a>
                 <span class="nav-link active">Training Quizzes</span>
             </div>
-
             <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
         </div>
 
@@ -130,11 +100,9 @@
         <div id="intro-view" class="card hidden">
             <h2 id="intro-title">Quiz Title</h2>
             <p style="color:#666;">Confirm your details to begin.</p>
-            
             <input type="text" id="firstName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="text" id="lastName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="email" id="userEmail" class="input-field" readonly style="background:#f9f9f9; color:#666;">
-
             <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
             <br>
             <button onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">Back</button>
@@ -167,79 +135,48 @@
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             if (!email) { alert("Please enter an email."); return; }
-
             const btn = document.querySelector('#login-view button');
             const msg = document.getElementById('login-msg');
-            
-            btn.innerText = "Verifying...";
-            btn.disabled = true;
-            msg.style.display = 'none';
+            btn.innerText = "Verifying..."; btn.disabled = true; msg.style.display = 'none';
 
             fetch(`${SCRIPT_URL}?action=getQuizData&email=${encodeURIComponent(email)}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.error) {
-                        msg.innerText = data.error;
-                        msg.style.display = 'block';
-                        btn.innerText = "Access Quizzes";
-                        btn.disabled = false;
-                        return;
+                        msg.innerText = data.error; msg.style.display = 'block';
+                        btn.innerText = "Access Quizzes"; btn.disabled = false; return;
                     }
-
                     allQuizzes = data.quizzes;
                     userScores = data.scores || {}; 
                     currentUser = data.user || { firstName: "", lastName: "", email: email }; 
-                    
                     document.getElementById('userEmail').value = email;
                     document.getElementById('firstName').value = currentUser.firstName;
                     document.getElementById('lastName').value = currentUser.lastName;
-
-                    if (currentUser.firstName) {
-                        document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
-                    }
-
+                    if (currentUser.firstName) document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
                     renderQuizList();
-                    
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('selection-view').classList.remove('hidden');
                 })
                 .catch(err => {
                     console.error(err);
-                    msg.innerText = "Connection failed.";
-                    msg.style.display = 'block';
-                    btn.innerText = "Access Quizzes";
-                    btn.disabled = false;
+                    msg.innerText = "Connection failed."; msg.style.display = 'block';
+                    btn.innerText = "Access Quizzes"; btn.disabled = false;
                 });
         }
 
         function renderQuizList() {
             const container = document.getElementById('quiz-list-container');
             container.innerHTML = '';
-            
             const titles = Object.keys(allQuizzes);
-            if (titles.length === 0) {
-                container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>";
-                return;
-            }
+            if (titles.length === 0) { container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; return; }
 
             titles.forEach(title => {
                 const count = allQuizzes[title].length;
                 const highScore = userScores[title]; 
-                
-                let badgeHtml = "";
-                if (highScore !== undefined) {
-                    badgeHtml = `<span class="score-badge good">Best: ${highScore}%</span>`;
-                }
-
+                let badgeHtml = highScore !== undefined ? `<span class="score-badge good">Best: ${highScore}%</span>` : "";
                 const div = document.createElement('div');
                 div.className = 'quiz-list-item';
-                div.innerHTML = `
-                    <div class="quiz-info">
-                        <span class="quiz-title">${title}</span>
-                        <span class="quiz-meta">${count} Questions</span>
-                    </div>
-                    ${badgeHtml}
-                `;
+                div.innerHTML = `<div class="quiz-info"><span class="quiz-title">${title}</span><span class="quiz-meta">${count} Questions</span></div>${badgeHtml}`;
                 div.onclick = () => showIntro(title);
                 container.appendChild(div);
             });
@@ -260,27 +197,27 @@
             renderQuestions();
         }
 
-        // --- IMPROVED VIDEO PARSER ---
-        function getEmbedHtml(url) {
+        // --- Video Logic ---
+        function getVideoHtml(url) {
             if (!url || url.length < 5) return "";
             url = url.trim();
-
-            // 1. YouTube
+            let embed = "";
+            
             const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
             if (ytMatch && ytMatch[1]) {
-                return `<div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+                embed = `<div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
+            } else {
+                const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)([0-9]+)/);
+                if (vimeoMatch && vimeoMatch[1]) {
+                    embed = `<div class="video-wrapper"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
+                }
             }
-
-            // 2. Vimeo (Numeric ID Parser)
-            const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)([0-9]+)/);
-            if (vimeoMatch && vimeoMatch[1]) {
-                return `<div class="video-wrapper"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`;
-            }
-
-            // 3. Fallback
-            return `<div class="video-container"><a href="${url}" target="_blank" style="color:#2ecc71; font-weight:bold; text-decoration:none;">▶ Watch Video Clip (External Link)</a></div>`;
+            
+            // Always append the fallback link below the player (or alone if no player)
+            return `${embed}<a href="${url}" target="_blank" class="backup-link">Open Video in New Tab (if player fails)</a>`;
         }
 
+        // --- Safe Rendering (Fixes the 4th Question Issue) ---
         function renderQuestions() {
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
@@ -289,41 +226,79 @@
                 const qDiv = document.createElement('div');
                 qDiv.className = 'question-block';
                 qDiv.id = `q-block-${index}`;
-                const videoHtml = getEmbedHtml(q.video);
 
-                let optionsHtml = '';
-                q.options.forEach(opt => {
-                    const safeOpt = opt.replace(/'/g, "\\'");
-                    optionsHtml += `<button class="option-btn" onclick="checkAnswer(${index}, '${safeOpt}', this)">${opt}</button>`;
+                // 1. Title
+                const title = document.createElement('div');
+                title.className = 'q-text';
+                title.innerText = `${index + 1}. ${q.question}`;
+                qDiv.appendChild(title);
+
+                // 2. Video
+                if(q.video) {
+                    const vidDiv = document.createElement('div');
+                    vidDiv.innerHTML = getVideoHtml(q.video);
+                    qDiv.appendChild(vidDiv);
+                }
+
+                // 3. Options
+                const optsDiv = document.createElement('div');
+                optsDiv.className = 'options-group';
+                
+                q.options.forEach(optText => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerText = optText;
+                    // Pass the BUTTON itself to the function, not the text string
+                    btn.onclick = function() { checkAnswer(index, optText, btn); };
+                    optsDiv.appendChild(btn);
                 });
+                qDiv.appendChild(optsDiv);
 
-                qDiv.innerHTML = `
-                    <div class="q-text">${index + 1}. ${q.question}</div>
-                    ${videoHtml}
-                    <div class="options-group">${optionsHtml}</div>
-                    <div class="explanation" id="explain-${index}"><strong>Note:</strong> ${q.explanation || ""}</div>
-                `;
+                // 4. Explanation
+                const expDiv = document.createElement('div');
+                expDiv.className = 'explanation';
+                expDiv.id = `explain-${index}`;
+                expDiv.innerHTML = `<strong>Note:</strong> ${q.explanation || ""}`;
+                qDiv.appendChild(expDiv);
+
                 container.appendChild(qDiv);
             });
         }
 
-        function checkAnswer(index, selectedValue, btnElement) {
+        function checkAnswer(index, selectedText, btnElement) {
             const questionData = currentQuizData[index];
             const parent = document.getElementById(`q-block-${index}`);
+            
             if(parent.getAttribute('data-answered') === 'true') return;
             parent.setAttribute('data-answered', 'true');
 
-            const isCorrect = (selectedValue === questionData.answer);
-            if(isCorrect) { btnElement.classList.add('correct'); score++; } 
-            else { btnElement.classList.add('wrong'); parent.querySelectorAll('.option-btn').forEach(b => { if(b.innerText === questionData.answer) b.classList.add('correct'); }); }
+            // Compare text directly
+            const isCorrect = (selectedText.trim() === questionData.answer.trim());
+            
+            if(isCorrect) {
+                btnElement.classList.add('correct');
+                score++;
+            } else {
+                btnElement.classList.add('wrong');
+                // Find correct button
+                const allBtns = parent.querySelectorAll('.option-btn');
+                allBtns.forEach(b => {
+                    if(b.innerText.trim() === questionData.answer.trim()) b.classList.add('correct');
+                });
+            }
 
-            if(questionData.explanation) document.getElementById(`explain-${index}`).style.display = 'block';
+            if(questionData.explanation) {
+                document.getElementById(`explain-${index}`).style.display = 'block';
+            }
         }
 
         function submitQuiz() {
             const total = currentQuizData.length;
             const answered = document.querySelectorAll('[data-answered="true"]').length;
-            if(answered < total && !confirm(`You have only answered ${answered} of ${total} questions. Submit anyway?`)) return;
+            
+            if(answered < total) {
+                if(!confirm(`You have only answered ${answered} of ${total} questions. Submit anyway?`)) return;
+            }
 
             const percentage = Math.round((score / total) * 100);
             document.getElementById('quiz-view').classList.add('hidden');
