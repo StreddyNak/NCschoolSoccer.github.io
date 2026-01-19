@@ -38,9 +38,14 @@
         .school-header { text-align: center; margin-bottom: 30px; }
         .school-title { font-size: 2.5rem; color: #2c3e50; margin: 0; }
         
+        /* New Association Style */
+        .school-association { font-size: 1.1rem; color: #666; margin-top: 5px; font-weight: 500; }
+
         .kits-display { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #eee; }
         .kit-group { text-align: center; width: 180px; }
-        .kit-label { display: block; font-weight: 800; font-size: 1.2rem; color: #2c3e50; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* FIXED LABEL COLOR */
+        .kit-label { display: block; font-weight: 800; font-size: 1.2rem; color: #333; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         
         .kit-svg { width: 150px; height: 220px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.15)); transition: transform 0.2s; }
         .kit-svg:hover { transform: scale(1.05); }
@@ -96,6 +101,7 @@
 
             <div class="school-header">
                 <h1 id="viewSchoolName" class="school-title">School Name</h1>
+                <div id="viewAssociation" class="school-association">Association Name</div>
             </div>
 
             <div id="kitsContainer" class="kits-display"></div>
@@ -160,9 +166,7 @@
                 list.innerHTML = '<div class="no-results">No schools found</div>';
             } else {
                 matches.forEach(school => {
-                    // Only show if we have at least one kit color to show
                     if (!school.hShirt && !school.aShirt) return;
-                    
                     const item = document.createElement('div');
                     item.className = 'result-item';
                     item.innerText = school.school;
@@ -176,11 +180,11 @@
         function selectSchool(school) {
             currentSchool = school;
             document.getElementById('viewSchoolName').innerText = school.school;
+            document.getElementById('viewAssociation').innerText = school.association || ""; // Add Association text
 
             const container = document.getElementById('kitsContainer');
             container.innerHTML = '';
 
-            // ONLY Show Kits that exist (have a shirt color)
             if (school.hShirt) container.innerHTML += createKitSvg("Home", school.hShirt, school.hAccent, school.hShort, school.hSock, school.hUpdate);
             if (school.aShirt) container.innerHTML += createKitSvg("Away", school.aShirt, school.aAccent, school.aShort, school.aSock, school.aUpdate);
             if (school.tShirt) container.innerHTML += createKitSvg("Alternate", school.tShirt, school.tAccent, school.tShort, school.tSock, school.tUpdate);
@@ -219,9 +223,9 @@
 
             return `
                 <div class="kit-group">
-                    <span class="kit-label" style="color:${cShirt === '#ffffff' ? '#333' : cShirt}">${label}</span>
+                    <span class="kit-label">${label}</span>
                     ${svgHtml}
-                    <div class="kit-updated">📅 Updated: ${updated}</div>
+                    <div class="kit-updated">Last Seen: ${updated}</div>
                 </div>
             `;
         }
