@@ -23,10 +23,14 @@
         .search-input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
         
         /* List Styles */
-        .list-header { display: grid; grid-template-columns: 110px 2fr 1.5fr 140px 2fr 110px; padding: 10px 20px; font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; }
-        .list-row { background: white; border-radius: 8px; padding: 12px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 5px solid #ccc; display: grid; grid-template-columns: 110px 2fr 1.5fr 140px 2fr 110px; gap: 15px; align-items: center; margin-bottom: 8px; cursor: pointer; }
+        .list-header { display: grid; padding: 10px 20px; font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; }
+        .list-row { background: white; border-radius: 8px; padding: 12px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 5px solid #ccc; display: grid; gap: 15px; align-items: center; margin-bottom: 8px; cursor: pointer; }
         .list-row.expanded { background-color: #f0fdf4; }
         .list-row.expanded .col-notes { white-space: normal; overflow: visible; }
+        
+        /* CMI-specific styling */
+        .cmi-header { grid-template-columns: 110px 2fr 1.5fr 140px 2fr 110px; }
+        .cmi-row { grid-template-columns: 110px 2fr 1.5fr 140px 2fr 110px; }
         
         .col-notes { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.85rem; color: #555; }
         .row-red { border-left-color: #e74c3c; } .row-pk { border-left-color: #3498db; } .row-goal { border-left-color: #2ecc71; }
@@ -34,10 +38,14 @@
         .tag { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-align: center; width: 100%; }
         .tag-red { background: #fee2e2; color: #991b1b; } .tag-pk { background: #e0f2fe; color: #075985; } .tag-goal { background: #dcfce7; color: #166534; }
         
-        /* Quiz Mode */
-        .quiz-mode .season-nav { display: none; } /* Hide Seasons in Quiz Mode */
-        .score-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; display: inline-block; width: 60px; }
+        /* Quiz-specific styling */
+        .quiz-header { grid-template-columns: 2fr 2fr 120px 100px 1fr; }
+        .quiz-row { grid-template-columns: 2fr 2fr 120px 100px 1fr; }
+        
+        .score-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; display: inline-block; min-width: 60px; }
         .score-high { background: #dcfce7; color: #166534; } .score-med { background: #fef9c3; color: #854d0e; } .score-low { background: #fee2e2; color: #991b1b; }
+        
+        .score-fraction { font-weight: bold; font-size: 1rem; color: #2c3e50; }
     </style>
 </head>
 <body>
@@ -90,7 +98,7 @@
             <button class="season-btn" onclick="switchSeason('Girls 2024')">Girls 2024</button>
         </div>
 
-        <div class="list-header" id="list-header">
+        <div class="list-header cmi-header" id="list-header">
             <div>Date</div><div>Match</div><div>Referee</div><div style="text-align:center;">Type</div><div>Notes</div><div style="text-align:right;">Video</div>
         </div>
 
@@ -142,12 +150,12 @@
             if(currentView === 'quiz') {
                 cmiFilters.style.display = 'none';
                 seasonNav.style.display = 'none';
-                header.style.gridTemplateColumns = '2fr 2fr 120px 100px 1fr';
-                header.innerHTML = '<div>Referee Name</div><div>Test Name</div><div>Best Score</div><div>Percent</div><div>Date Taken</div>';
+                header.className = 'list-header quiz-header';
+                header.innerHTML = '<div>Referee Name</div><div>Test Name</div><div style="text-align:center;">Score</div><div style="text-align:center;">Percent</div><div>Date Taken</div>';
             } else {
                 cmiFilters.style.display = 'flex';
                 seasonNav.style.display = 'flex';
-                header.style.gridTemplateColumns = '110px 2fr 1.5fr 140px 2fr 110px';
+                header.className = 'list-header cmi-header';
                 header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div style="text-align:center;">Type</div><div>Notes</div><div style="text-align:right;">Video</div>';
             }
             applyFilters();
@@ -177,7 +185,7 @@
                     const vidBtn = (item.video||"").startsWith("http") ? `<a href="${item.video}" target="_blank" style="font-weight:bold; color:#3498db; text-decoration:none;">Watch</a>` : `<span style="color:#ccc;">No Video</span>`;
 
                     const div = document.createElement('div');
-                    div.className = `list-row ${rClass}`;
+                    div.className = `list-row cmi-row ${rClass}`;
                     div.onclick = (e) => { if(e.target.tagName !== 'A') div.classList.toggle('expanded'); };
                     div.innerHTML = `
                         <div>${item.gameDate}</div>
@@ -190,7 +198,7 @@
                     list.appendChild(div);
                 });
             } else {
-                // QUIZ VIEW
+                // QUIZ VIEW - Show fractional scores
                 const bestScores = {};
                 quizData.forEach(q => {
                     const key = `${q.email}_${q.quiz}`;
@@ -206,13 +214,12 @@
                     if(p>=90) bClass='score-high'; else if(p>=70) bClass='score-med';
                     
                     const div = document.createElement('div');
-                    div.className = 'list-row';
-                    div.style.gridTemplateColumns = '2fr 2fr 120px 100px 1fr';
+                    div.className = 'list-row quiz-row';
                     div.innerHTML = `
                         <div style="font-weight:bold;">${q.name}<br><small style="font-weight:normal; color:#888;">${q.email}</small></div>
-                        <div>${q.quiz}</div>
-                        <div>${q.score}</div>
-                        <div><span class="score-badge ${bClass}">${q.percent}%</span></div>
+                        <div style="font-weight:600; color:#2c3e50;">${q.quiz}</div>
+                        <div style="text-align:center;"><span class="score-fraction">${q.score}</span></div>
+                        <div style="text-align:center;"><span class="score-badge ${bClass}">${q.percent}%</span></div>
                         <div style="color:#666; font-size:0.85rem;">${q.date}</div>
                     `;
                     list.appendChild(div);
