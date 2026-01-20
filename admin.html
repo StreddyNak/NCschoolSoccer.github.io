@@ -54,6 +54,31 @@
         .stat-item { text-align: center; padding: 15px; background: #f9fafb; border-radius: 6px; }
         .stat-value { font-size: 2rem; font-weight: bold; color: #2c3e50; }
         .stat-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
+        
+        /* Impersonation Styles */
+        .impersonation-banner { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white; 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            animation: slideDown 0.3s ease;
+        }
+        .master-controls {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -77,6 +102,28 @@
         <div class="header">
             <div><h2 style="margin:0;">Dashboard</h2><small id="welcome-msg" style="color:#666;"></small></div>
             <button onclick="location.reload()" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;">Logout</button>
+        </div>
+
+        <!-- Impersonation Banner -->
+        <div id="impersonation-banner" class="impersonation-banner hidden">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.2rem;">👤</span>
+                <div>
+                    <strong>Impersonation Mode Active</strong><br>
+                    <small>Viewing as: <span id="impersonated-name"></span></small>
+                </div>
+            </div>
+            <button onclick="exitImpersonation()" style="background:white; color:#e74c3c; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600;">Exit Impersonation</button>
+        </div>
+
+        <!-- Master Admin Controls -->
+        <div id="master-controls" class="master-controls hidden">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <label style="font-weight:600; color:#666;">🔧 View as Supervisor:</label>
+                <select id="impersonate-select" onchange="handleImpersonation()" style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.95rem; min-width:200px;">
+                    <option value="">-- Select Supervisor --</option>
+                </select>
+            </div>
         </div>
 
         <div class="filter-bar">
@@ -126,6 +173,9 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
         let userToken = null, cmiData = [], quizData = [], currentView = 'cmi';
+        let actualSupervisor = null; // The real logged-in supervisor
+        let impersonatedSupervisor = null; // Who we're viewing as
+        let allSupervisors = []; // List of all supervisors for impersonation dropdown
 
         function handleCredentialResponse(response) {
             userToken = response.credential;
@@ -148,15 +198,73 @@
                 if (resp.status === 'success') {
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('dashboard-view').classList.remove('hidden');
+                    
+                    // Store actual supervisor
+                    actualSupervisor = resp.supervisor;
+                    
                     document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
                     cmiData = resp.data || [];
                     quizData = resp.quizzes || [];
+                    
+                    // Check if user is MASTER admin
+                    if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
+                        document.getElementById('master-controls').classList.remove('hidden');
+                        populateSupervisorList();
+                    }
+                    
                     applyFilters();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
                     document.getElementById('login-error').innerText = "Access Denied.";
                 }
             });
+        }
+        
+        function populateSupervisorList() {
+            // Extract unique supervisors from CMI data
+            const supervisorSet = new Set();
+            cmiData.forEach(item => {
+                if (item.supervisor && item.supervisor !== 'MASTER') {
+                    supervisorSet.add(item.supervisor);
+                }
+            });
+            
+            // Sort alphabetically
+            allSupervisors = Array.from(supervisorSet).sort();
+            
+            // Populate dropdown
+            const dropdown = document.getElementById('impersonate-select');
+            dropdown.innerHTML = '<option value="">-- View as Yourself (MASTER) --</option>';
+            
+            allSupervisors.forEach(sup => {
+                const option = document.createElement('option');
+                option.value = sup;
+                option.textContent = sup;
+                dropdown.appendChild(option);
+            });
+        }
+        
+        function handleImpersonation() {
+            const selectedSupervisor = document.getElementById('impersonate-select').value;
+            
+            if (selectedSupervisor) {
+                impersonatedSupervisor = selectedSupervisor;
+                document.getElementById('impersonation-banner').classList.remove('hidden');
+                document.getElementById('impersonated-name').textContent = selectedSupervisor;
+            } else {
+                impersonatedSupervisor = null;
+                document.getElementById('impersonation-banner').classList.add('hidden');
+            }
+            
+            // Reapply filters to show data for impersonated supervisor
+            applyFilters();
+        }
+        
+        function exitImpersonation() {
+            impersonatedSupervisor = null;
+            document.getElementById('impersonate-select').value = '';
+            document.getElementById('impersonation-banner').classList.add('hidden');
+            applyFilters();
         }
 
         function toggleView() {
@@ -221,7 +329,15 @@
                 const tag = document.getElementById('tagFilter').value;
                 const vid = document.getElementById('videoToggle').checked;
 
+                // Determine which supervisor to filter by
+                const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+
                 const filtered = cmiData.filter(item => {
+                    // Filter by supervisor (unless MASTER without impersonation)
+                    if (effectiveSupervisor !== 'MASTER' && !String(item.supervisor).includes(effectiveSupervisor)) {
+                        return false;
+                    }
+                    
                     if (vid && !(item.video||"").toString().startsWith("http")) return false;
                     if (tag && !(item.cmi||"").includes(tag)) return false;
                     return JSON.stringify(item).toLowerCase().includes(term);
