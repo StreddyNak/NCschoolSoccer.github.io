@@ -39,13 +39,25 @@
         .tag-red { background: #fee2e2; color: #991b1b; } .tag-pk { background: #e0f2fe; color: #075985; } .tag-goal { background: #dcfce7; color: #166534; }
         
         /* Quiz-specific styling */
-        .quiz-header { grid-template-columns: 2fr 2fr 1fr 120px 100px 1fr; }
-        .quiz-row { grid-template-columns: 2fr 2fr 1fr 120px 100px 1fr; }
+        .quiz-header { grid-template-columns: 2fr 1.5fr 5fr; }
+        .quiz-row { grid-template-columns: 2fr 1.5fr 5fr; align-items: start; }
         
         .score-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; display: inline-block; min-width: 60px; }
         .score-high { background: #dcfce7; color: #166534; } .score-med { background: #fef9c3; color: #854d0e; } .score-low { background: #fee2e2; color: #991b1b; }
         
         .score-fraction { font-weight: bold; font-size: 1rem; color: #2c3e50; }
+        
+        /* Quiz score cards */
+        .quiz-score-card {
+            background: #f9fafb;
+            padding: 10px 15px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .quiz-score-card.high { border-left: 4px solid #22c55e; }
+        .quiz-score-card.med { border-left: 4px solid #eab308; }
+        .quiz-score-card.low { border-left: 4px solid #ef4444; }
         
         /* Stats Card */
         .stats-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: none; }
@@ -281,7 +293,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Test Name</div><div>Group</div><div style="text-align:center;">Score</div><div style="text-align:center;">Percent</div><div>Date Taken</div>';
+                header.innerHTML = '<div>Referee Name</div><div>Group</div><div>Quiz Scores</div>';
                 
                 // Populate quiz name dropdown
                 populateQuizFilter();
@@ -365,7 +377,7 @@
                     list.appendChild(div);
                 });
             } else {
-                // QUIZ VIEW - Show fractional scores and filter by region
+                // QUIZ VIEW - Show all quiz scores per student in one row
                 console.log("Quiz Data Received:", quizData); // Debug logging
                 
                 if (!quizData || quizData.length === 0) {
@@ -381,50 +393,113 @@
                 const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
                 const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
                 
-                const bestScores = {};
+                // Group by student email and collect best scores for each quiz
+                const studentQuizzes = {};
+                
                 quizData.forEach(q => {
-                    const key = `${q.email}_${q.quiz}`;
-                    const p = parseFloat(q.percent)||0;
-                    if (!bestScores[key] || p > parseFloat(bestScores[key].percent)) bestScores[key] = q;
+                    const email = q.email;
+                    
+                    // Initialize student entry if not exists
+                    if (!studentQuizzes[email]) {
+                        studentQuizzes[email] = {
+                            name: q.name,
+                            email: q.email,
+                            group: q.group || "Unknown",
+                            quizzes: {}
+                        };
+                    }
+                    
+                    // Track best score for each quiz
+                    const quizName = q.quiz;
+                    const percent = parseFloat(q.percent) || 0;
+                    
+                    if (!studentQuizzes[email].quizzes[quizName] || percent > parseFloat(studentQuizzes[email].quizzes[quizName].percent)) {
+                        studentQuizzes[email].quizzes[quizName] = {
+                            score: q.score,
+                            percent: q.percent,
+                            date: q.date
+                        };
+                    }
                 });
                 
-                let filtered = Object.values(bestScores).filter(q => {
+                // Filter students
+                let filtered = Object.values(studentQuizzes).filter(student => {
                     // Filter by search term
-                    if (!JSON.stringify(q).toLowerCase().includes(term)) return false;
+                    if (!JSON.stringify(student).toLowerCase().includes(term)) return false;
                     
-                    // Filter by selected quiz
-                    if (selectedQuiz && q.quiz !== selectedQuiz) return false;
+                    // Filter by selected quiz (only show students who took that quiz)
+                    if (selectedQuiz && !student.quizzes[selectedQuiz]) return false;
                     
                     // Filter by supervisor's region (unless MASTER without impersonation)
-                    if (supervisorRegion && !matchesRegion(q.group, supervisorRegion)) {
+                    if (supervisorRegion && !matchesRegion(student.group, supervisorRegion)) {
                         return false;
                     }
                     
                     return true;
-                }).sort((a,b) => a.name.localeCompare(b.name));
+                }).sort((a, b) => a.name.localeCompare(b.name));
                 
-                // Update stats
-                updateQuizStats(filtered, selectedQuiz);
+                // Calculate stats based on all quiz attempts
+                const allAttempts = [];
+                filtered.forEach(student => {
+                    Object.values(student.quizzes).forEach(quiz => {
+                        if (!selectedQuiz || selectedQuiz === Object.keys(student.quizzes).find(q => student.quizzes[q] === quiz)) {
+                            allAttempts.push({percent: parseFloat(quiz.percent)});
+                        }
+                    });
+                });
+                updateQuizStats(allAttempts, selectedQuiz);
                 
                 if (filtered.length === 0) {
                     list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
                     return;
                 }
                 
-                filtered.forEach(q => {
-                    const p = parseFloat(q.percent);
-                    let bClass = 'score-low';
-                    if(p>=90) bClass='score-high'; else if(p>=70) bClass='score-med';
-                    
+                // Render each student with all their quiz scores
+                filtered.forEach(student => {
                     const div = document.createElement('div');
                     div.className = 'list-row quiz-row';
+                    
+                    // Build quiz scores display
+                    let quizScoresHtml = '<div style="display: flex; flex-wrap: wrap; gap: 12px;">';
+                    
+                    // Sort quizzes alphabetically
+                    const quizNames = Object.keys(student.quizzes).sort();
+                    
+                    // If filtering by specific quiz, show only that one
+                    const quizzesToShow = selectedQuiz ? [selectedQuiz] : quizNames;
+                    
+                    quizzesToShow.forEach(quizName => {
+                        if (!student.quizzes[quizName]) return; // Skip if student didn't take this quiz
+                        
+                        const quiz = student.quizzes[quizName];
+                        const p = parseFloat(quiz.percent);
+                        let bClass = 'score-low';
+                        if (p >= 90) bClass = 'score-high';
+                        else if (p >= 70) bClass = 'score-med';
+                        
+                        quizScoresHtml += `
+                            <div style="background: #f9fafb; padding: 10px 15px; border-radius: 8px; border-left: 4px solid ${bClass === 'score-high' ? '#22c55e' : bClass === 'score-med' ? '#eab308' : '#ef4444'}; flex: 1; min-width: 200px;">
+                                <div style="font-weight: 600; color: #2c3e50; margin-bottom: 4px; font-size: 0.95rem;">${quizName}</div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span class="score-fraction" style="font-size: 1.1rem;">${quiz.score || 'N/A'}</span>
+                                    <span class="score-badge ${bClass}" style="margin-left: 10px;">${quiz.percent}%</span>
+                                </div>
+                                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${quiz.date}</div>
+                            </div>
+                        `;
+                    });
+                    
+                    quizScoresHtml += '</div>';
+                    
                     div.innerHTML = `
-                        <div style="font-weight:bold;">${q.name}<br><small style="font-weight:normal; color:#888;">${q.email}</small></div>
-                        <div style="font-weight:600; color:#2c3e50;">${q.quiz}</div>
-                        <div style="color:#666; font-size:0.9rem;">${q.group || 'Unknown'}</div>
-                        <div style="text-align:center;"><span class="score-fraction">${q.score || 'N/A'}</span></div>
-                        <div style="text-align:center;"><span class="score-badge ${bClass}">${q.percent}%</span></div>
-                        <div style="color:#666; font-size:0.85rem;">${q.date}</div>
+                        <div style="font-weight:bold; padding-right: 15px;">
+                            ${student.name}
+                            <br><small style="font-weight:normal; color:#888;">${student.email}</small>
+                        </div>
+                        <div style="color:#666; font-size:0.95rem; padding-right: 15px;">
+                            <span style="display: inline-block; background: #e5e7eb; padding: 4px 12px; border-radius: 12px; font-weight: 600;">${student.group}</span>
+                        </div>
+                        ${quizScoresHtml}
                     `;
                     list.appendChild(div);
                 });
