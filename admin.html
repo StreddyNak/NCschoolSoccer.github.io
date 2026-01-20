@@ -50,10 +50,11 @@
         /* Quiz score cards */
         .quiz-score-card {
             background: #f9fafb;
-            padding: 10px 15px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
             flex: 1;
-            min-width: 200px;
+            min-width: 160px;
+            max-width: 200px;
         }
         .quiz-score-card.high { border-left: 4px solid #22c55e; }
         .quiz-score-card.med { border-left: 4px solid #eab308; }
@@ -218,17 +219,26 @@
                     cmiData = resp.data || [];
                     quizData = resp.quizzes || [];
                     
+                    // Log quiz data for debugging
+                    console.log("Quiz data loaded:", quizData.length, "results");
+                    
                     // Check if user is MASTER admin
                     if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
                         document.getElementById('master-controls').classList.remove('hidden');
                         populateSupervisorList();
                     }
                     
+                    // Apply filters for initial view (CMI)
                     applyFilters();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
                     document.getElementById('login-error').innerText = "Access Denied.";
                 }
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('login-error').innerText = "Connection error. Please try again.";
             });
         }
         
@@ -460,7 +470,7 @@
                     div.className = 'list-row quiz-row';
                     
                     // Build quiz scores display
-                    let quizScoresHtml = '<div style="display: flex; flex-wrap: wrap; gap: 12px;">';
+                    let quizScoresHtml = '<div style="display: flex; flex-wrap: wrap; gap: 8px;">';
                     
                     // Sort quizzes alphabetically
                     const quizNames = Object.keys(student.quizzes).sort();
@@ -478,13 +488,13 @@
                         else if (p >= 70) bClass = 'score-med';
                         
                         quizScoresHtml += `
-                            <div style="background: #f9fafb; padding: 10px 15px; border-radius: 8px; border-left: 4px solid ${bClass === 'score-high' ? '#22c55e' : bClass === 'score-med' ? '#eab308' : '#ef4444'}; flex: 1; min-width: 200px;">
-                                <div style="font-weight: 600; color: #2c3e50; margin-bottom: 4px; font-size: 0.95rem;">${quizName}</div>
+                            <div style="background: #f9fafb; padding: 8px 12px; border-radius: 6px; border-left: 4px solid ${bClass === 'score-high' ? '#22c55e' : bClass === 'score-med' ? '#eab308' : '#ef4444'}; flex: 1; min-width: 160px; max-width: 200px;">
+                                <div style="font-weight: 600; color: #2c3e50; margin-bottom: 3px; font-size: 0.9rem;">${quizName}</div>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span class="score-fraction" style="font-size: 1.1rem;">${quiz.score || 'N/A'}</span>
-                                    <span class="score-badge ${bClass}" style="margin-left: 10px;">${quiz.percent}%</span>
+                                    <span style="font-size: 1rem; font-weight: bold; color: #2c3e50;">${quiz.score || 'N/A'}</span>
+                                    <span class="score-badge ${bClass}" style="margin-left: 8px; padding: 3px 8px; font-size: 0.85rem;">${quiz.percent}%</span>
                                 </div>
-                                <div style="font-size: 0.75rem; color: #999; margin-top: 4px;">${quiz.date}</div>
+                                <div style="font-size: 0.7rem; color: #999; margin-top: 3px;">${quiz.date}</div>
                             </div>
                         `;
                     });
@@ -542,48 +552,51 @@
                 return;
             }
             
-            // Calculate stats
-            const totalStudents = filteredData.length;
-            const percentages = filteredData.map(q => parseFloat(q.percent) || 0);
-            const avgPercent = Math.round(percentages.reduce((a, b) => a + b, 0) / percentages.length);
-            const highScore = Math.max(...percentages);
-            const lowScore = Math.min(...percentages);
-            
-            // Count by quiz if showing all
-            let quizBreakdown = '';
-            if (!selectedQuiz) {
-                const quizCounts = {};
-                filteredData.forEach(q => {
-                    quizCounts[q.quiz] = (quizCounts[q.quiz] || 0) + 1;
+            // Count quiz attempts by quiz name
+            const quizCounts = {};
+            filteredData.forEach(student => {
+                Object.keys(student.quizzes).forEach(quizName => {
+                    if (!selectedQuiz || selectedQuiz === quizName) {
+                        quizCounts[quizName] = (quizCounts[quizName] || 0) + 1;
+                    }
                 });
-                const topQuiz = Object.keys(quizCounts).reduce((a, b) => quizCounts[a] > quizCounts[b] ? a : b);
-                quizBreakdown = `
+            });
+            
+            // Sort quiz names alphabetically
+            const sortedQuizNames = Object.keys(quizCounts).sort();
+            
+            let statsHtml = '';
+            
+            // Total students
+            statsHtml += `
+                <div class="stat-item">
+                    <div class="stat-value">${filteredData.length}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            `;
+            
+            // Quiz counts
+            if (selectedQuiz) {
+                // Show single quiz count
+                statsHtml += `
                     <div class="stat-item">
-                        <div class="stat-value">${quizCounts[topQuiz]}</div>
-                        <div class="stat-label">Most Taken: ${topQuiz}</div>
+                        <div class="stat-value">${quizCounts[selectedQuiz] || 0}</div>
+                        <div class="stat-label">${selectedQuiz} Attempts</div>
                     </div>
                 `;
+            } else {
+                // Show all quiz counts
+                sortedQuizNames.forEach(quizName => {
+                    statsHtml += `
+                        <div class="stat-item">
+                            <div class="stat-value">${quizCounts[quizName]}</div>
+                            <div class="stat-label">${quizName}</div>
+                        </div>
+                    `;
+                });
             }
             
-            statsGrid.innerHTML = `
-                <div class="stat-item">
-                    <div class="stat-value">${totalStudents}</div>
-                    <div class="stat-label">${selectedQuiz ? 'Students' : 'Total Results'}</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">${avgPercent}%</div>
-                    <div class="stat-label">Average Score</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">${highScore}%</div>
-                    <div class="stat-label">Highest Score</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">${lowScore}%</div>
-                    <div class="stat-label">Lowest Score</div>
-                </div>
-                ${quizBreakdown}
-            `;
+            statsGrid.innerHTML = statsHtml;
         }
     </script>
 </body>
