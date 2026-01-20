@@ -157,7 +157,28 @@
         <p style="margin-bottom:20px; color:#666;">Please sign in with your authorized Google Account.</p>
         <div id="g_id_onload" data-client_id="340823693231-qr4j73bfcsn971po2h153jqnvimlab6h.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
         <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-        <div id="login-error" style="color:red; margin-top:20px; display:none;"></div>
+        <div id="login-error" style="color:red; margin-top:20px; display:none; white-space: pre-line; text-align: left; padding: 15px; background: #fee; border-radius: 6px; font-size: 0.9rem;"></div>
+        <div id="login-status" style="color:#666; margin-top:15px; font-size:0.85rem; font-style:italic;"></div>
+        
+        <details style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; cursor: pointer;">
+            <summary style="font-weight: 600; color: #666;">🔧 Troubleshooting</summary>
+            <div style="margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
+                <p><strong>If login keeps failing:</strong></p>
+                <ol>
+                    <li>Open browser console (F12) and check for errors</li>
+                    <li>Verify your email is listed in Form Responses → Admins tab</li>
+                    <li>Ensure Form Responses backend script is deployed</li>
+                    <li>Try clearing browser cache and cookies</li>
+                    <li>Try in an incognito/private window</li>
+                </ol>
+                <p style="margin-top:10px;"><strong>Console logs will show:</strong></p>
+                <ul>
+                    <li>"Attempting login with token..." - OAuth successful</li>
+                    <li>"Response received: 200" - Server responded</li>
+                    <li>"Login successful!" - You should see the dashboard</li>
+                </ul>
+            </div>
+        </details>
     </div>
 
     <div id="dashboard-view" class="container hidden">
@@ -251,6 +272,19 @@
 
         function handleCredentialResponse(response) {
             userToken = response.credential;
+            
+            // Show loading state
+            const loginView = document.getElementById('login-view');
+            const errorDiv = document.getElementById('login-error');
+            const statusDiv = document.getElementById('login-status');
+            const signinButton = document.querySelector('.g_id_signin');
+            
+            errorDiv.style.display = 'none';
+            statusDiv.textContent = '🔄 Authenticating...';
+            statusDiv.style.display = 'block';
+            if (signinButton) signinButton.style.opacity = '0.5';
+            
+            console.log("Attempting login with token...");
             fetchData('Current');
         }
 
@@ -263,13 +297,48 @@
         }
 
         function fetchData(season) {
-            if (!userToken) return;
+            if (!userToken) {
+                console.error("No user token available");
+                const statusDiv = document.getElementById('login-status');
+                if (statusDiv) {
+                    statusDiv.textContent = '❌ No authentication token';
+                    statusDiv.style.color = 'red';
+                }
+                return;
+            }
+            
+            const statusDiv = document.getElementById('login-status');
+            if (statusDiv && season === 'Current') {
+                statusDiv.textContent = '🔄 Verifying credentials...';
+            }
+            
+            console.log("Fetching data for season:", season);
+            
             fetch(`${SCRIPT_URL}?action=googleLogin&token=${userToken}&season=${season}`)
-            .then(res => res.json())
+            .then(res => {
+                console.log("Response received:", res.status);
+                
+                if (statusDiv && season === 'Current') {
+                    statusDiv.textContent = '🔄 Loading data...';
+                }
+                
+                return res.json();
+            })
             .then(resp => {
+                console.log("Response data:", resp);
+                
                 if (resp.status === 'success') {
-                    document.getElementById('login-view').classList.add('hidden');
-                    document.getElementById('dashboard-view').classList.remove('hidden');
+                    console.log("Login successful!");
+                    
+                    if (statusDiv && season === 'Current') {
+                        statusDiv.textContent = '✅ Success! Loading dashboard...';
+                    }
+                    
+                    // Small delay to show success message
+                    setTimeout(() => {
+                        document.getElementById('login-view').classList.add('hidden');
+                        document.getElementById('dashboard-view').classList.remove('hidden');
+                    }, 500);
                     
                     // Store actual supervisor
                     actualSupervisor = resp.supervisor;
@@ -292,14 +361,37 @@
                     // Apply filters for initial view (CMI)
                     applyFilters();
                 } else {
+                    console.error("Login failed:", resp.message || "Access denied");
+                    
+                    // Reset login state
+                    userToken = null;
+                    const signinButton = document.querySelector('.g_id_signin');
+                    if (signinButton) signinButton.style.opacity = '1';
+                    
+                    if (statusDiv) {
+                        statusDiv.textContent = '';
+                        statusDiv.style.display = 'none';
+                    }
+                    
                     document.getElementById('login-error').style.display = 'block';
-                    document.getElementById('login-error').innerText = "Access Denied.";
+                    document.getElementById('login-error').innerText = "❌ Access Denied\n\n" + (resp.message || "Your email is not authorized.") + "\n\nPlease ensure your email is listed in:\nForm Responses → Admins tab";
                 }
             })
             .catch(err => {
                 console.error("Fetch error:", err);
+                
+                // Reset login state
+                userToken = null;
+                const signinButton = document.querySelector('.g_id_signin');
+                if (signinButton) signinButton.style.opacity = '1';
+                
+                if (statusDiv) {
+                    statusDiv.textContent = '';
+                    statusDiv.style.display = 'none';
+                }
+                
                 document.getElementById('login-error').style.display = 'block';
-                document.getElementById('login-error').innerText = "Connection error. Please try again.";
+                document.getElementById('login-error').innerText = "❌ Connection Error\n\n" + err.toString() + "\n\nPossible issues:\n1. Form Responses script not deployed\n2. Internet connection problem\n3. Browser blocking the request\n\nTry:\n- Refresh the page\n- Clear browser cache\n- Use incognito mode";
             });
         }
         
