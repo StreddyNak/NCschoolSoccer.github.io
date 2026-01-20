@@ -232,9 +232,13 @@
             return `${embed}<a href="${url}" target="_blank" class="backup-link">Open Video in New Tab (if player fails)</a>`;
         }
 
+        // Store user answers (don't show correct/wrong immediately)
+        let userAnswers = {};
+
         function renderQuestions() {
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
+            userAnswers = {}; // Reset answers
 
             currentQuizData.forEach((q, index) => {
                 const qDiv = document.createElement('div');
@@ -257,50 +261,34 @@
                 // 3. Options
                 const optsDiv = document.createElement('div');
                 optsDiv.className = 'options-group';
+                optsDiv.id = `options-${index}`;
                 
                 q.options.forEach(optText => {
                     const btn = document.createElement('button');
                     btn.className = 'option-btn';
                     btn.innerText = optText;
-                    btn.onclick = function() { checkAnswer(index, optText, btn); };
+                    btn.onclick = function() { selectAnswer(index, optText); };
                     optsDiv.appendChild(btn);
                 });
                 qDiv.appendChild(optsDiv);
-
-                // 4. Explanation
-                const expDiv = document.createElement('div');
-                expDiv.className = 'explanation';
-                expDiv.id = `explain-${index}`;
-                expDiv.innerHTML = `<strong>Note:</strong> ${q.explanation || ""}`;
-                qDiv.appendChild(expDiv);
 
                 container.appendChild(qDiv);
             });
         }
 
-        function checkAnswer(index, selectedText, btnElement) {
-            const questionData = currentQuizData[index];
-            const parent = document.getElementById(`q-block-${index}`);
+        function selectAnswer(index, selectedText) {
+            // Record the answer
+            userAnswers[index] = selectedText;
             
-            if(parent.getAttribute('data-answered') === 'true') return;
-            parent.setAttribute('data-answered', 'true');
-
-            const isCorrect = (selectedText.trim() === questionData.answer.trim());
-            
-            if(isCorrect) {
-                btnElement.classList.add('correct');
-                score++;
-            } else {
-                btnElement.classList.add('wrong');
-                const allBtns = parent.querySelectorAll('.option-btn');
-                allBtns.forEach(b => {
-                    if(b.innerText.trim() === questionData.answer.trim()) b.classList.add('correct');
-                });
-            }
-
-            if(questionData.explanation) {
-                document.getElementById(`explain-${index}`).style.display = 'block';
-            }
+            // Visual feedback - just show it's selected
+            const parent = document.getElementById(`options-${index}`);
+            const allBtns = parent.querySelectorAll('.option-btn');
+            allBtns.forEach(btn => {
+                btn.classList.remove('selected');
+                if(btn.innerText === selectedText) {
+                    btn.classList.add('selected');
+                }
+            });
         }
 
         function submitQuiz() {
@@ -318,6 +306,21 @@
             finishBtn.innerText = "Submitting...";
             finishBtn.disabled = true;
 
+            // Collect question-by-question results
+            const questionResults = [];
+            currentQuizData.forEach((q, index) => {
+                const questionBlock = document.getElementById(`q-block-${index}`);
+                const selectedBtn = questionBlock.querySelector('.option-btn.correct, .option-btn.wrong');
+                
+                questionResults.push({
+                    questionNumber: index + 1,
+                    questionText: q.question,
+                    studentAnswer: selectedBtn ? selectedBtn.innerText.trim() : "",
+                    correctAnswer: q.answer,
+                    isCorrect: selectedBtn ? selectedBtn.classList.contains('correct') : false
+                });
+            });
+
             const payload = {
                 type: 'quiz_result', // IMPORTANT FOR BACKEND
                 firstName: document.getElementById('firstName').value,
@@ -325,7 +328,8 @@
                 email: document.getElementById('userEmail').value,
                 quizName: currentQuizName,
                 score: `${score}/${total}`,
-                percent: `${percentage}%`
+                percent: `${percentage}%`,
+                questionResults: questionResults // NEW: Question-by-question data
             };
 
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
