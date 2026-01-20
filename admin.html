@@ -46,6 +46,14 @@
         .score-high { background: #dcfce7; color: #166534; } .score-med { background: #fef9c3; color: #854d0e; } .score-low { background: #fee2e2; color: #991b1b; }
         
         .score-fraction { font-weight: bold; font-size: 1rem; color: #2c3e50; }
+        
+        /* Stats Card */
+        .stats-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: none; }
+        .stats-card.show { display: block; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .stat-item { text-align: center; padding: 15px; background: #f9fafb; border-radius: 6px; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #2c3e50; }
+        .stat-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -88,6 +96,12 @@
                 </select>
                 <label style="font-size:13px; font-weight:600;"><input type="checkbox" id="videoToggle" onchange="applyFilters()"> Video Only</label>
             </div>
+            
+            <div id="quiz-filters" style="display:none; gap:10px; align-items:center;">
+                <select id="quizNameFilter" onchange="applyFilters()" style="padding:10px; border:1px solid #ddd; border-radius:6px; min-width:200px;">
+                    <option value="">All Quizzes</option>
+                </select>
+            </div>
         </div>
 
         <div class="season-nav" id="season-nav">
@@ -96,6 +110,10 @@
             <button class="season-btn" onclick="switchSeason('Girls 2025')">Girls 2025</button>
             <button class="season-btn" onclick="switchSeason('Boys 2024')">Boys 2024</button>
             <button class="season-btn" onclick="switchSeason('Girls 2024')">Girls 2024</button>
+        </div>
+
+        <div class="stats-card" id="stats-card">
+            <div class="stats-grid" id="stats-grid"></div>
         </div>
 
         <div class="list-header cmi-header" id="list-header">
@@ -144,21 +162,54 @@
         function toggleView() {
             currentView = document.getElementById('viewSelect').value;
             const cmiFilters = document.getElementById('cmi-filters');
+            const quizFilters = document.getElementById('quiz-filters');
             const seasonNav = document.getElementById('season-nav');
             const header = document.getElementById('list-header');
+            const statsCard = document.getElementById('stats-card');
 
             if(currentView === 'quiz') {
                 cmiFilters.style.display = 'none';
+                quizFilters.style.display = 'flex';
                 seasonNav.style.display = 'none';
+                statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
                 header.innerHTML = '<div>Referee Name</div><div>Test Name</div><div style="text-align:center;">Score</div><div style="text-align:center;">Percent</div><div>Date Taken</div>';
+                
+                // Populate quiz name dropdown
+                populateQuizFilter();
             } else {
                 cmiFilters.style.display = 'flex';
+                quizFilters.style.display = 'none';
                 seasonNav.style.display = 'flex';
+                statsCard.classList.remove('show');
                 header.className = 'list-header cmi-header';
                 header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div style="text-align:center;">Type</div><div>Notes</div><div style="text-align:right;">Video</div>';
             }
             applyFilters();
+        }
+        
+        function populateQuizFilter() {
+            const dropdown = document.getElementById('quizNameFilter');
+            const uniqueQuizzes = new Set();
+            
+            // Extract unique quiz names from quiz data
+            quizData.forEach(q => {
+                if (q.quiz) uniqueQuizzes.add(q.quiz);
+            });
+            
+            // Sort alphabetically
+            const sortedQuizzes = Array.from(uniqueQuizzes).sort();
+            
+            // Clear existing options except "All Quizzes"
+            dropdown.innerHTML = '<option value="">All Quizzes</option>';
+            
+            // Add each unique quiz
+            sortedQuizzes.forEach(quizName => {
+                const option = document.createElement('option');
+                option.value = quizName;
+                option.textContent = quizName;
+                dropdown.appendChild(option);
+            });
         }
 
         function applyFilters() {
@@ -203,8 +254,12 @@
                 
                 if (!quizData || quizData.length === 0) {
                     list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p><p style="font-size:0.9rem; margin-top:20px;">Make sure the "Quiz Results" tab exists in your Form Responses sheet.</p></div>';
+                    document.getElementById('stats-grid').innerHTML = '';
                     return;
                 }
+                
+                // Get selected quiz filter
+                const selectedQuiz = document.getElementById('quizNameFilter').value;
                 
                 const bestScores = {};
                 quizData.forEach(q => {
@@ -213,14 +268,25 @@
                     if (!bestScores[key] || p > parseFloat(bestScores[key].percent)) bestScores[key] = q;
                 });
                 
-                const final = Object.values(bestScores).filter(q => q.name.toLowerCase().includes(term)).sort((a,b) => a.name.localeCompare(b.name));
+                let filtered = Object.values(bestScores).filter(q => {
+                    // Filter by search term
+                    if (!JSON.stringify(q).toLowerCase().includes(term)) return false;
+                    
+                    // Filter by selected quiz
+                    if (selectedQuiz && q.quiz !== selectedQuiz) return false;
+                    
+                    return true;
+                }).sort((a,b) => a.name.localeCompare(b.name));
                 
-                if (final.length === 0) {
-                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your search.</p></div>';
+                // Update stats
+                updateQuizStats(filtered, selectedQuiz);
+                
+                if (filtered.length === 0) {
+                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
                     return;
                 }
                 
-                final.forEach(q => {
+                filtered.forEach(q => {
                     const p = parseFloat(q.percent);
                     let bClass = 'score-low';
                     if(p>=90) bClass='score-high'; else if(p>=70) bClass='score-med';
@@ -237,6 +303,58 @@
                     list.appendChild(div);
                 });
             }
+        }
+        
+        function updateQuizStats(filteredData, selectedQuiz) {
+            const statsGrid = document.getElementById('stats-grid');
+            
+            if (filteredData.length === 0) {
+                statsGrid.innerHTML = '';
+                return;
+            }
+            
+            // Calculate stats
+            const totalStudents = filteredData.length;
+            const percentages = filteredData.map(q => parseFloat(q.percent) || 0);
+            const avgPercent = Math.round(percentages.reduce((a, b) => a + b, 0) / percentages.length);
+            const highScore = Math.max(...percentages);
+            const lowScore = Math.min(...percentages);
+            
+            // Count by quiz if showing all
+            let quizBreakdown = '';
+            if (!selectedQuiz) {
+                const quizCounts = {};
+                filteredData.forEach(q => {
+                    quizCounts[q.quiz] = (quizCounts[q.quiz] || 0) + 1;
+                });
+                const topQuiz = Object.keys(quizCounts).reduce((a, b) => quizCounts[a] > quizCounts[b] ? a : b);
+                quizBreakdown = `
+                    <div class="stat-item">
+                        <div class="stat-value">${quizCounts[topQuiz]}</div>
+                        <div class="stat-label">Most Taken: ${topQuiz}</div>
+                    </div>
+                `;
+            }
+            
+            statsGrid.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-value">${totalStudents}</div>
+                    <div class="stat-label">${selectedQuiz ? 'Students' : 'Total Results'}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${avgPercent}%</div>
+                    <div class="stat-label">Average Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${highScore}%</div>
+                    <div class="stat-label">Highest Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">${lowScore}%</div>
+                    <div class="stat-label">Lowest Score</div>
+                </div>
+                ${quizBreakdown}
+            `;
         }
     </script>
 </body>
