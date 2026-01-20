@@ -39,8 +39,8 @@
         .tag-red { background: #fee2e2; color: #991b1b; } .tag-pk { background: #e0f2fe; color: #075985; } .tag-goal { background: #dcfce7; color: #166534; }
         
         /* Quiz-specific styling */
-        .quiz-header { grid-template-columns: 2fr 2fr 120px 100px 1fr; }
-        .quiz-row { grid-template-columns: 2fr 2fr 120px 100px 1fr; }
+        .quiz-header { grid-template-columns: 2fr 2fr 1fr 120px 100px 1fr; }
+        .quiz-row { grid-template-columns: 2fr 2fr 1fr 120px 100px 1fr; }
         
         .score-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; display: inline-block; min-width: 60px; }
         .score-high { background: #dcfce7; color: #166534; } .score-med { background: #fef9c3; color: #854d0e; } .score-low { background: #fee2e2; color: #991b1b; }
@@ -281,7 +281,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Test Name</div><div style="text-align:center;">Score</div><div style="text-align:center;">Percent</div><div>Date Taken</div>';
+                header.innerHTML = '<div>Referee Name</div><div>Test Name</div><div>Group</div><div style="text-align:center;">Score</div><div style="text-align:center;">Percent</div><div>Date Taken</div>';
                 
                 // Populate quiz name dropdown
                 populateQuizFilter();
@@ -365,7 +365,7 @@
                     list.appendChild(div);
                 });
             } else {
-                // QUIZ VIEW - Show fractional scores
+                // QUIZ VIEW - Show fractional scores and filter by region
                 console.log("Quiz Data Received:", quizData); // Debug logging
                 
                 if (!quizData || quizData.length === 0) {
@@ -376,6 +376,10 @@
                 
                 // Get selected quiz filter
                 const selectedQuiz = document.getElementById('quizNameFilter').value;
+                
+                // Determine which supervisor's region to filter by
+                const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
                 
                 const bestScores = {};
                 quizData.forEach(q => {
@@ -390,6 +394,11 @@
                     
                     // Filter by selected quiz
                     if (selectedQuiz && q.quiz !== selectedQuiz) return false;
+                    
+                    // Filter by supervisor's region (unless MASTER without impersonation)
+                    if (supervisorRegion && !matchesRegion(q.group, supervisorRegion)) {
+                        return false;
+                    }
                     
                     return true;
                 }).sort((a,b) => a.name.localeCompare(b.name));
@@ -412,6 +421,7 @@
                     div.innerHTML = `
                         <div style="font-weight:bold;">${q.name}<br><small style="font-weight:normal; color:#888;">${q.email}</small></div>
                         <div style="font-weight:600; color:#2c3e50;">${q.quiz}</div>
+                        <div style="color:#666; font-size:0.9rem;">${q.group || 'Unknown'}</div>
                         <div style="text-align:center;"><span class="score-fraction">${q.score || 'N/A'}</span></div>
                         <div style="text-align:center;"><span class="score-badge ${bClass}">${q.percent}%</span></div>
                         <div style="color:#666; font-size:0.85rem;">${q.date}</div>
@@ -419,6 +429,34 @@
                     list.appendChild(div);
                 });
             }
+        }
+        
+        // Helper function to extract region from supervisor name
+        // e.g., "Roger Morton (Piedmont)" -> "Piedmont"
+        function extractRegionFromSupervisor(supervisorName) {
+            if (!supervisorName || supervisorName === 'MASTER') return null;
+            
+            const match = supervisorName.match(/\(([^)]+)\)/);
+            return match ? match[1] : null;
+        }
+        
+        // Helper function to check if student's group matches supervisor's region
+        function matchesRegion(studentGroup, supervisorRegion) {
+            if (!studentGroup || !supervisorRegion) return false;
+            
+            // Normalize strings for comparison
+            const normalizedGroup = studentGroup.toLowerCase().trim();
+            const normalizedRegion = supervisorRegion.toLowerCase().trim();
+            
+            // Direct match
+            if (normalizedGroup === normalizedRegion) return true;
+            
+            // Partial match (e.g., "Western NC" matches "Western")
+            if (normalizedGroup.includes(normalizedRegion) || normalizedRegion.includes(normalizedGroup)) {
+                return true;
+            }
+            
+            return false;
         }
         
         function updateQuizStats(filteredData, selectedQuiz) {
