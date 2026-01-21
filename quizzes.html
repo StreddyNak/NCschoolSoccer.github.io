@@ -36,6 +36,7 @@
         
         .btn-primary { background: #2ecc71; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; }
         .btn-primary:hover { background: #27ae60; }
+        .btn-primary:disabled { background: #95a5a6; cursor: not-allowed; }
         
         .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; margin-bottom: 15px; }
 
@@ -62,11 +63,23 @@
         .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
         .backup-link { display: inline-block; font-size: 0.85rem; color: #666; text-decoration: underline; margin-bottom: 15px; }
         
-        .option-btn { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 1rem; }
-        .option-btn:hover { background-color: #f9fafb; border-color: #d1d5db; }
-        .option-btn.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; }
-        .option-btn.wrong { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; opacity: 0.7; }
-        .explanation { margin-top: 10px; padding: 10px; background: #eff6ff; border-radius: 6px; color: #1e40af; font-size: 0.9rem; display: none; text-align: left;}
+        .option-btn { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+        .option-btn:hover:not(.disabled) { background-color: #f9fafb; border-color: #d1d5db; }
+        .option-btn.selected { background-color: #dbeafe; border-color: #3b82f6; font-weight: 600; }
+        .option-btn.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: 600; }
+        .option-btn.wrong { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+        .option-btn.disabled { cursor: not-allowed; pointer-events: none; }
+        .explanation { margin-top: 10px; padding: 12px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e3a8a; font-size: 0.9rem; line-height: 1.5; }
+        .correct-indicator { display: inline-block; margin-left: 8px; font-weight: bold; font-size: 1.1rem; }
+        .correct-indicator.right { color: #22c55e; }
+        .correct-indicator.wrong { color: #ef4444; }
+        
+        /* Review Section */
+        .review-header { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        .review-score { font-size: 2.5rem; font-weight: 800; color: #2c3e50; margin: 10px 0; }
+        .review-score.good { color: #22c55e; }
+        .review-score.okay { color: #eab308; }
+        .review-score.poor { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -111,7 +124,18 @@
         <div id="quiz-view" class="card hidden">
             <h2 id="active-quiz-title" style="border-bottom:2px solid #2ecc71; padding-bottom:10px; margin-bottom:20px;"></h2>
             <div id="questions-container"></div>
-            <button id="finishBtn" class="btn-primary" onclick="submitQuiz()">Submit Results</button>
+            <button id="finishBtn" class="btn-primary" onclick="submitQuiz()">Submit Quiz</button>
+        </div>
+
+        <div id="review-view" class="card hidden">
+            <div class="review-header">
+                <h2 style="margin:0 0 10px 0;">Quiz Results</h2>
+                <div id="review-score-display" class="review-score">0%</div>
+                <p id="review-detail">You got X out of Y correct.</p>
+            </div>
+            <p style="color:#666; margin-bottom:20px; text-align:center;">Review your answers below:</p>
+            <div id="review-container"></div>
+            <button class="btn-primary" onclick="finalizeQuiz()" style="margin-top:20px;">Continue to Final Score</button>
         </div>
 
         <div id="result-view" class="card hidden">
@@ -131,6 +155,7 @@
         let currentQuizName = "";
         let score = 0;
         let currentUser = {};
+        let userAnswers = {}; // Store user answers
 
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
@@ -210,6 +235,8 @@
             document.getElementById('intro-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
+            score = 0; // Reset score
+            userAnswers = {}; // Reset answers
             renderQuestions();
         }
 
@@ -232,13 +259,9 @@
             return `${embed}<a href="${url}" target="_blank" class="backup-link">Open Video in New Tab (if player fails)</a>`;
         }
 
-        // Store user answers (don't show correct/wrong immediately)
-        let userAnswers = {};
-
         function renderQuestions() {
             const container = document.getElementById('questions-container');
             container.innerHTML = '';
-            userAnswers = {}; // Reset answers
 
             currentQuizData.forEach((q, index) => {
                 const qDiv = document.createElement('div');
@@ -280,7 +303,7 @@
             // Record the answer
             userAnswers[index] = selectedText;
             
-            // Visual feedback - just show it's selected
+            // Visual feedback - highlight selected answer
             const parent = document.getElementById(`options-${index}`);
             const allBtns = parent.querySelectorAll('.option-btn');
             allBtns.forEach(btn => {
@@ -293,56 +316,141 @@
 
         function submitQuiz() {
             const total = currentQuizData.length;
-            const answered = document.querySelectorAll('[data-answered="true"]').length;
+            const answeredCount = Object.keys(userAnswers).length;
             
-            if(answered < total) {
-                if(!confirm(`You have only answered ${answered} of ${total} questions. Submit anyway?`)) return;
+            if(answeredCount < total) {
+                if(!confirm(`You have only answered ${answeredCount} of ${total} questions. Submit anyway?`)) return;
             }
+
+            // Grade the quiz
+            score = 0;
+            currentQuizData.forEach((q, index) => {
+                const userAnswer = userAnswers[index];
+                if (userAnswer && userAnswer.trim() === q.answer.trim()) {
+                    score++;
+                }
+            });
 
             const percentage = Math.round((score / total) * 100);
             
-            // Show Loading
-            const finishBtn = document.getElementById('finishBtn');
-            finishBtn.innerText = "Submitting...";
-            finishBtn.disabled = true;
+            // Update review view
+            document.getElementById('review-score-display').innerText = `${percentage}%`;
+            document.getElementById('review-score-display').className = `review-score ${percentage >= 80 ? 'good' : percentage >= 60 ? 'okay' : 'poor'}`;
+            document.getElementById('review-detail').innerText = `You got ${score} out of ${total} correct.`;
+            
+            // Show review of all answers
+            showReview();
+            
+            // Switch to review view
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('review-view').classList.remove('hidden');
+        }
+
+        function showReview() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            currentQuizData.forEach((q, index) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-block';
+
+                // Question title with indicator
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer && userAnswer.trim() === q.answer.trim();
+                
+                const title = document.createElement('div');
+                title.className = 'q-text';
+                title.innerHTML = `${index + 1}. ${q.question} <span class="correct-indicator ${isCorrect ? 'right' : 'wrong'}">${isCorrect ? '✓' : '✗'}</span>`;
+                qDiv.appendChild(title);
+
+                // Video (if exists)
+                if(q.video) {
+                    const vidDiv = document.createElement('div');
+                    vidDiv.innerHTML = getVideoHtml(q.video);
+                    qDiv.appendChild(vidDiv);
+                }
+
+                // Options with correct/wrong highlighting
+                const optsDiv = document.createElement('div');
+                q.options.forEach(optText => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn disabled';
+                    btn.innerText = optText;
+                    
+                    // Highlight user's answer
+                    if (optText === userAnswer) {
+                        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+                    }
+                    // Always show the correct answer
+                    if (optText === q.answer) {
+                        btn.classList.add('correct');
+                        if (!isCorrect) {
+                            btn.innerHTML += ' <span style="font-size:0.85rem; margin-left:8px;">← Correct Answer</span>';
+                        }
+                    }
+                    
+                    optsDiv.appendChild(btn);
+                });
+                qDiv.appendChild(optsDiv);
+
+                // Show explanation if available
+                if (q.explanation && q.explanation.trim()) {
+                    const expDiv = document.createElement('div');
+                    expDiv.className = 'explanation';
+                    expDiv.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
+                    qDiv.appendChild(expDiv);
+                }
+
+                container.appendChild(qDiv);
+            });
+        }
+
+        function finalizeQuiz() {
+            // Show loading
+            const btn = document.querySelector('#review-view button');
+            btn.innerText = "Submitting...";
+            btn.disabled = true;
+
+            const total = currentQuizData.length;
+            const percentage = Math.round((score / total) * 100);
 
             // Collect question-by-question results
             const questionResults = [];
             currentQuizData.forEach((q, index) => {
-                const questionBlock = document.getElementById(`q-block-${index}`);
-                const selectedBtn = questionBlock.querySelector('.option-btn.correct, .option-btn.wrong');
+                const userAnswer = userAnswers[index] || "";
+                const isCorrect = userAnswer.trim() === q.answer.trim();
                 
                 questionResults.push({
                     questionNumber: index + 1,
                     questionText: q.question,
-                    studentAnswer: selectedBtn ? selectedBtn.innerText.trim() : "",
+                    studentAnswer: userAnswer,
                     correctAnswer: q.answer,
-                    isCorrect: selectedBtn ? selectedBtn.classList.contains('correct') : false
+                    isCorrect: isCorrect
                 });
             });
 
             const payload = {
-                type: 'quiz_result', // IMPORTANT FOR BACKEND
+                type: 'quiz_result',
                 firstName: document.getElementById('firstName').value,
                 lastName: document.getElementById('lastName').value,
                 email: document.getElementById('userEmail').value,
                 quizName: currentQuizName,
                 score: `${score}/${total}`,
                 percent: `${percentage}%`,
-                questionResults: questionResults // NEW: Question-by-question data
+                questionResults: questionResults
             };
 
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
             .then(() => {
-                document.getElementById('quiz-view').classList.add('hidden');
+                document.getElementById('review-view').classList.add('hidden');
                 document.getElementById('result-view').classList.remove('hidden');
                 document.getElementById('score-display').innerText = `${percentage}%`;
                 document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
             })
             .catch(err => {
                 alert("Error submitting results.");
-                finishBtn.innerText = "Submit Results";
-                finishBtn.disabled = false;
+                btn.innerText = "Continue to Final Score";
+                btn.disabled = false;
             });
         }
     </script>
