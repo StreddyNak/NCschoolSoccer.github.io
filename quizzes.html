@@ -132,10 +132,11 @@
                 <h2 style="margin:0 0 10px 0;">Quiz Results</h2>
                 <div id="review-score-display" class="review-score">0%</div>
                 <p id="review-detail">You got X out of Y correct.</p>
+                <p style="color:#22c55e; margin-top:10px; font-weight:600;">✓ Results saved successfully</p>
             </div>
             <p style="color:#666; margin-bottom:20px; text-align:center;">Review your answers below:</p>
             <div id="review-container"></div>
-            <button class="btn-primary" onclick="finalizeQuiz()" style="margin-top:20px;">Continue to Final Score</button>
+            <button class="btn-primary" onclick="finalizeQuiz()" style="margin-top:20px;">View Final Score</button>
         </div>
 
         <div id="result-view" class="card hidden">
@@ -333,17 +334,58 @@
 
             const percentage = Math.round((score / total) * 100);
             
-            // Update review view
-            document.getElementById('review-score-display').innerText = `${percentage}%`;
-            document.getElementById('review-score-display').className = `review-score ${percentage >= 80 ? 'good' : percentage >= 60 ? 'okay' : 'poor'}`;
-            document.getElementById('review-detail').innerText = `You got ${score} out of ${total} correct.`;
-            
-            // Show review of all answers
-            showReview();
-            
-            // Switch to review view
-            document.getElementById('quiz-view').classList.add('hidden');
-            document.getElementById('review-view').classList.remove('hidden');
+            // Show loading state
+            const finishBtn = document.getElementById('finishBtn');
+            finishBtn.innerText = "Submitting Results...";
+            finishBtn.disabled = true;
+
+            // Collect question-by-question results
+            const questionResults = [];
+            currentQuizData.forEach((q, index) => {
+                const userAnswer = userAnswers[index] || "";
+                const isCorrect = userAnswer.trim() === q.answer.trim();
+                
+                questionResults.push({
+                    questionNumber: index + 1,
+                    questionText: q.question,
+                    studentAnswer: userAnswer,
+                    correctAnswer: q.answer,
+                    isCorrect: isCorrect
+                });
+            });
+
+            // SUBMIT TO GOOGLE SHEETS FIRST (before showing answers)
+            const payload = {
+                type: 'quiz_result',
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('userEmail').value,
+                quizName: currentQuizName,
+                score: `${score}/${total}`,
+                percent: `${percentage}%`,
+                questionResults: questionResults
+            };
+
+            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .then(() => {
+                // After successful submission, NOW show the review
+                document.getElementById('review-score-display').innerText = `${percentage}%`;
+                document.getElementById('review-score-display').className = `review-score ${percentage >= 80 ? 'good' : percentage >= 60 ? 'okay' : 'poor'}`;
+                document.getElementById('review-detail').innerText = `You got ${score} out of ${total} correct.`;
+                
+                // Show review of all answers
+                showReview();
+                
+                // Switch to review view
+                document.getElementById('quiz-view').classList.add('hidden');
+                document.getElementById('review-view').classList.remove('hidden');
+            })
+            .catch(err => {
+                console.error("Submission error:", err);
+                alert("Error submitting results. Please try again or contact your supervisor.");
+                finishBtn.innerText = "Submit Quiz";
+                finishBtn.disabled = false;
+            });
         }
 
         function showReview() {
@@ -406,52 +448,14 @@
         }
 
         function finalizeQuiz() {
-            // Show loading
-            const btn = document.querySelector('#review-view button');
-            btn.innerText = "Submitting...";
-            btn.disabled = true;
-
+            // Results already submitted, just show final score screen
             const total = currentQuizData.length;
             const percentage = Math.round((score / total) * 100);
-
-            // Collect question-by-question results
-            const questionResults = [];
-            currentQuizData.forEach((q, index) => {
-                const userAnswer = userAnswers[index] || "";
-                const isCorrect = userAnswer.trim() === q.answer.trim();
-                
-                questionResults.push({
-                    questionNumber: index + 1,
-                    questionText: q.question,
-                    studentAnswer: userAnswer,
-                    correctAnswer: q.answer,
-                    isCorrect: isCorrect
-                });
-            });
-
-            const payload = {
-                type: 'quiz_result',
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('userEmail').value,
-                quizName: currentQuizName,
-                score: `${score}/${total}`,
-                percent: `${percentage}%`,
-                questionResults: questionResults
-            };
-
-            fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
-            .then(() => {
-                document.getElementById('review-view').classList.add('hidden');
-                document.getElementById('result-view').classList.remove('hidden');
-                document.getElementById('score-display').innerText = `${percentage}%`;
-                document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
-            })
-            .catch(err => {
-                alert("Error submitting results.");
-                btn.innerText = "Continue to Final Score";
-                btn.disabled = false;
-            });
+            
+            document.getElementById('review-view').classList.add('hidden');
+            document.getElementById('result-view').classList.remove('hidden');
+            document.getElementById('score-display').innerText = `${percentage}%`;
+            document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
         }
     </script>
 </body>
