@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Supervisor Portal</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; font-size: 14px; }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -48,6 +47,35 @@
         
         #login-view { max-width: 400px; margin: 60px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
         .hidden { display: none !important; }
+        
+        /* Login Form Styles */
+        .login-input { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+        .login-input:focus { 
+            border-color: #2ecc71; 
+            outline: none; 
+        }
+        .login-btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #2ecc71; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: 0.2s;
+        }
+        .login-btn:hover { background: #27ae60; }
+        .login-btn:disabled { background: #95a5a6; cursor: not-allowed; }
         
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .season-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0; }
@@ -291,22 +319,26 @@
 
     <div id="login-view">
         <h2>Supervisor Portal</h2>
-        <p style="margin-bottom:20px; color:#666;">Please sign in with your authorized Google Account.</p>
-        <div id="g_id_onload" data-client_id="340823693231-qr4j73bfcsn971po2h153jqnvimlab6h.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-        <div id="login-error" style="color:red; margin-top:20px; display:none; white-space: pre-line; text-align: left; padding: 15px; background: #fee; border-radius: 6px; font-size: 0.9rem;"></div>
+        <p style="margin-bottom:25px; color:#666;">Please sign in with your credentials.</p>
+        
+        <input type="email" id="loginEmail" class="login-input" placeholder="Email Address" autocomplete="email">
+        <input type="password" id="loginPassword" class="login-input" placeholder="Password" autocomplete="current-password">
+        
+        <button id="loginBtn" class="login-btn" onclick="handleLogin()">Sign In</button>
+        
+        <div id="login-error" style="color:#e74c3c; margin-top:20px; display:none; white-space: pre-line; text-align: left; padding: 15px; background: #fee; border-radius: 6px; font-size: 0.9rem;"></div>
         <div id="login-status" style="color:#666; margin-top:15px; font-size:0.85rem; font-style:italic;"></div>
         
         <details style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; cursor: pointer;">
             <summary style="font-weight: 600; color: #666;">🔧 Troubleshooting</summary>
             <div style="margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
                 <p><strong>If login keeps failing:</strong></p>
-                <ol>
-                    <li>Open browser console (F12) and check for errors</li>
+                <ol style="text-align: left;">
                     <li>Verify your email is listed in Form Responses → Admins tab</li>
+                    <li>Check that your password is correct (Column D in Admins tab)</li>
                     <li>Ensure Form Responses backend script is deployed</li>
                     <li>Try clearing browser cache and cookies</li>
-                    <li>Try in an incognito/private window</li>
+                    <li>Open browser console (F12) and check for errors</li>
                 </ol>
             </div>
         </details>
@@ -404,62 +436,47 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
-        let userToken = null, cmiData = [], quizData = [], questionStats = [], currentView = 'cmi';
+        let cmiData = [], quizData = [], questionStats = [], currentView = 'cmi';
         let actualSupervisor = null;
         let impersonatedSupervisor = null;
         let allSupervisors = [];
 
-        function handleCredentialResponse(response) {
-            userToken = response.credential;
+        // Handle Enter key on password field
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+        });
+
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
             
-            const loginView = document.getElementById('login-view');
+            const loginBtn = document.getElementById('loginBtn');
             const errorDiv = document.getElementById('login-error');
             const statusDiv = document.getElementById('login-status');
-            const signinButton = document.querySelector('.g_id_signin');
+            
+            if (!email || !password) {
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = '❌ Please enter both email and password';
+                return;
+            }
             
             errorDiv.style.display = 'none';
             statusDiv.textContent = '🔄 Authenticating...';
             statusDiv.style.display = 'block';
-            if (signinButton) signinButton.style.opacity = '0.5';
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing In...';
             
-            console.log("Attempting login with token...");
-            fetchData('Current');
-        }
-
-        function switchSeason(seasonName) {
-            document.querySelectorAll('.season-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if(btn.innerText.includes(seasonName)) btn.classList.add('active');
-            });
-            fetchData(seasonName);
-        }
-
-        function fetchData(season) {
-            if (!userToken) {
-                console.error("No user token available");
-                const statusDiv = document.getElementById('login-status');
-                if (statusDiv) {
-                    statusDiv.textContent = '❌ No authentication token';
-                    statusDiv.style.color = 'red';
-                }
-                return;
-            }
+            console.log("Attempting login with email:", email);
             
-            const statusDiv = document.getElementById('login-status');
-            if (statusDiv && season === 'Current') {
-                statusDiv.textContent = '🔄 Verifying credentials...';
-            }
-            
-            console.log("Fetching data for season:", season);
-            
-            fetch(`${SCRIPT_URL}?action=googleLogin&token=${userToken}&season=${season}`)
+            // Send email and password to backend
+            fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=Current`)
             .then(res => {
                 console.log("Response received:", res.status);
-                
-                if (statusDiv && season === 'Current') {
-                    statusDiv.textContent = '🔄 Loading data...';
-                }
-                
+                statusDiv.textContent = '🔄 Loading data...';
                 return res.json();
             })
             .then(resp => {
@@ -468,9 +485,7 @@
                 if (resp.status === 'success') {
                     console.log("Login successful!");
                     
-                    if (statusDiv && season === 'Current') {
-                        statusDiv.textContent = '✅ Success! Loading dashboard...';
-                    }
+                    statusDiv.textContent = '✅ Success! Loading dashboard...';
                     
                     setTimeout(() => {
                         document.getElementById('login-view').classList.add('hidden');
@@ -498,33 +513,80 @@
                 } else {
                     console.error("Login failed:", resp.message || "Access denied");
                     
-                    userToken = null;
-                    const signinButton = document.querySelector('.g_id_signin');
-                    if (signinButton) signinButton.style.opacity = '1';
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
                     
-                    if (statusDiv) {
-                        statusDiv.textContent = '';
-                        statusDiv.style.display = 'none';
-                    }
+                    statusDiv.textContent = '';
+                    statusDiv.style.display = 'none';
                     
-                    document.getElementById('login-error').style.display = 'block';
-                    document.getElementById('login-error').innerText = "❌ Access Denied\n\n" + (resp.message || "Your email is not authorized.") + "\n\nPlease ensure your email is listed in:\nForm Responses → Admins tab";
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = "❌ Access Denied\n\n" + (resp.message || "Invalid email or password.") + "\n\nPlease ensure:\n1. Your email is listed in the Admins tab\n2. Your password is correct (Column D)";
                 }
             })
             .catch(err => {
                 console.error("Fetch error:", err);
                 
-                userToken = null;
-                const signinButton = document.querySelector('.g_id_signin');
-                if (signinButton) signinButton.style.opacity = '1';
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
                 
-                if (statusDiv) {
-                    statusDiv.textContent = '';
-                    statusDiv.style.display = 'none';
+                statusDiv.textContent = '';
+                statusDiv.style.display = 'none';
+                
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = "❌ Connection Error\n\n" + err.toString() + "\n\nPossible issues:\n1. Form Responses script not deployed\n2. Internet connection problem\n3. Browser blocking the request\n\nTry:\n- Refresh the page\n- Clear browser cache\n- Check console (F12) for errors";
+            });
+        }
+
+        function switchSeason(seasonName) {
+            document.querySelectorAll('.season-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.innerText.includes(seasonName)) btn.classList.add('active');
+            });
+            fetchData(seasonName);
+        }
+
+        function fetchData(season) {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                console.error("No credentials available");
+                return;
+            }
+            
+            console.log("Fetching data for season:", season);
+            
+            fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=${season}`)
+            .then(res => {
+                console.log("Response received:", res.status);
+                return res.json();
+            })
+            .then(resp => {
+                console.log("Response data:", resp);
+                
+                if (resp.status === 'success') {
+                    console.log("Data fetch successful!");
+                    
+                    actualSupervisor = resp.supervisor;
+                    cmiData = resp.data || [];
+                    quizData = resp.quizzes || [];
+                    questionStats = resp.questionStats || [];
+                    
+                    console.log("CMI data loaded:", cmiData.length, "reports");
+                    console.log("Quiz data loaded:", quizData.length, "results");
+                    console.log("Question stats loaded:", questionStats.length, "questions");
+                    
+                    populateMetaTagFilter();
+                    applyFilters();
+                } else {
+                    console.error("Data fetch failed:", resp.message);
+                    alert("Session expired. Please log in again.");
+                    location.reload();
                 }
-                
-                document.getElementById('login-error').style.display = 'block';
-                document.getElementById('login-error').innerText = "❌ Connection Error\n\n" + err.toString() + "\n\nPossible issues:\n1. Form Responses script not deployed\n2. Internet connection problem\n3. Browser blocking the request\n\nTry:\n- Refresh the page\n- Clear browser cache\n- Use incognito mode";
+            })
+            .catch(err => {
+                console.error("Fetch error:", err);
+                alert("Error loading data. Please try again.");
             });
         }
         
