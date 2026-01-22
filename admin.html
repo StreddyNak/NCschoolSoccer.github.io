@@ -326,22 +326,8 @@
         
         <button id="loginBtn" class="login-btn" onclick="handleLogin()">Sign In</button>
         
-        <div id="login-error" style="color:#e74c3c; margin-top:20px; display:none; white-space: pre-line; text-align: left; padding: 15px; background: #fee; border-radius: 6px; font-size: 0.9rem;"></div>
+        <div id="login-error" style="color:#e74c3c; margin-top:20px; display:none; padding: 15px; background: #fee; border-radius: 6px; font-size: 0.9rem;"></div>
         <div id="login-status" style="color:#666; margin-top:15px; font-size:0.85rem; font-style:italic;"></div>
-        
-        <details style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px; cursor: pointer;">
-            <summary style="font-weight: 600; color: #666;">🔧 Troubleshooting</summary>
-            <div style="margin-top: 10px; font-size: 0.85rem; line-height: 1.6;">
-                <p><strong>If login keeps failing:</strong></p>
-                <ol style="text-align: left;">
-                    <li>Verify your email is listed in Form Responses → Admins tab</li>
-                    <li>Check that your password is correct (Column D in Admins tab)</li>
-                    <li>Ensure Form Responses backend script is deployed</li>
-                    <li>Try clearing browser cache and cookies</li>
-                    <li>Open browser console (F12) and check for errors</li>
-                </ol>
-            </div>
-        </details>
     </div>
 
     <div id="dashboard-view" class="container hidden">
@@ -460,7 +446,7 @@
             
             if (!email || !password) {
                 errorDiv.style.display = 'block';
-                errorDiv.innerText = '❌ Please enter both email and password';
+                errorDiv.innerText = 'Please enter both email and password';
                 return;
             }
             
@@ -484,6 +470,7 @@
                 
                 if (resp.status === 'success') {
                     console.log("Login successful!");
+                    console.log("CMI data count:", resp.data ? resp.data.length : 0);
                     
                     statusDiv.textContent = '✅ Success! Loading dashboard...';
                     
@@ -520,7 +507,7 @@
                     statusDiv.style.display = 'none';
                     
                     errorDiv.style.display = 'block';
-                    errorDiv.innerText = "❌ Access Denied\n\n" + (resp.message || "Invalid email or password.") + "\n\nPlease ensure:\n1. Your email is listed in the Admins tab\n2. Your password is correct (Column D)";
+                    errorDiv.innerText = resp.message || "Invalid email or password.";
                 }
             })
             .catch(err => {
@@ -533,7 +520,7 @@
                 statusDiv.style.display = 'none';
                 
                 errorDiv.style.display = 'block';
-                errorDiv.innerText = "❌ Connection Error\n\n" + err.toString() + "\n\nPossible issues:\n1. Form Responses script not deployed\n2. Internet connection problem\n3. Browser blocking the request\n\nTry:\n- Refresh the page\n- Clear browser cache\n- Check console (F12) for errors";
+                errorDiv.innerText = "Connection error. Please try again.";
             });
         }
 
