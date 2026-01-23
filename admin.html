@@ -239,8 +239,44 @@
         }
         
         /* Quiz-specific styling */
-        .quiz-header { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; }
-        .quiz-row { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; align-items: start; }
+.quiz-header { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; }
+.quiz-row { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; align-items: start; }
+
+/* Scrimmage checkbox styling */
+.scrim-check {
+    font-size: 1.2rem;
+    text-align: center;
+}
+.scrim-check.attended { color: #22c55e; }
+.scrim-check.not-attended { color: #e5e7eb; }
+
+/* Quiz score card styling with color-coded borders */
+.quiz-score-card {
+    background: #f9fafb;
+    padding: 8px 12px;
+    border-radius: 6px;
+    flex: 1;
+    min-width: 160px;
+    max-width: 200px;
+}
+
+/* Green border for 80%+ */
+.quiz-score-card.high { 
+    border-left: 4px solid #22c55e;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+/* Red border for 79% or below */
+.quiz-score-card.low { 
+    border-left: 4px solid #ef4444;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+/* No quiz taken */
+.quiz-score-card.none {
+    border-left: 4px solid #e5e7eb;
+    background: #f9fafb;
+}
 
         /* Scrimmage checkbox styling */
         .scrim-check {
@@ -667,8 +703,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Group</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';
-                
+                header.innerHTML = '<div>Referee Name</div><div>Group</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
                 populateQuizFilter();
             } else if(currentView === 'questions') {
                 cmiFilters.style.display = 'none';
@@ -933,21 +968,51 @@
                         if (p >= 90) bClass = 'score-high';
                         else if (p >= 70) bClass = 'score-med';
                         
-                        quizScoresHtml += `
-                            <div style="background: #f9fafb; padding: 8px 12px; border-radius: 6px; border-left: 4px solid ${bClass === 'score-high' ? '#22c55e' : bClass === 'score-med' ? '#eab308' : '#ef4444'}; flex: 1; min-width: 160px; max-width: 200px;">
-                                <div style="font-weight: 600; color: #2c3e50; margin-bottom: 3px; font-size: 0.9rem;">${quizName}</div>
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-size: 1rem; font-weight: bold; color: #2c3e50;">${quiz.score || 'N/A'}</span>
-                                    <span class="score-badge ${bClass}" style="margin-left: 8px; padding: 3px 8px; font-size: 0.85rem;">${quiz.percent}%</span>
-                                </div>
-                                <div style="font-size: 0.7rem; color: #999; margin-top: 3px;">${quiz.date}</div>
-                            </div>
-                        `;
+                        // ⭐ FIX: Calculate percentage correctly from fractional score
+var quizPercent = 0;
+if (quiz.percent && quiz.percent !== '') {
+    quizPercent = parseFloat(quiz.percent);
+}
+
+// If percentage is missing or wrong, calculate from fractional score
+if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
+    var parts = quiz.score.split('/');
+    if (parts.length === 2) {
+        var earned = parseFloat(parts[0]);
+        var total = parseFloat(parts[1]);
+        if (total > 0) {
+            quizPercent = Math.round((earned / total) * 100);
+        }
+    }
+}
+
+// ⭐ NEW: Color-coded border class (80%+ = green, 79% or below = red)
+var borderClass = 'none';
+if (quizPercent >= 80) {
+    borderClass = 'high';
+} else if (quizPercent > 0) {
+    borderClass = 'low';
+}
+
+// ⭐ UPDATED: Quiz card with color border, NO percentage badge
+quizScoresHtml += `
+    <div class="quiz-score-card ${borderClass}">
+        <div style="font-weight: 600; color: #2c3e50; margin-bottom: 3px; font-size: 0.9rem;">${quizName}</div>
+        <div style="font-size: 1rem; font-weight: bold; color: #2c3e50;">${quiz.score || 'Not taken'}</div>
+        <div style="font-size: 0.7rem; color: #999; margin-top: 3px;">${quiz.date || ''}</div>
+    </div>
+`;
                     });
                     
                     quizScoresHtml += '</div>';
                     
                     // Add scrimmage checkboxes
+const scrim1Icon = student.scrimmage1 ? '✓' : '○';
+const scrim2Icon = student.scrimmage2 ? '✓' : '○';
+const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
+const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
+
+// Add scrimmage checkboxes
 const scrim1Icon = student.scrimmage1 ? '✓' : '○';
 const scrim2Icon = student.scrimmage2 ? '✓' : '○';
 const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
