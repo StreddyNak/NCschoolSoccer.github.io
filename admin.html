@@ -239,8 +239,16 @@
         }
         
         /* Quiz-specific styling */
-        .quiz-header { grid-template-columns: 2fr 1.5fr 5fr; }
-        .quiz-row { grid-template-columns: 2fr 1.5fr 5fr; align-items: start; }
+        .quiz-header { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; }
+        .quiz-row { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; align-items: start; }
+
+        /* Scrimmage checkbox styling */
+        .scrim-check {
+            font-size: 1.2rem;
+            text-align: center;
+}
+        .scrim-check.attended { color: #22c55e; }
+        .scrim-check.not-attended { color: #e5e7eb; }
         
         /* Question Analysis styling */
         .question-header { grid-template-columns: 80px 1fr 120px 150px 2fr; }
@@ -659,7 +667,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Group</div><div>Quiz Scores</div>';
+                header.innerHTML = '<div>Referee Name</div><div>Group</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';
                 
                 populateQuizFilter();
             } else if(currentView === 'questions') {
@@ -866,11 +874,14 @@
                     
                     if (!studentQuizzes[email]) {
                         studentQuizzes[email] = {
-                            name: q.name,
-                            email: q.email,
-                            group: q.group || "Unknown",
-                            quizzes: {}
-                        };
+    name: q.name,
+    email: q.email,
+    group: q.group || "Unknown",
+    quizzes: {},
+    scrimmage1: q.scrimmage1 || false,
+    scrimmage2: q.scrimmage2 || false,
+    playoffEligible: q.playoffEligible || false
+};
                     }
                     
                     const quizName = q.quiz;
@@ -936,16 +947,24 @@
                     
                     quizScoresHtml += '</div>';
                     
-                    div.innerHTML = `
-                        <div style="font-weight:bold; padding-right: 15px;">
-                            ${student.name}
-                            <br><small style="font-weight:normal; color:#888;">${student.email}</small>
-                        </div>
-                        <div style="color:#666; font-size:0.95rem; padding-right: 15px;">
-                            <span style="display: inline-block; background: #e5e7eb; padding: 4px 12px; border-radius: 12px; font-weight: 600;">${student.group}</span>
-                        </div>
-                        ${quizScoresHtml}
-                    `;
+                    // Add scrimmage checkboxes
+const scrim1Icon = student.scrimmage1 ? '✓' : '○';
+const scrim2Icon = student.scrimmage2 ? '✓' : '○';
+const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
+const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
+
+div.innerHTML = `
+    <div style="font-weight:bold; padding-right: 15px;">
+        ${student.name}
+        <br><small style="font-weight:normal; color:#888;">${student.email}</small>
+    </div>
+    <div style="color:#666; font-size:0.95rem; padding-right: 15px;">
+        <span style="display: inline-block; background: #e5e7eb; padding: 4px 12px; border-radius: 12px; font-weight: 600;">${student.group}</span>
+    </div>
+    <div class="scrim-check ${scrim1Class}">${scrim1Icon}</div>
+    <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
+    ${quizScoresHtml}
+`;
                     list.appendChild(div);
                 });
             } else if (currentView === 'questions') {
