@@ -39,79 +39,19 @@
             margin-bottom: 30px;
         }
         
-        .eligibility-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .eligibility-header h2 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 1.5rem;
-        }
-        
-        .eligibility-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-        }
-        
-        .eligibility-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        
-        .eligibility-card.eligible {
-            border-color: #22c55e;
+        .playoff-notice {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        }
-        
-        .eligibility-card.not-eligible {
-            border-color: #ef4444;
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-        }
-        
-        .eligibility-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        
-        .eligibility-title {
-            font-size: 1.1rem;
+            border: 2px solid #22c55e;
+            border-radius: 8px;
+            padding: 12px 20px;
+            text-align: center;
             font-weight: 700;
-            margin-bottom: 8px;
-            color: #2c3e50;
+            font-size: 1.1rem;
+            color: #166534;
         }
         
-        .eligibility-status {
-            font-size: 1.3rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-        
-        .eligibility-status.eligible { color: #22c55e; }
-        .eligibility-status.not-eligible { color: #ef4444; }
-        
-        .eligibility-detail {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 8px;
-        }
-        
-        .scrimmage-count {
-            display: inline-block;
-            background: #3b82f6;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 5px;
+        .playoff-notice.hidden {
+            display: none;
         }
         
         .scrimmage-detail-card {
@@ -232,7 +172,7 @@
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="report.html" class="nav-link">CMI Form</a>
                 <a href="jersey.html" class="nav-link">Kit Search</a>
-                <span class="nav-link active">Eligibility & Training</span>
+                <span class="nav-link active">Eligibility & Quizzes</span>
             </div>
             <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
         </div>
@@ -245,40 +185,20 @@
             <p id="login-msg" style="color:red; margin-top:10px; display:none;"></p>
         </div>
 
-        <!-- ⭐ NEW: Eligibility Display -->
+        <!-- ⭐ NEW: Eligibility Display (Simplified) -->
         <div id="eligibility-display" class="eligibility-section hidden">
-            <div class="eligibility-header">
-                <span style="font-size: 2rem;">📋</span>
-                <h2>Season Eligibility Status</h2>
+            <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span>📋</span> Scrimmage Attendance
+            </h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-bottom: 15px;">
+                <div id="scrimmage1-detail" class="scrimmage-detail-card"></div>
+                <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
             </div>
             
-            <div class="eligibility-grid">
-                <div id="regular-season-card" class="eligibility-card">
-                    <div class="eligibility-icon">🏃</div>
-                    <div class="eligibility-title">Regular Season</div>
-                    <div id="regular-status" class="eligibility-status">Checking...</div>
-                    <div class="eligibility-detail">Requires 1+ scrimmage</div>
-                </div>
-                
-                <div id="playoff-card" class="eligibility-card">
-                    <div class="eligibility-icon">🏆</div>
-                    <div class="eligibility-title">Playoffs</div>
-                    <div id="playoff-status" class="eligibility-status">Checking...</div>
-                    <div class="eligibility-detail">Requires both scrimmages</div>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 15px;">
-                <span id="scrimmage-badge" class="scrimmage-count">0/2 Scrimmages Attended</span>
-            </div>
-            
-            <!-- Scrimmage Details -->
-            <div id="scrimmage-details" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                <h3 style="text-align: center; color: #2c3e50; font-size: 1.1rem; margin-bottom: 15px;">Scrimmage Attendance</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;">
-                    <div id="scrimmage1-detail" class="scrimmage-detail-card"></div>
-                    <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
-                </div>
+            <!-- Playoff Eligibility Notice (only shown when eligible) -->
+            <div id="playoff-notice" class="playoff-notice hidden">
+                🏆 You are playoff eligible
             </div>
         </div>
 
@@ -384,39 +304,12 @@
                 return;
             }
             
-            const scrimmagesAttended = eligibilityData.scrimmagesAttended || 0;
-            const regularEligible = eligibilityData.regularSeasonEligible;
-            const playoffEligible = eligibilityData.playoffEligible;
-            
-            // Update scrimmage count badge
-            document.getElementById('scrimmage-badge').innerText = `${scrimmagesAttended}/2 Scrimmages Attended`;
-            
-            // Update Regular Season card
-            const regularCard = document.getElementById('regular-season-card');
-            const regularStatus = document.getElementById('regular-status');
-            
-            if (regularEligible) {
-                regularCard.className = 'eligibility-card eligible';
-                regularStatus.className = 'eligibility-status eligible';
-                regularStatus.innerText = '✓ ELIGIBLE';
+            // Show playoff notice only if eligible
+            const playoffNotice = document.getElementById('playoff-notice');
+            if (eligibilityData.playoffEligible) {
+                playoffNotice.classList.remove('hidden');
             } else {
-                regularCard.className = 'eligibility-card not-eligible';
-                regularStatus.className = 'eligibility-status not-eligible';
-                regularStatus.innerText = '✗ NOT ELIGIBLE';
-            }
-            
-            // Update Playoff card
-            const playoffCard = document.getElementById('playoff-card');
-            const playoffStatus = document.getElementById('playoff-status');
-            
-            if (playoffEligible) {
-                playoffCard.className = 'eligibility-card eligible';
-                playoffStatus.className = 'eligibility-status eligible';
-                playoffStatus.innerText = '✓ ELIGIBLE';
-            } else {
-                playoffCard.className = 'eligibility-card not-eligible';
-                playoffStatus.className = 'eligibility-status not-eligible';
-                playoffStatus.innerText = '✗ NOT ELIGIBLE';
+                playoffNotice.classList.add('hidden');
             }
             
             // Display scrimmage details if available
