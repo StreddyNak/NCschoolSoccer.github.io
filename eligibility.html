@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Quizzes</title>
+    <title>Eligibility & Quizzes</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
         .container { max-width: 800px; margin: 0 auto; }
@@ -28,6 +28,148 @@
             .nav-bar { flex-direction: column; gap: 15px; }
             .supervisor-link { position: static; transform: none; margin-left: auto; }
             .nav-center { flex-wrap: wrap; justify-content: center; }
+        }
+
+        /* --- Eligibility Section --- */
+        .eligibility-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .eligibility-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .eligibility-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+        
+        .eligibility-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .eligibility-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .eligibility-card.eligible {
+            border-color: #22c55e;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        
+        .eligibility-card.not-eligible {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+        
+        .eligibility-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .eligibility-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .eligibility-status {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .eligibility-status.eligible { color: #22c55e; }
+        .eligibility-status.not-eligible { color: #ef4444; }
+        
+        .eligibility-detail {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .scrimmage-count {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .scrimmage-detail-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .scrimmage-detail-card.attended {
+            border-left: 4px solid #22c55e;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+        
+        .scrimmage-detail-card.not-attended {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .scrimmage-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        
+        .scrimmage-info {
+            flex-grow: 1;
+        }
+        
+        .scrimmage-name {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        
+        .scrimmage-date {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .scrimmage-status {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+        
+        .scrimmage-status.attended {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .scrimmage-status.not-attended {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         /* --- Page Styles --- */
@@ -90,21 +232,58 @@
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="report.html" class="nav-link">CMI Form</a>
                 <a href="jersey.html" class="nav-link">Kit Search</a>
-                <span class="nav-link active">Training Quizzes</span>
+                <span class="nav-link active">Eligibility & Training</span>
             </div>
             <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
         </div>
 
         <div id="login-view" class="card">
             <h2>Referee Login</h2>
-            <p style="color:#666; margin-bottom:20px;">Enter your email to view your assigned training modules.</p>
+            <p style="color:#666; margin-bottom:20px;">Enter your email to view your eligibility status and training modules.</p>
             <input type="email" id="loginEmail" class="input-field" placeholder="yourname@email.com">
-            <button class="btn-primary" onclick="handleLogin()">Access Quizzes</button>
+            <button class="btn-primary" onclick="handleLogin()">Login</button>
             <p id="login-msg" style="color:red; margin-top:10px; display:none;"></p>
         </div>
 
+        <!-- ⭐ NEW: Eligibility Display -->
+        <div id="eligibility-display" class="eligibility-section hidden">
+            <div class="eligibility-header">
+                <span style="font-size: 2rem;">📋</span>
+                <h2>Season Eligibility Status</h2>
+            </div>
+            
+            <div class="eligibility-grid">
+                <div id="regular-season-card" class="eligibility-card">
+                    <div class="eligibility-icon">🏃</div>
+                    <div class="eligibility-title">Regular Season</div>
+                    <div id="regular-status" class="eligibility-status">Checking...</div>
+                    <div class="eligibility-detail">Requires 1+ scrimmage</div>
+                </div>
+                
+                <div id="playoff-card" class="eligibility-card">
+                    <div class="eligibility-icon">🏆</div>
+                    <div class="eligibility-title">Playoffs</div>
+                    <div id="playoff-status" class="eligibility-status">Checking...</div>
+                    <div class="eligibility-detail">Requires both scrimmages</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px;">
+                <span id="scrimmage-badge" class="scrimmage-count">0/2 Scrimmages Attended</span>
+            </div>
+            
+            <!-- Scrimmage Details -->
+            <div id="scrimmage-details" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <h3 style="text-align: center; color: #2c3e50; font-size: 1.1rem; margin-bottom: 15px;">Scrimmage Attendance</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;">
+                    <div id="scrimmage1-detail" class="scrimmage-detail-card"></div>
+                    <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="selection-view" class="hidden">
-            <h2 id="welcome-header" style="text-align:center;">Available Quizzes</h2>
+            <h2 id="welcome-header" style="text-align:center;">Training Quizzes</h2>
             <p style="text-align:center; color:#666; margin-bottom:30px;">Select a topic to begin.</p>
             <div id="quiz-list-container"></div>
             <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Logout</button>
@@ -156,7 +335,8 @@
         let currentQuizName = "";
         let score = 0;
         let currentUser = {};
-        let userAnswers = {}; // Store user answers
+        let userAnswers = {};
+        let eligibilityData = null; // ⭐ NEW
 
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
@@ -170,24 +350,111 @@
                 .then(data => {
                     if (data.error) {
                         msg.innerText = data.error; msg.style.display = 'block';
-                        btn.innerText = "Access Quizzes"; btn.disabled = false; return;
+                        btn.innerText = "Login"; btn.disabled = false; return;
                     }
                     allQuizzes = data.quizzes;
                     userScores = data.scores || {}; 
                     currentUser = data.user || { firstName: "", lastName: "", email: email }; 
+                    eligibilityData = data.eligibility || null; // ⭐ NEW
+                    
                     document.getElementById('userEmail').value = email;
                     document.getElementById('firstName').value = currentUser.firstName;
                     document.getElementById('lastName').value = currentUser.lastName;
                     if (currentUser.firstName) document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
+                    
+                    // ⭐ NEW: Display eligibility
+                    displayEligibility();
+                    
                     renderQuizList();
                     document.getElementById('login-view').classList.add('hidden');
+                    document.getElementById('eligibility-display').classList.remove('hidden');
                     document.getElementById('selection-view').classList.remove('hidden');
                 })
                 .catch(err => {
                     console.error(err);
                     msg.innerText = "Connection failed. Please check your internet."; msg.style.display = 'block';
-                    btn.innerText = "Access Quizzes"; btn.disabled = false;
+                    btn.innerText = "Login"; btn.disabled = false;
                 });
+        }
+
+        // ⭐ NEW: Display Eligibility Status
+        function displayEligibility() {
+            if (!eligibilityData) {
+                console.log("No eligibility data available");
+                return;
+            }
+            
+            const scrimmagesAttended = eligibilityData.scrimmagesAttended || 0;
+            const regularEligible = eligibilityData.regularSeasonEligible;
+            const playoffEligible = eligibilityData.playoffEligible;
+            
+            // Update scrimmage count badge
+            document.getElementById('scrimmage-badge').innerText = `${scrimmagesAttended}/2 Scrimmages Attended`;
+            
+            // Update Regular Season card
+            const regularCard = document.getElementById('regular-season-card');
+            const regularStatus = document.getElementById('regular-status');
+            
+            if (regularEligible) {
+                regularCard.className = 'eligibility-card eligible';
+                regularStatus.className = 'eligibility-status eligible';
+                regularStatus.innerText = '✓ ELIGIBLE';
+            } else {
+                regularCard.className = 'eligibility-card not-eligible';
+                regularStatus.className = 'eligibility-status not-eligible';
+                regularStatus.innerText = '✗ NOT ELIGIBLE';
+            }
+            
+            // Update Playoff card
+            const playoffCard = document.getElementById('playoff-card');
+            const playoffStatus = document.getElementById('playoff-status');
+            
+            if (playoffEligible) {
+                playoffCard.className = 'eligibility-card eligible';
+                playoffStatus.className = 'eligibility-status eligible';
+                playoffStatus.innerText = '✓ ELIGIBLE';
+            } else {
+                playoffCard.className = 'eligibility-card not-eligible';
+                playoffStatus.className = 'eligibility-status not-eligible';
+                playoffStatus.innerText = '✗ NOT ELIGIBLE';
+            }
+            
+            // Display scrimmage details if available
+            if (eligibilityData.scrimmages && eligibilityData.scrimmages.length >= 2) {
+                displayScrimmageDetails(eligibilityData.scrimmages);
+            }
+        }
+        
+        function displayScrimmageDetails(scrimmages) {
+            // Scrimmage 1
+            const scrim1 = scrimmages[0];
+            const scrim1Card = document.getElementById('scrimmage1-detail');
+            scrim1Card.className = `scrimmage-detail-card ${scrim1.attended ? 'attended' : 'not-attended'}`;
+            scrim1Card.innerHTML = `
+                <div class="scrimmage-icon">${scrim1.attended ? '✅' : '📅'}</div>
+                <div class="scrimmage-info">
+                    <div class="scrimmage-name">${scrim1.name}</div>
+                    <div class="scrimmage-date">${scrim1.date ? scrim1.date : 'Date TBD'}</div>
+                </div>
+                <div class="scrimmage-status ${scrim1.attended ? 'attended' : 'not-attended'}">
+                    ${scrim1.attended ? 'Attended' : 'Not Attended'}
+                </div>
+            `;
+            
+            // Scrimmage 2
+            const scrim2 = scrimmages[1];
+            const scrim2Card = document.getElementById('scrimmage2-detail');
+            scrim2Card.className = `scrimmage-detail-card ${scrim2.attended ? 'attended' : 'not-attended'}`;
+            scrim2Card.innerHTML = `
+                <div class="scrimmage-icon">${scrim2.attended ? '✅' : '📅'}</div>
+                <div class="scrimmage-info">
+                    <div class="scrimmage-name">${scrim2.name}</div>
+                    <div class="scrimmage-date">${scrim2.date ? scrim2.date : 'Date TBD'}</div>
+                </div>
+                <div class="scrimmage-status ${scrim2.attended ? 'attended' : 'not-attended'}">
+                    ${scrim2.attended ? 'Attended' : 'Not Attended'}
+                </div>
+            `;
         }
 
         function renderQuizList() {
@@ -196,23 +463,16 @@
             const titles = Object.keys(allQuizzes);
             if (titles.length === 0) { container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; return; }
 
-            console.log("User Scores Object:", userScores); // Debug logging
-
             titles.forEach(title => {
                 const count = allQuizzes[title].length;
                 const highScore = userScores[title]; 
                 let badgeHtml = "";
                 
-                console.log(`Quiz: ${title}, High Score:`, highScore); // Debug logging
-                
-                // Display fractional score if available
                 if (highScore !== undefined && highScore.score) {
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.score}</span>`;
                 } else if (highScore !== undefined && typeof highScore === 'number') {
-                    // Fallback for old percentage format (backward compatibility)
                     badgeHtml = `<span class="score-badge good">Best: ${highScore}%</span>`;
                 } else if (highScore !== undefined && typeof highScore === 'object') {
-                    // If we have an object but score is missing, show percent
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.percent}%</span>`;
                 }
                 
@@ -227,6 +487,7 @@
         function showIntro(title) {
             currentQuizName = title;
             currentQuizData = allQuizzes[title];
+            document.getElementById('eligibility-display').classList.add('hidden');
             document.getElementById('selection-view').classList.add('hidden');
             document.getElementById('intro-view').classList.remove('hidden');
             document.getElementById('intro-title').innerText = title;
@@ -236,12 +497,11 @@
             document.getElementById('intro-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
-            score = 0; // Reset score
-            userAnswers = {}; // Reset answers
+            score = 0;
+            userAnswers = {};
             renderQuestions();
         }
 
-        // --- Video Logic ---
         function getVideoHtml(url) {
             if (!url || url.length < 5) return "";
             url = url.trim();
@@ -269,20 +529,17 @@
                 qDiv.className = 'question-block';
                 qDiv.id = `q-block-${index}`;
 
-                // 1. Title
                 const title = document.createElement('div');
                 title.className = 'q-text';
                 title.innerText = `${index + 1}. ${q.question}`;
                 qDiv.appendChild(title);
 
-                // 2. Video
                 if(q.video) {
                     const vidDiv = document.createElement('div');
                     vidDiv.innerHTML = getVideoHtml(q.video);
                     qDiv.appendChild(vidDiv);
                 }
 
-                // 3. Options
                 const optsDiv = document.createElement('div');
                 optsDiv.className = 'options-group';
                 optsDiv.id = `options-${index}`;
@@ -301,10 +558,8 @@
         }
 
         function selectAnswer(index, selectedText) {
-            // Record the answer
             userAnswers[index] = selectedText;
             
-            // Visual feedback - highlight selected answer
             const parent = document.getElementById(`options-${index}`);
             const allBtns = parent.querySelectorAll('.option-btn');
             allBtns.forEach(btn => {
@@ -323,7 +578,6 @@
                 if(!confirm(`You have only answered ${answeredCount} of ${total} questions. Submit anyway?`)) return;
             }
 
-            // Grade the quiz
             score = 0;
             currentQuizData.forEach((q, index) => {
                 const userAnswer = userAnswers[index];
@@ -334,12 +588,10 @@
 
             const percentage = Math.round((score / total) * 100);
             
-            // Show loading state
             const finishBtn = document.getElementById('finishBtn');
             finishBtn.innerText = "Submitting Results...";
             finishBtn.disabled = true;
 
-            // Collect question-by-question results
             const questionResults = [];
             currentQuizData.forEach((q, index) => {
                 const userAnswer = userAnswers[index] || "";
@@ -354,7 +606,6 @@
                 });
             });
 
-            // SUBMIT TO GOOGLE SHEETS FIRST (before showing answers)
             const payload = {
                 type: 'quiz_result',
                 firstName: document.getElementById('firstName').value,
@@ -368,15 +619,12 @@
 
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
             .then(() => {
-                // After successful submission, NOW show the review
                 document.getElementById('review-score-display').innerText = `${percentage}%`;
                 document.getElementById('review-score-display').className = `review-score ${percentage >= 80 ? 'good' : percentage >= 60 ? 'okay' : 'poor'}`;
                 document.getElementById('review-detail').innerText = `You got ${score} out of ${total} correct.`;
                 
-                // Show review of all answers
                 showReview();
                 
-                // Switch to review view
                 document.getElementById('quiz-view').classList.add('hidden');
                 document.getElementById('review-view').classList.remove('hidden');
             })
@@ -396,7 +644,6 @@
                 const qDiv = document.createElement('div');
                 qDiv.className = 'question-block';
 
-                // Question title with indicator
                 const userAnswer = userAnswers[index];
                 const isCorrect = userAnswer && userAnswer.trim() === q.answer.trim();
                 
@@ -405,25 +652,21 @@
                 title.innerHTML = `${index + 1}. ${q.question} <span class="correct-indicator ${isCorrect ? 'right' : 'wrong'}">${isCorrect ? '✓' : '✗'}</span>`;
                 qDiv.appendChild(title);
 
-                // Video (if exists)
                 if(q.video) {
                     const vidDiv = document.createElement('div');
                     vidDiv.innerHTML = getVideoHtml(q.video);
                     qDiv.appendChild(vidDiv);
                 }
 
-                // Options with correct/wrong highlighting
                 const optsDiv = document.createElement('div');
                 q.options.forEach(optText => {
                     const btn = document.createElement('button');
                     btn.className = 'option-btn disabled';
                     btn.innerText = optText;
                     
-                    // Highlight user's answer
                     if (optText === userAnswer) {
                         btn.classList.add(isCorrect ? 'correct' : 'wrong');
                     }
-                    // Always show the correct answer
                     if (optText === q.answer) {
                         btn.classList.add('correct');
                         if (!isCorrect) {
@@ -435,7 +678,6 @@
                 });
                 qDiv.appendChild(optsDiv);
 
-                // Show explanation if available
                 if (q.explanation && q.explanation.trim()) {
                     const expDiv = document.createElement('div');
                     expDiv.className = 'explanation';
@@ -448,7 +690,6 @@
         }
 
         function finalizeQuiz() {
-            // Results already submitted, just show final score screen
             const total = currentQuizData.length;
             const percentage = Math.round((score / total) * 100);
             
