@@ -136,6 +136,18 @@
         .score-badge { font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 20px; background: #eee; color: #777; }
         .score-badge.good { background: #dcfce7; color: #166534; }
         
+        /* ⭐ NEW: Randomization Badge */
+        .randomization-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
         /* Questions */
         .question-block { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px; text-align: left; }
         .q-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
@@ -148,20 +160,7 @@
         .option-btn { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
         .option-btn:hover:not(.disabled) { background-color: #f9fafb; border-color: #d1d5db; }
         .option-btn.selected { background-color: #dbeafe; border-color: #3b82f6; font-weight: 600; }
-        .option-btn.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: 600; }
-        .option-btn.wrong { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; }
         .option-btn.disabled { cursor: not-allowed; pointer-events: none; }
-        .explanation { margin-top: 10px; padding: 12px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e3a8a; font-size: 0.9rem; line-height: 1.5; }
-        .correct-indicator { display: inline-block; margin-left: 8px; font-weight: bold; font-size: 1.1rem; }
-        .correct-indicator.right { color: #22c55e; }
-        .correct-indicator.wrong { color: #ef4444; }
-        
-        /* Review Section */
-        .review-header { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-        .review-score { font-size: 2.5rem; font-weight: 800; color: #2c3e50; margin: 10px 0; }
-        .review-score.good { color: #22c55e; }
-        .review-score.okay { color: #eab308; }
-        .review-score.poor { color: #ef4444; }
     </style>
 </head>
 <body>
@@ -185,7 +184,6 @@
             <p id="login-msg" style="color:red; margin-top:10px; display:none;"></p>
         </div>
 
-        <!-- ⭐ NEW: Eligibility Display (Simplified) -->
         <div id="eligibility-display" class="eligibility-section hidden">
             <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
                 <span>📋</span> Scrimmage Attendance
@@ -196,7 +194,6 @@
                 <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
             </div>
             
-            <!-- Playoff Eligibility Notice (only shown when eligible) -->
             <div id="playoff-notice" class="playoff-notice hidden">
                 You have completed the scrimmages requirement for playoff eligibility!
             </div>
@@ -204,7 +201,12 @@
 
         <div id="selection-view" class="hidden">
             <h2 id="welcome-header" style="text-align:center;">Training Quizzes</h2>
-            <p style="text-align:center; color:#666; margin-bottom:30px;">Select a topic to begin.</p>
+            
+            <!-- ⭐ NEW: Randomization Info -->
+            <div class="randomization-info">
+                Each quiz randomly selects 15 questions and shuffles answer choices for academic integrity
+            </div>
+            
             <div id="quiz-list-container"></div>
             <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Logout</button>
         </div>
@@ -215,6 +217,9 @@
             <input type="text" id="firstName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="text" id="lastName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="email" id="userEmail" class="input-field" readonly style="background:#f9f9f9; color:#666;">
+            <p style="font-size: 0.9rem; color: #666; background: #f0f9ff; padding: 12px; border-radius: 6px; border-left: 4px solid #3b82f6;">
+                <strong>Note:</strong> This quiz will show 15 randomly selected questions with shuffled answer choices.
+            </p>
             <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
             <br>
             <button onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">Back</button>
@@ -226,28 +231,18 @@
             <button id="finishBtn" class="btn-primary" onclick="submitQuiz()">Submit Quiz</button>
         </div>
 
-        <div id="review-view" class="card hidden">
-            <div class="review-header">
-                <h2 style="margin:0 0 10px 0;">Quiz Results</h2>
-                <div id="review-score-display" class="review-score">0%</div>
-                <p id="review-detail">You got X out of Y correct.</p>
-                <p style="color:#22c55e; margin-top:10px; font-weight:600;">✓ Results saved successfully</p>
-            </div>
-            <p style="color:#666; margin-bottom:20px; text-align:center;">Review your answers below:</p>
-            <div id="review-container"></div>
-            <button class="btn-primary" onclick="finalizeQuiz()" style="margin-top:20px;">View Final Score</button>
-        </div>
-
         <div id="result-view" class="card hidden">
             <h1>Quiz Complete!</h1>
-            <div style="font-size:3rem; font-weight:800; color:#2ecc71; margin:20px 0;" id="score-display">0%</div>
+            <div style="font-size:3rem; font-weight:800; margin:20px 0;" id="score-display">0%</div>
             <p id="score-detail">You got X out of Y correct.</p>
+            <p style="color:#22c55e; margin-top:20px; font-weight:600;">✓ Results saved successfully</p>
             <button class="btn-primary" onclick="location.reload()">Return to Login</button>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCKkdHudV8CA1hcdV_KN2KEyOeZ5nmaQ_5-fWO40BPpIZwjMO1z3F4lalyP3wMYRf7lQ/exec";
+        const QUESTIONS_PER_QUIZ = 15; // ⭐ Configure how many questions to show
 
         let allQuizzes = {};
         let userScores = {}; 
@@ -256,7 +251,57 @@
         let score = 0;
         let currentUser = {};
         let userAnswers = {};
-        let eligibilityData = null; // ⭐ NEW
+        let eligibilityData = null;
+
+        // ===== ⭐ NEW: RANDOMIZATION FUNCTIONS =====
+        
+        /**
+         * Fisher-Yates shuffle algorithm - ensures truly random shuffling
+         */
+        function shuffleArray(array) {
+            const shuffled = [...array]; // Create copy to avoid mutating original
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        /**
+         * Prepare quiz with randomization:
+         * 1. Shuffle all questions
+         * 2. Select first N questions (e.g., 15 out of 20)
+         * 3. Shuffle answer options for each question
+         */
+        function prepareQuizQuestions(questions, maxQuestions = QUESTIONS_PER_QUIZ) {
+            console.log(`Preparing quiz: ${questions.length} total questions, selecting ${maxQuestions}`);
+            
+            // Step 1: Shuffle questions
+            let shuffled = shuffleArray(questions);
+            
+            // Step 2: Take only first N questions
+            shuffled = shuffled.slice(0, Math.min(maxQuestions, questions.length));
+            
+            // Step 3: Shuffle answer options for each question
+            shuffled = shuffled.map((q, index) => {
+                const correctAnswer = q.answer;
+                
+                // Shuffle the options array
+                const shuffledOptions = shuffleArray(q.options);
+                
+                return {
+                    ...q,
+                    questionNumber: index + 1,
+                    options: shuffledOptions, // Use shuffled options
+                    correctAnswer: correctAnswer // Keep track of correct answer
+                };
+            });
+            
+            console.log(`Quiz prepared: ${shuffled.length} randomized questions with shuffled answers`);
+            return shuffled;
+        }
+        
+        // ===== LOGIN & DATA LOADING =====
 
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
@@ -275,17 +320,16 @@
                     allQuizzes = data.quizzes;
                     userScores = data.scores || {}; 
                     currentUser = data.user || { firstName: "", lastName: "", email: email }; 
-                    eligibilityData = data.eligibility || null; // ⭐ NEW
+                    eligibilityData = data.eligibility || null;
                     
                     document.getElementById('userEmail').value = email;
                     document.getElementById('firstName').value = currentUser.firstName;
                     document.getElementById('lastName').value = currentUser.lastName;
                     if (currentUser.firstName) document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
                     
-                    // ⭐ NEW: Display eligibility
                     displayEligibility();
-                    
                     renderQuizList();
+                    
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('eligibility-display').classList.remove('hidden');
                     document.getElementById('selection-view').classList.remove('hidden');
@@ -297,14 +341,12 @@
                 });
         }
 
-        // ⭐ NEW: Display Eligibility Status
         function displayEligibility() {
             if (!eligibilityData) {
                 console.log("No eligibility data available");
                 return;
             }
             
-            // Show playoff notice only if eligible
             const playoffNotice = document.getElementById('playoff-notice');
             if (eligibilityData.playoffEligible) {
                 playoffNotice.classList.remove('hidden');
@@ -312,14 +354,12 @@
                 playoffNotice.classList.add('hidden');
             }
             
-            // Display scrimmage details if available
             if (eligibilityData.scrimmages && eligibilityData.scrimmages.length >= 2) {
                 displayScrimmageDetails(eligibilityData.scrimmages);
             }
         }
         
         function displayScrimmageDetails(scrimmages) {
-            // Scrimmage 1
             const scrim1 = scrimmages[0];
             const scrim1Card = document.getElementById('scrimmage1-detail');
             scrim1Card.className = `scrimmage-detail-card ${scrim1.attended ? 'attended' : 'not-attended'}`;
@@ -334,7 +374,6 @@
                 </div>
             `;
             
-            // Scrimmage 2
             const scrim2 = scrimmages[1];
             const scrim2Card = document.getElementById('scrimmage2-detail');
             scrim2Card.className = `scrimmage-detail-card ${scrim2.attended ? 'attended' : 'not-attended'}`;
@@ -354,10 +393,14 @@
             const container = document.getElementById('quiz-list-container');
             container.innerHTML = '';
             const titles = Object.keys(allQuizzes);
-            if (titles.length === 0) { container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; return; }
+            if (titles.length === 0) { 
+                container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; 
+                return; 
+            }
 
             titles.forEach(title => {
                 const count = allQuizzes[title].length;
+                const questionsShown = Math.min(QUESTIONS_PER_QUIZ, count);
                 const highScore = userScores[title]; 
                 let badgeHtml = "";
                 
@@ -371,7 +414,13 @@
                 
                 const div = document.createElement('div');
                 div.className = 'quiz-list-item';
-                div.innerHTML = `<div class="quiz-info"><span class="quiz-title">${title}</span><span class="quiz-meta">${count} Questions</span></div>${badgeHtml}`;
+                div.innerHTML = `
+                    <div class="quiz-info">
+                        <span class="quiz-title">${title}</span>
+                        <span class="quiz-meta">${count} questions available • ${questionsShown} shown randomly</span>
+                    </div>
+                    ${badgeHtml}
+                `;
                 div.onclick = () => showIntro(title);
                 container.appendChild(div);
             });
@@ -379,7 +428,9 @@
 
         function showIntro(title) {
             currentQuizName = title;
+            // ⭐ Store original questions but don't randomize yet
             currentQuizData = allQuizzes[title];
+            
             document.getElementById('eligibility-display').classList.add('hidden');
             document.getElementById('selection-view').classList.add('hidden');
             document.getElementById('intro-view').classList.remove('hidden');
@@ -387,9 +438,14 @@
         }
 
         function startQuiz() {
+            // ⭐ NOW apply randomization when quiz starts
+            const originalQuestions = allQuizzes[currentQuizName];
+            currentQuizData = prepareQuizQuestions(originalQuestions, QUESTIONS_PER_QUIZ);
+            
             document.getElementById('intro-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
+            
             score = 0;
             userAnswers = {};
             renderQuestions();
@@ -424,7 +480,7 @@
 
                 const title = document.createElement('div');
                 title.className = 'q-text';
-                title.innerText = `${index + 1}. ${q.question}`;
+                title.innerText = `${q.questionNumber}. ${q.question}`;
                 qDiv.appendChild(title);
 
                 if(q.video) {
@@ -437,6 +493,7 @@
                 optsDiv.className = 'options-group';
                 optsDiv.id = `options-${index}`;
                 
+                // ⭐ Options are already shuffled by prepareQuizQuestions
                 q.options.forEach(optText => {
                     const btn = document.createElement('button');
                     btn.className = 'option-btn';
@@ -471,10 +528,11 @@
                 if(!confirm(`You have only answered ${answeredCount} of ${total} questions. Submit anyway?`)) return;
             }
 
+            // Calculate score
             score = 0;
             currentQuizData.forEach((q, index) => {
                 const userAnswer = userAnswers[index];
-                if (userAnswer && userAnswer.trim() === q.answer.trim()) {
+                if (userAnswer && userAnswer.trim() === q.correctAnswer.trim()) {
                     score++;
                 }
             });
@@ -485,16 +543,17 @@
             finishBtn.innerText = "Submitting Results...";
             finishBtn.disabled = true;
 
+            // Build question results for backend
             const questionResults = [];
             currentQuizData.forEach((q, index) => {
                 const userAnswer = userAnswers[index] || "";
-                const isCorrect = userAnswer.trim() === q.answer.trim();
+                const isCorrect = userAnswer.trim() === q.correctAnswer.trim();
                 
                 questionResults.push({
-                    questionNumber: index + 1,
+                    questionNumber: q.questionNumber,
                     questionText: q.question,
                     studentAnswer: userAnswer,
-                    correctAnswer: q.answer,
+                    correctAnswer: q.correctAnswer,
                     isCorrect: isCorrect
                 });
             });
@@ -510,16 +569,26 @@
                 questionResults: questionResults
             };
 
+            // Submit to backend
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
             .then(() => {
-                document.getElementById('review-score-display').innerText = `${percentage}%`;
-                document.getElementById('review-score-display').className = `review-score ${percentage >= 80 ? 'good' : percentage >= 60 ? 'okay' : 'poor'}`;
-                document.getElementById('review-detail').innerText = `You got ${score} out of ${total} correct.`;
+                // ⭐ Go directly to result view (no review)
+                const scoreDisplay = document.getElementById('score-display');
+                scoreDisplay.innerText = `${percentage}%`;
                 
-                showReview();
+                // Color code the score
+                if (percentage >= 80) {
+                    scoreDisplay.style.color = '#22c55e'; // Green
+                } else if (percentage >= 60) {
+                    scoreDisplay.style.color = '#eab308'; // Yellow
+                } else {
+                    scoreDisplay.style.color = '#ef4444'; // Red
+                }
+                
+                document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
                 
                 document.getElementById('quiz-view').classList.add('hidden');
-                document.getElementById('review-view').classList.remove('hidden');
+                document.getElementById('result-view').classList.remove('hidden');
             })
             .catch(err => {
                 console.error("Submission error:", err);
@@ -527,69 +596,6 @@
                 finishBtn.innerText = "Submit Quiz";
                 finishBtn.disabled = false;
             });
-        }
-
-        function showReview() {
-            const container = document.getElementById('review-container');
-            container.innerHTML = '';
-
-            currentQuizData.forEach((q, index) => {
-                const qDiv = document.createElement('div');
-                qDiv.className = 'question-block';
-
-                const userAnswer = userAnswers[index];
-                const isCorrect = userAnswer && userAnswer.trim() === q.answer.trim();
-                
-                const title = document.createElement('div');
-                title.className = 'q-text';
-                title.innerHTML = `${index + 1}. ${q.question} <span class="correct-indicator ${isCorrect ? 'right' : 'wrong'}">${isCorrect ? '✓' : '✗'}</span>`;
-                qDiv.appendChild(title);
-
-                if(q.video) {
-                    const vidDiv = document.createElement('div');
-                    vidDiv.innerHTML = getVideoHtml(q.video);
-                    qDiv.appendChild(vidDiv);
-                }
-
-                const optsDiv = document.createElement('div');
-                q.options.forEach(optText => {
-                    const btn = document.createElement('button');
-                    btn.className = 'option-btn disabled';
-                    btn.innerText = optText;
-                    
-                    if (optText === userAnswer) {
-                        btn.classList.add(isCorrect ? 'correct' : 'wrong');
-                    }
-                    if (optText === q.answer) {
-                        btn.classList.add('correct');
-                        if (!isCorrect) {
-                            btn.innerHTML += ' <span style="font-size:0.85rem; margin-left:8px;">← Correct Answer</span>';
-                        }
-                    }
-                    
-                    optsDiv.appendChild(btn);
-                });
-                qDiv.appendChild(optsDiv);
-
-                if (q.explanation && q.explanation.trim()) {
-                    const expDiv = document.createElement('div');
-                    expDiv.className = 'explanation';
-                    expDiv.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
-                    qDiv.appendChild(expDiv);
-                }
-
-                container.appendChild(qDiv);
-            });
-        }
-
-        function finalizeQuiz() {
-            const total = currentQuizData.length;
-            const percentage = Math.round((score / total) * 100);
-            
-            document.getElementById('review-view').classList.add('hidden');
-            document.getElementById('result-view').classList.remove('hidden');
-            document.getElementById('score-display').innerText = `${percentage}%`;
-            document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
         }
     </script>
 </body>
