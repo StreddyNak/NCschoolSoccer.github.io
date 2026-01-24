@@ -145,9 +145,9 @@
             margin-top: 2px;
         }
         
-        .col-referee { line-height: 1.4; }
-        .col-referee-name { font-weight: 600; color: #374151; font-size: 13px; }
-        .col-referee-region { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+        .col-referee { line-height: 1.3; }
+        .col-referee-name { font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 3px; }
+        .col-referee-region { font-size: 10px; color: #9ca3af; margin-top: 0; }
         
         /* Meta tags styling - IMPROVED */
         .col-tags { display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-start; }
@@ -238,53 +238,78 @@
             font-style: italic;
         }
         
-        /* Quiz-specific styling */
-.quiz-header { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; }
-.quiz-row { grid-template-columns: 2fr 1.5fr 50px 50px 4fr; align-items: start; }
+        /* Quiz-specific styling - IMPROVED ALIGNMENT */
+        .quiz-header { grid-template-columns: 2fr 1fr 60px 60px 4fr; }
+        .quiz-row { grid-template-columns: 2fr 1fr 60px 60px 4fr; align-items: center; }
 
-/* Scrimmage checkbox styling */
-.scrim-check {
-    font-size: 1.2rem;
-    text-align: center;
-}
-.scrim-check.attended { color: #22c55e; }
-.scrim-check.not-attended { color: #e5e7eb; }
-
-/* Quiz score card styling with color-coded borders */
-.quiz-score-card {
-    background: #f9fafb;
-    padding: 8px 12px;
-    border-radius: 6px;
-    flex: 1;
-    min-width: 160px;
-    max-width: 200px;
-}
-
-/* Green border for 80%+ */
-.quiz-score-card.high { 
-    border-left: 4px solid #22c55e;
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-}
-
-/* Red border for 79% or below */
-.quiz-score-card.low { 
-    border-left: 4px solid #ef4444;
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-}
-
-/* No quiz taken */
-.quiz-score-card.none {
-    border-left: 4px solid #e5e7eb;
-    background: #f9fafb;
-}
-
-        /* Scrimmage checkbox styling */
+        /* Scrimmage checkbox styling - BETTER CENTERED */
         .scrim-check {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             text-align: center;
-}
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
         .scrim-check.attended { color: #22c55e; }
         .scrim-check.not-attended { color: #e5e7eb; }
+
+        /* Quiz score cards - IMPROVED */
+        .quiz-scores-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quiz-score-card {
+            background: #f9fafb;
+            padding: 8px 12px;
+            border-radius: 6px;
+            flex: 0 1 auto;
+            min-width: 140px;
+            max-width: 180px;
+        }
+
+        .quiz-score-card.high { 
+            border-left: 4px solid #22c55e;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        }
+
+        .quiz-score-card.low { 
+            border-left: 4px solid #ef4444;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+
+        .quiz-score-card.none {
+            border-left: 4px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .quiz-name-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .quiz-score-value {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .quiz-score-value.not-taken {
+            color: #9ca3af;
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        .quiz-date {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 3px;
+        }
         
         /* Question Analysis styling */
         .question-header { grid-template-columns: 80px 1fr 120px 150px 2fr; }
@@ -302,26 +327,13 @@
         
         .score-fraction { font-weight: bold; font-size: 1rem; color: #2c3e50; }
         
-        /* Quiz score cards */
-        .quiz-score-card {
-            background: #f9fafb;
-            padding: 8px 12px;
-            border-radius: 6px;
-            flex: 1;
-            min-width: 160px;
-            max-width: 200px;
-        }
-        .quiz-score-card.high { border-left: 4px solid #22c55e; }
-        .quiz-score-card.med { border-left: 4px solid #eab308; }
-        .quiz-score-card.low { border-left: 4px solid #ef4444; }
-        
-        /* Stats Card */
-        .stats-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: none; }
+        /* Stats Card - SMALLER AND MORE COMPACT */
+        .stats-card { background: white; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: none; }
         .stats-card.show { display: block; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .stat-item { text-align: center; padding: 15px; background: #f9fafb; border-radius: 6px; }
-        .stat-value { font-size: 2rem; font-weight: bold; color: #2c3e50; }
-        .stat-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .stat-item { text-align: center; padding: 12px; background: #f9fafb; border-radius: 6px; border-left: 4px solid #2ecc71; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
+        .stat-label { font-size: 0.8rem; color: #666; margin-top: 4px; font-weight: 600; }
         
         /* Impersonation Styles */
         .impersonation-banner { 
@@ -356,7 +368,7 @@
             <a href="index.html" class="nav-link">Home</a>
             <a href="report.html" class="nav-link">CMI Form</a>
             <a href="jersey.html" class="nav-link">Kit Search</a>
-            <a href="eligibility" class="nav-link">Eligibility/Quizzes</a>
+            <a href="eligibility.html" class="nav-link">Eligibility/Quizzes</a>
         </div>
         <a href="admin.html" class="supervisor-link active">🔒 Supervisors</a>
     </div>
@@ -703,7 +715,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Group</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
+                header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
                 populateQuizFilter();
             } else if(currentView === 'questions') {
                 cmiFilters.style.display = 'none';
@@ -909,14 +921,14 @@
                     
                     if (!studentQuizzes[email]) {
                         studentQuizzes[email] = {
-    name: q.name,
-    email: q.email,
-    group: q.group || "Unknown",
-    quizzes: {},
-    scrimmage1: q.scrimmage1 || false,
-    scrimmage2: q.scrimmage2 || false,
-    playoffEligible: q.playoffEligible || false
-};
+                            name: q.name,
+                            email: q.email,
+                            group: q.group || "Unknown",
+                            quizzes: {},
+                            scrimmage1: q.scrimmage1 || false,
+                            scrimmage2: q.scrimmage2 || false,
+                            playoffEligible: q.playoffEligible || false
+                        };
                     }
                     
                     const quizName = q.quiz;
@@ -930,6 +942,15 @@
                         };
                     }
                 });
+                
+                // Get all unique quiz names from the data
+                const allQuizNames = new Set();
+                Object.values(studentQuizzes).forEach(student => {
+                    Object.keys(student.quizzes).forEach(quizName => {
+                        allQuizNames.add(quizName);
+                    });
+                });
+                const sortedAllQuizNames = Array.from(allQuizNames).sort();
                 
                 let filtered = Object.values(studentQuizzes).filter(student => {
                     if (!JSON.stringify(student).toLowerCase().includes(term)) return false;
@@ -954,76 +975,76 @@
                     const div = document.createElement('div');
                     div.className = 'list-row quiz-row';
                     
-                    let quizScoresHtml = '<div style="display: flex; flex-wrap: wrap; gap: 8px;">';
+                    // ⭐ IMPROVED: Build quiz scores HTML - ALWAYS show quiz name
+                    let quizScoresHtml = '<div class="quiz-scores-container">';
                     
-                    const quizNames = Object.keys(student.quizzes).sort();
-                    const quizzesToShow = selectedQuiz ? [selectedQuiz] : quizNames;
+                    const quizzesToShow = selectedQuiz ? [selectedQuiz] : sortedAllQuizNames;
                     
                     quizzesToShow.forEach(quizName => {
-                        if (!student.quizzes[quizName]) return;
-                        
                         const quiz = student.quizzes[quizName];
-                        const p = parseFloat(quiz.percent);
-                        let bClass = 'score-low';
-                        if (p >= 90) bClass = 'score-high';
-                        else if (p >= 70) bClass = 'score-med';
                         
-                        // ⭐ FIX: Calculate percentage correctly from fractional score
-var quizPercent = 0;
-if (quiz.percent && quiz.percent !== '') {
-    quizPercent = parseFloat(quiz.percent);
-}
-
-// If percentage is missing or wrong, calculate from fractional score
-if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
-    var parts = quiz.score.split('/');
-    if (parts.length === 2) {
-        var earned = parseFloat(parts[0]);
-        var total = parseFloat(parts[1]);
-        if (total > 0) {
-            quizPercent = Math.round((earned / total) * 100);
-        }
-    }
-}
-
-// ⭐ NEW: Color-coded border class (80%+ = green, 79% or below = red)
-var borderClass = 'none';
-if (quizPercent >= 80) {
-    borderClass = 'high';
-} else if (quizPercent > 0) {
-    borderClass = 'low';
-}
-
-// ⭐ UPDATED: Quiz card with color border, NO percentage badge
-quizScoresHtml += `
-    <div class="quiz-score-card ${borderClass}">
-        <div style="font-weight: 600; color: #2c3e50; margin-bottom: 3px; font-size: 0.9rem;">${quizName}</div>
-        <div style="font-size: 1rem; font-weight: bold; color: #2c3e50;">${quiz.score || 'Not taken'}</div>
-        <div style="font-size: 0.7rem; color: #999; margin-top: 3px;">${quiz.date || ''}</div>
-    </div>
-`;
+                        if (quiz) {
+                            // Student has taken this quiz
+                            var quizPercent = 0;
+                            if (quiz.percent && quiz.percent !== '') {
+                                quizPercent = parseFloat(quiz.percent);
+                            }
+                            
+                            // If percentage is missing or wrong, calculate from fractional score
+                            if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
+                                var parts = quiz.score.split('/');
+                                if (parts.length === 2) {
+                                    var earned = parseFloat(parts[0]);
+                                    var total = parseFloat(parts[1]);
+                                    if (total > 0) {
+                                        quizPercent = Math.round((earned / total) * 100);
+                                    }
+                                }
+                            }
+                            
+                            var borderClass = 'none';
+                            if (quizPercent >= 80) borderClass = 'high';
+                            else if (quizPercent > 0) borderClass = 'low';
+                            
+                            quizScoresHtml += `
+                                <div class="quiz-score-card ${borderClass}">
+                                    <div class="quiz-name-label">${quizName}</div>
+                                    <div class="quiz-score-value">${quiz.score || 'N/A'}</div>
+                                    <div class="quiz-date">${quiz.date || ''}</div>
+                                </div>
+                            `;
+                        } else {
+                            // Student has NOT taken this quiz
+                            quizScoresHtml += `
+                                <div class="quiz-score-card none">
+                                    <div class="quiz-name-label">${quizName}</div>
+                                    <div class="quiz-score-value not-taken">Not taken</div>
+                                </div>
+                            `;
+                        }
                     });
                     
                     quizScoresHtml += '</div>';
 
-// Add scrimmage checkboxes
-const scrim1Icon = student.scrimmage1 ? '✓' : '○';
-const scrim2Icon = student.scrimmage2 ? '✓' : '○';
-const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
-const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
+                    // ⭐ IMPROVED: Scrimmage checkboxes - better centered
+                    const scrim1Icon = student.scrimmage1 ? '✓' : '○';
+                    const scrim2Icon = student.scrimmage2 ? '✓' : '○';
+                    const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
+                    const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
 
-div.innerHTML = `
-    <div style="font-weight:bold; padding-right: 15px;">
-        ${student.name}
-        <br><small style="font-weight:normal; color:#888;">${student.email}</small>
-    </div>
-    <div style="color:#666; font-size:0.95rem; padding-right: 15px;">
-        <span style="display: inline-block; background: #e5e7eb; padding: 4px 12px; border-radius: 12px; font-weight: 600;">${student.group}</span>
-    </div>
-    <div class="scrim-check ${scrim1Class}">${scrim1Icon}</div>
-    <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
-    ${quizScoresHtml}
-`;
+                    // ⭐ IMPROVED: Name and group alignment
+                    div.innerHTML = `
+                        <div class="col-referee">
+                            <div class="col-referee-name">${student.name}</div>
+                            <div class="col-referee-region">${student.group}</div>
+                        </div>
+                        <div style="color:#666; font-size:0.85rem; padding-right: 10px;">
+                            ${student.email}
+                        </div>
+                        <div class="scrim-check ${scrim1Class}">${scrim1Icon}</div>
+                        <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
+                        ${quizScoresHtml}
+                    `;
                     list.appendChild(div);
                 });
             } else if (currentView === 'questions') {
@@ -1143,6 +1164,7 @@ div.innerHTML = `
             
             let statsHtml = '';
             
+            // Always show total students
             statsHtml += `
                 <div class="stat-item">
                     <div class="stat-value">${filteredData.length}</div>
@@ -1150,7 +1172,9 @@ div.innerHTML = `
                 </div>
             `;
             
+            // Show quiz-specific stats
             if (selectedQuiz) {
+                // Single quiz selected - show attempts for that quiz
                 statsHtml += `
                     <div class="stat-item">
                         <div class="stat-value">${quizCounts[selectedQuiz] || 0}</div>
@@ -1158,6 +1182,7 @@ div.innerHTML = `
                     </div>
                 `;
             } else {
+                // All quizzes - show count for each quiz
                 sortedQuizNames.forEach(quizName => {
                     statsHtml += `
                         <div class="stat-item">
