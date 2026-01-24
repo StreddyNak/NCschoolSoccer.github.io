@@ -136,18 +136,6 @@
         .score-badge { font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 20px; background: #eee; color: #777; }
         .score-badge.good { background: #dcfce7; color: #166534; }
         
-        /* ⭐ NEW: Randomization Badge */
-        .randomization-info {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-        
         /* Questions */
         .question-block { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px; text-align: left; }
         .q-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
@@ -201,12 +189,7 @@
 
         <div id="selection-view" class="hidden">
             <h2 id="welcome-header" style="text-align:center;">Training Quizzes</h2>
-            
-            <!-- ⭐ NEW: Randomization Info -->
-            <div class="randomization-info">
-                Each quiz randomly selects 15 questions and shuffles answer choices for academic integrity
-            </div>
-            
+            <p style="text-align:center; color:#666; margin-bottom:30px;">Select a topic to begin.</p>
             <div id="quiz-list-container"></div>
             <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Logout</button>
         </div>
@@ -217,9 +200,6 @@
             <input type="text" id="firstName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="text" id="lastName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="email" id="userEmail" class="input-field" readonly style="background:#f9f9f9; color:#666;">
-            <p style="font-size: 0.9rem; color: #666; background: #f0f9ff; padding: 12px; border-radius: 6px; border-left: 4px solid #3b82f6;">
-                <strong>Note:</strong> This quiz will show 15 randomly selected questions with shuffled answer choices.
-            </p>
             <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
             <br>
             <button onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">Back</button>
@@ -417,7 +397,7 @@
                 div.innerHTML = `
                     <div class="quiz-info">
                         <span class="quiz-title">${title}</span>
-                        <span class="quiz-meta">${count} questions available • ${questionsShown} shown randomly</span>
+                        <span class="quiz-meta">${questionsShown} Questions</span>
                     </div>
                     ${badgeHtml}
                 `;
