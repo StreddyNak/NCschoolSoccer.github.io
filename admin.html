@@ -311,16 +311,81 @@
             margin-top: 3px;
         }
         
-        /* Question Analysis styling */
-        .question-header { grid-template-columns: 80px 1fr 120px 150px 2fr; }
-        .question-row { grid-template-columns: 80px 1fr 120px 150px 2fr; align-items: start; }
+        /* Question Analysis styling - IMPROVED */
+        .question-header { grid-template-columns: 1fr 120px 2fr; }
+        .question-row { grid-template-columns: 1fr 120px 2fr; align-items: start; }
         .question-text { font-weight: 600; color: #2c3e50; line-height: 1.4; }
-        .success-rate { font-size: 1.2rem; font-weight: bold; }
-        .rate-good { color: #22c55e; }
-        .rate-warning { color: #eab308; }
-        .rate-poor { color: #ef4444; }
+        .success-rate { font-size: 1.2rem; font-weight: bold; color: #374151; }
         .wrong-answers { font-size: 0.85rem; color: #666; margin-top: 5px; }
-        .needs-attention { background: #fef3c7 !important; border-left-color: #eab308 !important; }
+        .lowest-performer { background: #fef3c7 !important; border-left-color: #eab308 !important; }
+        
+        /* Answer breakdown in expanded view */
+        .answer-breakdown {
+            display: none;
+            margin-top: 12px;
+            padding: 15px;
+            background: #fafbfc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            grid-column: 1 / -1;
+        }
+        .list-row.expanded .answer-breakdown { display: block; }
+        
+        .answer-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: white;
+            border-radius: 4px;
+            border-left: 3px solid #e5e7eb;
+        }
+        .answer-item.correct {
+            border-left-color: #22c55e;
+            background: #f0fdf4;
+        }
+        .answer-item.incorrect {
+            border-left-color: #ef4444;
+        }
+        .answer-text {
+            font-weight: 600;
+            color: #374151;
+            flex: 1;
+        }
+        .answer-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .answer-count {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .answer-bar {
+            width: 150px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .answer-bar-fill {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.3s ease;
+        }
+        .answer-bar-fill.correct {
+            background: #22c55e;
+        }
+        .answer-bar-fill.incorrect {
+            background: #ef4444;
+        }
+        .answer-percent {
+            min-width: 45px;
+            text-align: right;
+            font-weight: 600;
+            color: #374151;
+        }
         
         .score-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; display: inline-block; min-width: 60px; }
         .score-high { background: #dcfce7; color: #166534; } .score-med { background: #fef9c3; color: #854d0e; } .score-low { background: #fee2e2; color: #991b1b; }
@@ -724,7 +789,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.remove('show');
                 header.className = 'list-header question-header';
-                header.innerHTML = '<div>Quiz</div><div>Question</div><div style="text-align:center;">Success Rate</div><div style="text-align:center;">Attempts</div><div>Common Mistakes</div>';
+                header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
                 
                 populateQuestionQuizFilter();
             } else {
@@ -1086,36 +1151,106 @@
                     return;
                 }
                 
+                
+                // Find the lowest success rate for highlighting
+                let lowestRate = 100;
                 filtered.forEach(q => {
-                    const rateClass = q.successRate >= 80 ? 'rate-good' : q.successRate >= 60 ? 'rate-warning' : 'rate-poor';
-                    const needsAttention = q.successRate < 70;
+                    if (q.successRate < lowestRate) {
+                        lowestRate = q.successRate;
+                    }
+                });
+                
+                filtered.forEach(q => {
+                    const isLowestPerformer = q.successRate === lowestRate;
                     
                     const div = document.createElement('div');
-                    div.className = `list-row question-row ${needsAttention ? 'needs-attention' : ''}`;
+                    div.className = `list-row question-row ${isLowestPerformer ? 'lowest-performer' : ''}`;
                     
+                    // Build answer breakdown
+                    let answerBreakdownHtml = '<div class="answer-breakdown">';
+                    answerBreakdownHtml += '<div style="font-weight:600; margin-bottom:10px; color:#374151;">Answer Breakdown:</div>';
+                    
+                    // Calculate total responses
+                    const totalResponses = q.totalAttempts;
+                    
+                    // Create array of all answers with their counts
+                    const allAnswers = [];
+                    
+                    // Add correct answer
+                    const correctCount = q.correctAttempts;
+                    const correctPercent = Math.round((correctCount / totalResponses) * 100);
+                    allAnswers.push({
+                        text: q.correctAnswer,
+                        count: correctCount,
+                        percent: correctPercent,
+                        isCorrect: true
+                    });
+                    
+                    // Add wrong answers
+                    if (q.wrongAnswers) {
+                        for (const [answer, count] of Object.entries(q.wrongAnswers)) {
+                            const percent = Math.round((count / totalResponses) * 100);
+                            allAnswers.push({
+                                text: answer,
+                                count: count,
+                                percent: percent,
+                                isCorrect: false
+                            });
+                        }
+                    }
+                    
+                    // Sort by count (most selected first)
+                    allAnswers.sort((a, b) => b.count - a.count);
+                    
+                    // Render answer items
+                    allAnswers.forEach(ans => {
+                        const correctClass = ans.isCorrect ? 'correct' : 'incorrect';
+                        const fillClass = ans.isCorrect ? 'correct' : 'incorrect';
+                        
+                        answerBreakdownHtml += `
+                            <div class="answer-item ${correctClass}">
+                                <div class="answer-text">
+                                    ${ans.text}
+                                    ${ans.isCorrect ? '<span style="color:#22c55e; margin-left:8px;">✓ Correct</span>' : ''}
+                                </div>
+                                <div class="answer-stats">
+                                    <div class="answer-count">${ans.count} ${ans.count === 1 ? 'student' : 'students'}</div>
+                                    <div class="answer-bar">
+                                        <div class="answer-bar-fill ${fillClass}" style="width: ${ans.percent}%"></div>
+                                    </div>
+                                    <div class="answer-percent">${ans.percent}%</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    answerBreakdownHtml += '</div>';
+                    
+                    // Build wrong answers summary (only most common incorrect)
                     let wrongAnswersHtml = '';
                     if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
-                        wrongAnswersHtml = `<div class="wrong-answers">Most common: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
+                        wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
                     }
                     
                     div.innerHTML = `
-                        <div style="font-weight:bold; color:#2c3e50; font-size:1.1rem;">Q${q.questionNumber}</div>
                         <div class="question-text">${q.questionText}</div>
                         <div style="text-align:center;">
-                            <div class="success-rate ${rateClass}">${q.successRate}%</div>
-                            <div style="font-size:0.75rem; color:#999; margin-top:3px;">
-                                ${needsAttention ? '⚠️ Needs Review' : q.successRate >= 80 ? '✓ Good' : '~ OK'}
-                            </div>
-                        </div>
-                        <div style="text-align:center; color:#666;">
-                            <div style="font-weight:600;">${q.correctAttempts}/${q.totalAttempts}</div>
-                            <div style="font-size:0.75rem; color:#999;">${q.correctAttempts} correct</div>
+                            <div class="success-rate">${q.successRate}%</div>
                         </div>
                         <div>
                             <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
                             ${wrongAnswersHtml}
                         </div>
+                        ${answerBreakdownHtml}
                     `;
+                    
+                    // Add click handler to expand/collapse
+                    div.onclick = function(e) {
+                        // Don't collapse if clicking on links
+                        if (e.target.tagName === 'A') return;
+                        div.classList.toggle('expanded');
+                    };
+                    
                     list.appendChild(div);
                 });
             }
