@@ -23,7 +23,7 @@
         
         .supervisor-link {
             position: absolute;
-            right: 0;
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
             text-decoration: none;
@@ -239,8 +239,8 @@
         }
         
         /* Quiz-specific styling - IMPROVED ALIGNMENT */
-        .quiz-header { grid-template-columns: 2fr 1fr 60px 60px 4fr; }
-        .quiz-row { grid-template-columns: 2fr 1fr 60px 60px 4fr; align-items: center; }
+        .quiz-header { grid-template-columns: 2fr 60px 60px 4fr; }
+        .quiz-row { grid-template-columns: 2fr 60px 60px 4fr; align-items: center; }
 
         /* Scrimmage checkbox styling - BETTER CENTERED */
         .scrim-check {
@@ -780,7 +780,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
+                header.innerHTML = '<div>Referee Name</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
                 populateQuizFilter();
             } else if(currentView === 'questions') {
                 cmiFilters.style.display = 'none';
@@ -1097,14 +1097,12 @@
                     const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
                     const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
 
-                    // ⭐ IMPROVED: Name and group alignment
+                    // ⭐ IMPROVED: Name, email, and group together
                     div.innerHTML = `
                         <div class="col-referee">
                             <div class="col-referee-name">${student.name}</div>
+                            <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">${student.email}</div>
                             <div class="col-referee-region">${student.group}</div>
-                        </div>
-                        <div style="color:#666; font-size:0.85rem; padding-right: 10px;">
-                            ${student.email}
                         </div>
                         <div class="scrim-check ${scrim1Class}">${scrim1Icon}</div>
                         <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
@@ -1289,6 +1287,9 @@
             const quizCounts = {};
             filteredData.forEach(student => {
                 Object.keys(student.quizzes).forEach(quizName => {
+                    // Skip empty or whitespace-only quiz names
+                    if (!quizName || !quizName.trim()) return;
+                    
                     if (!selectedQuiz || selectedQuiz === quizName) {
                         quizCounts[quizName] = (quizCounts[quizName] || 0) + 1;
                     }
@@ -1303,7 +1304,7 @@
             statsHtml += `
                 <div class="stat-item">
                     <div class="stat-value">${filteredData.length}</div>
-                    <div class="stat-label">Total Students</div>
+                    <div class="stat-label">Referees</div>
                 </div>
             `;
             
