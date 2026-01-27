@@ -257,7 +257,22 @@
         
         /* Quiz-specific styling */
         .quiz-header { grid-template-columns: 2fr 1.5fr 60px 60px 4fr; }
-        .quiz-row { grid-template-columns: 2fr 1.5fr 60px 60px 4fr; align-items: center; }
+        .quiz-row { 
+            grid-template-columns: 2fr 1.5fr 60px 60px 4fr; 
+            align-items: center;
+            cursor: default; /* Not clickable on desktop */
+        }
+        
+        /* Desktop: Hide the mobile attendance row */
+        .quiz-attendance-row {
+            display: none;
+        }
+        
+        /* Desktop: Show scrimmage columns */
+        .quiz-row > div:nth-child(4),
+        .quiz-row > div:nth-child(5) {
+            display: flex;
+        }
 
         /* Scrimmage checkbox styling */
         .scrim-check {
@@ -565,29 +580,90 @@
                 grid-template-columns: 1fr;
                 gap: 12px;
                 padding: 15px;
+                cursor: pointer;
+                transition: background-color 0.2s;
             }
-            .quiz-row > div {
-                padding: 8px 0;
-            }
-            /* Add labels for mobile quiz view */
-            .quiz-row > .col-referee::before { content: "Referee: "; }
-            .quiz-row > div:nth-child(2)::before { content: "Email: "; font-weight: 700; color: #6b7280; display: block; margin-bottom: 4px; }
             
-            /* Scrimmage section on mobile */
-            .scrim-check {
-                display: inline-flex;
-                margin-right: 20px;
-                font-size: 1.2rem;
+            /* Mobile: Add tap feedback */
+            .quiz-row:active {
+                background-color: #f9fafb;
             }
-            .scrim-check::before {
-                content: "Scrimmage ";
+            
+            /* Mobile: Show only name by default */
+            .quiz-row > div {
+                display: none; /* Hide all by default */
+            }
+            .quiz-row > .col-referee {
+                display: block; /* Always show referee name */
+                padding: 0;
+                border-bottom: none;
+            }
+            
+            /* Mobile: Hide the desktop scrimmage columns (4th and 5th child) */
+            .quiz-row > div:nth-child(4),
+            .quiz-row > div:nth-child(5) {
+                display: none !important;
+            }
+            
+            /* Mobile: Show expand indicator */
+            .quiz-row > .col-referee::after {
+                content: " ▼";
+                font-size: 0.7rem;
+                color: #9ca3af;
+                margin-left: 8px;
+                transition: transform 0.2s;
+            }
+            .quiz-row.expanded > .col-referee::after {
+                content: " ▲";
+                color: #2ecc71;
+            }
+            
+            /* Mobile: Show specific content when expanded */
+            .quiz-row.expanded > div:nth-child(2) {
+                display: block;
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .quiz-row.expanded > div:nth-child(2)::before { 
+                content: "Email: "; 
+                font-weight: 700; 
+                color: #6b7280; 
+                display: inline; 
+                margin-right: 4px; 
+            }
+            
+            /* Scrimmage attendance row */
+            .quiz-attendance-row {
+                display: none;
+                padding: 10px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .quiz-row.expanded .quiz-attendance-row {
+                display: flex;
+                gap: 30px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .quiz-attendance-row strong {
                 font-weight: 700;
                 color: #6b7280;
-                font-size: 0.85rem;
-                margin-right: 8px;
+                font-size: 0.9rem;
+                width: 100%;
+                margin-bottom: 5px;
             }
-            .quiz-row > div:nth-child(3)::before { content: "S1: "; }
-            .quiz-row > div:nth-child(4)::before { content: "S2: "; }
+            .quiz-attendance-row > div {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            
+            /* Scrimmage section on mobile - inline style */
+            .scrim-check {
+                display: inline-flex;
+                font-size: 1.2rem;
+                align-items: center;
+                gap: 6px;
+            }
             
             .quiz-scores-container {
                 flex-direction: column;
@@ -595,6 +671,10 @@
                 border-top: 1px solid #e5e7eb;
                 padding-top: 12px;
                 margin-top: 8px;
+                display: none; /* Hidden by default */
+            }
+            .quiz-row.expanded .quiz-scores-container {
+                display: flex; /* Show when expanded */
             }
             .quiz-scores-container::before {
                 content: "Quiz Scores:";
@@ -1330,6 +1410,14 @@
                     const div = document.createElement('div');
                     div.className = 'list-row quiz-row';
                     
+                    // Add click handler for mobile expand/collapse
+                    div.onclick = function(e) {
+                        // Only toggle on mobile (screen width < 768px)
+                        if (window.innerWidth < 768) {
+                            div.classList.toggle('expanded');
+                        }
+                    };
+                    
                     // Build quiz scores HTML
                     let quizScoresHtml = '<div class="quiz-scores-container">';
                     
@@ -1402,8 +1490,19 @@
                         <div style="color:#666; font-size:0.85rem; padding-right: 10px;">
                             ${student.email}
                         </div>
-                        <div class="scrim-check ${scrim1Class}">${scrim1Icon}</div>
-                        <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
+                        <div class="quiz-attendance-row">
+                            <strong>Attendance:</strong>
+                            <div>
+                                <span style="font-size:0.85rem; color:#666; margin-right:4px;">S1:</span>
+                                <span class="scrim-check ${scrim1Class}">${scrim1Icon}</span>
+                            </div>
+                            <div>
+                                <span style="font-size:0.85rem; color:#666; margin-right:4px;">S2:</span>
+                                <span class="scrim-check ${scrim2Class}">${scrim2Icon}</span>
+                            </div>
+                        </div>
+                        <div class="scrim-check ${scrim1Class}" style="display:none;">${scrim1Icon}</div>
+                        <div class="scrim-check ${scrim2Class}" style="display:none;">${scrim2Icon}</div>
                         ${quizScoresHtml}
                     `;
                     list.appendChild(div);
