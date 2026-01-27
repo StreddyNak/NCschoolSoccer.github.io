@@ -5,102 +5,347 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Referee Portal</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; text-align: center; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #f4f6f8; 
+            margin: 0; 
+            padding: 0; 
+            color: #333; 
+        }
         
-        /* Navigation Menu - Updated for "Upper Right" Login */
-        .nav-bar { 
-            position: relative; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            margin-bottom: 40px; 
-            padding: 10px 0;
-        }
-
-        /* Center Group for Main Tools */
-        .nav-center {
+        /* Partnership Header */
+        .partnership-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 15px 20px;
             display: flex;
-            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 16px; transition: 0.2s; }
-        .nav-link:hover { background-color: #e5e7eb; color: #111827; }
-        .nav-link.active { background-color: #2ecc71; color: white; }
-
-        /* Supervisor Login - Pushed to Far Right */
-        .supervisor-link {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            text-decoration: none;
-            color: #2c3e50;
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .partnership-text {
+            color: white;
             font-size: 0.9rem;
             font-weight: 600;
-            border: 1px solid #d1d5db;
-            padding: 6px 12px;
-            border-radius: 4px;
-            background: white;
-            transition: all 0.2s;
+            text-align: center;
+            padding: 0 10px;
         }
-        .supervisor-link:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            text-align: center; 
+        }
+        
+        /* Navigation Menu - Improved Mobile */
+        .nav-bar { 
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        h1 { margin-bottom: 10px; color: #2c3e50; }
-        p { margin-bottom: 40px; color: #7f8c8d; font-size: 1.1rem; }
+        /* Main Navigation */
+        .nav-center {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link { 
+            text-decoration: none; 
+            color: #4b5563; 
+            font-weight: 600; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 2px solid transparent;
+        }
+        
+        .nav-link:hover { 
+            background-color: #e5e7eb; 
+            color: #111827; 
+        }
+        
+        .nav-link.active { 
+            background-color: #2ecc71; 
+            color: white;
+            border-color: #27ae60;
+        }
+
+        /* Supervisor Section - Improved */
+        .supervisor-section {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .supervisor-label {
+            color: #6b7280;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .supervisor-link {
+            text-decoration: none;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+        }
+        
+        .supervisor-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
+        }
+        
+        .supervisor-link:active {
+            transform: translateY(0);
+        }
+
+        /* Header Content */
+        h1 { 
+            margin: 30px 0 10px 0; 
+            color: #2c3e50; 
+            font-size: 2.5rem;
+            line-height: 1.2;
+        }
+        
+        .subtitle { 
+            margin-bottom: 40px; 
+            color: #7f8c8d; 
+            font-size: 1.1rem; 
+        }
 
         /* Card Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; text-align: left; }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+            text-align: left;
+            margin-bottom: 40px;
+        }
         
         .card { 
-            background: white; border-radius: 12px; padding: 30px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-decoration: none; color: inherit; 
-            transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #eee; display: flex; flex-direction: column;
+            background: white; 
+            border-radius: 12px; 
+            padding: 30px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            text-decoration: none; 
+            color: inherit; 
+            transition: all 0.3s ease; 
+            border: 2px solid #eee; 
+            display: flex; 
+            flex-direction: column;
         }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-color: #2ecc71; }
         
-        .card h2 { margin: 0 0 10px 0; color: #2c3e50; font-size: 1.4rem; }
-        .card p { margin: 0; font-size: 0.95rem; color: #666; line-height: 1.5; }
-        .icon { font-size: 2rem; margin-bottom: 15px; display: block; }
+        .card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            border-color: #2ecc71; 
+        }
+        
+        .card h2 { 
+            margin: 0 0 10px 0; 
+            color: #2c3e50; 
+            font-size: 1.4rem; 
+        }
+        
+        .card p { 
+            margin: 0; 
+            font-size: 0.95rem; 
+            color: #666; 
+            line-height: 1.6; 
+        }
+        
+        .icon { 
+            font-size: 2.5rem; 
+            margin-bottom: 15px; 
+            display: block; 
+        }
 
-        /* Mobile Adjust */
-        @media (max-width: 800px) {
-            .nav-bar { flex-direction: column; gap: 15px; }
-            .supervisor-link { position: static; transform: none; margin-left: auto; }
-            .nav-center { flex-wrap: wrap; justify-content: center; }
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 40px;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .partnership-header {
+                padding: 10px 15px;
+                gap: 15px;
+            }
+            
+            .logo-img {
+                height: 40px;
+            }
+            
+            .partnership-text {
+                font-size: 0.8rem;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+                margin: 20px 0 10px 0;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+            
+            .nav-bar {
+                padding: 15px;
+                gap: 12px;
+            }
+            
+            .nav-center {
+                gap: 8px;
+            }
+            
+            .nav-link {
+                padding: 10px 16px;
+                font-size: 14px;
+                flex: 1 1 auto;
+                text-align: center;
+                min-width: calc(50% - 4px);
+            }
+            
+            .supervisor-section {
+                padding-top: 12px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .supervisor-link {
+                width: 100%;
+                justify-content: center;
+                padding: 12px 20px;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .card {
+                padding: 25px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            h1 {
+                font-size: 1.75rem;
+            }
+            
+            .nav-link {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Partnership Header with Logos -->
+    <div class="partnership-header">
+        <div class="logo-container">
+            <!-- Replace 'assets/logo1.png' with your actual image path -->
+            <img src="assets/NickNak logo.svg" alt="Organization 1" class="logo-img" onerror="this.style.display='none'">
+        </div>
+        <div class="partnership-text">
+            A Partnership Initiative
+        </div>
+        <div class="logo-container">
+            <!-- Replace 'assets/logo2.png' with your actual image path -->
+            <img src="TSOA logo svg.svg" alt="Organization 2" class="logo-img" onerror="this.style.display='none'">
+        </div>
+    </div>
+
     <div class="container">
-        <div class="nav-bar">
+        <!-- Navigation -->
+        <nav class="nav-bar">
             <div class="nav-center">
                 <span class="nav-link active">Home</span>
                 <a href="report.html" class="nav-link">CMI Form</a>
                 <a href="jersey.html" class="nav-link">Kit Search</a>
                 <a href="eligibility.html" class="nav-link">Eligibility/Quizzes</a>
             </div>
+            
+            <div class="supervisor-section">
+                <span class="supervisor-label">For Supervisors:</span>
+                <a href="admin.html" class="supervisor-link">
+                    <span>🔒</span>
+                    <span>Supervisor Portal</span>
+                </a>
+            </div>
+        </nav>
 
-            <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
-        </div>
-
+        <!-- Main Content -->
         <h1>Referee Resource Hub</h1>
-        <p>Select a tool below to get started.</p>
+        <p class="subtitle">Select a tool below to get started.</p>
 
         <div class="grid">
             <a href="report.html" class="card">
                 <span class="icon">📝</span>
                 <h2>CMI Report Form</h2>
-                <p>Submit post-game Critical Match Incident reports for review.</p>
+                <p>Submit the 2026 Girl's Critical Match Incident reports</p>
             </a>
 
             <a href="jersey.html" class="card">
                 <span class="icon">👕</span>
                 <h2>Kit Search</h2>
-                <p>Check home and away jersey colors for upcoming matches.</p>
+                <p>Check home and away jersey colors for upcoming matches</p>
             </a>
 
             <a href="eligibility.html" class="card">
@@ -108,11 +353,12 @@
                 <h2>Eligibility & Quizzes</h2>
                 <p>Review your eligibility and take your quizzes here</p>
             </a>
-            
-            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Triangle Soccer Officials Association &amp; NickNak Productions</p>
+            <p>© 2026 All Rights Reserved</p>
+        </div>
     </div>
 </body>
 </html>
-
-
-
