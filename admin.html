@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Supervisor Portal</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; font-size: 14px; }
@@ -16,8 +17,8 @@
             margin-bottom: 40px; 
             padding: 10px 0;
         }
-        .nav-center { display: flex; gap: 20px; }
-        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: 0.2s; }
+        .nav-center { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 14px; transition: 0.2s; white-space: nowrap; }
         .nav-link:hover { background-color: #e5e7eb; color: #111827; }
         .nav-link.active { background-color: #2ecc71; color: white; }
         
@@ -38,12 +39,6 @@
         }
         .supervisor-link:hover { background: #f3f4f6; border-color: #9ca3af; }
         .supervisor-link.active { background: #2ecc71; color: white; border-color: #2ecc71; }
-        
-        @media (max-width: 800px) {
-            .nav-bar { flex-direction: column; gap: 15px; }
-            .supervisor-link { position: static; transform: none; margin-left: auto; }
-            .nav-center { flex-wrap: wrap; justify-content: center; }
-        }
         
         #login-view { max-width: 400px; margin: 60px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
         .hidden { display: none !important; }
@@ -85,7 +80,7 @@
         .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); align-items: center; flex-wrap: wrap; }
         .search-input { flex-grow: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; min-width: 200px; font-size: 13px; }
         
-        /* List Styles - IMPROVED */
+        /* List Styles */
         .list-header { 
             display: grid; 
             padding: 8px 15px; 
@@ -124,7 +119,7 @@
             box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         }
         
-        /* CMI-specific styling - NEW LAYOUT */
+        /* CMI-specific styling */
         .cmi-header { grid-template-columns: 100px 2fr 1.5fr 2fr 2fr 100px; }
         .cmi-row { grid-template-columns: 100px 2fr 1.5fr 2fr 2fr 100px; }
         
@@ -149,7 +144,7 @@
         .col-referee-name { font-weight: 600; color: #374151; font-size: 13px; margin-bottom: 3px; }
         .col-referee-region { font-size: 10px; color: #9ca3af; margin-top: 0; }
         
-        /* Meta tags styling - IMPROVED */
+        /* Meta tags styling */
         .col-tags { display: flex; flex-wrap: wrap; gap: 4px; align-items: flex-start; }
         .meta-tag { 
             display: inline-block; 
@@ -193,7 +188,7 @@
         .video-link:hover { background: #2563eb; }
         .video-none { color: #d1d5db; font-size: 11px; }
         
-        /* Detail View - NEW */
+        /* Detail View */
         .detail-view {
             display: none;
             margin-top: 12px;
@@ -238,11 +233,11 @@
             font-style: italic;
         }
         
-        /* Quiz-specific styling - IMPROVED ALIGNMENT */
+        /* Quiz-specific styling */
         .quiz-header { grid-template-columns: 2fr 1.5fr 60px 60px 4fr; }
         .quiz-row { grid-template-columns: 2fr 1.5fr 60px 60px 4fr; align-items: center; }
 
-        /* Scrimmage checkbox styling - BETTER CENTERED */
+        /* Scrimmage checkbox styling */
         .scrim-check {
             font-size: 1.4rem;
             text-align: center;
@@ -254,7 +249,7 @@
         .scrim-check.attended { color: #22c55e; }
         .scrim-check.not-attended { color: #e5e7eb; }
 
-        /* Quiz score cards - IMPROVED */
+        /* Quiz score cards */
         .quiz-scores-container {
             display: flex;
             flex-wrap: wrap;
@@ -311,7 +306,18 @@
             margin-top: 3px;
         }
         
-        /* Question Analysis styling - IMPROVED */
+        /* NEW: Attempt count badge */
+        .attempt-count {
+            font-size: 0.75rem;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        
+        /* Question Analysis styling */
         .question-header { grid-template-columns: 1fr 120px 2fr; }
         .question-row { grid-template-columns: 1fr 120px 2fr; align-items: start; }
         .question-text { font-weight: 600; color: #2c3e50; line-height: 1.4; }
@@ -387,18 +393,37 @@
             color: #374151;
         }
         
-        .score-badge { padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 0.9rem; text-align: center; display: inline-block; min-width: 60px; }
-        .score-high { background: #dcfce7; color: #166534; } .score-med { background: #fef9c3; color: #854d0e; } .score-low { background: #fee2e2; color: #991b1b; }
-        
-        .score-fraction { font-weight: bold; font-size: 1rem; color: #2c3e50; }
-        
-        /* Stats Card - SMALLER AND MORE COMPACT */
+        /* Stats Card */
         .stats-card { background: white; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: none; }
         .stats-card.show { display: block; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
         .stat-item { text-align: center; padding: 12px; background: #f9fafb; border-radius: 6px; border-left: 4px solid #2ecc71; }
         .stat-value { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
         .stat-label { font-size: 0.8rem; color: #666; margin-top: 4px; font-weight: 600; }
+        
+        /* NEW: Quiz Detail Stats */
+        .quiz-detail-stats {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .quiz-detail-stats.show { display: block; }
+        .quiz-detail-stats h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        .quiz-detail-stats p {
+            margin: 5px 0;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+        .quiz-detail-stats strong {
+            color: #166534;
+        }
         
         /* Impersonation Styles */
         .impersonation-banner { 
@@ -423,6 +448,209 @@
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ========== MOBILE RESPONSIVE STYLES ========== */
+        @media (max-width: 800px) {
+            .nav-bar { flex-direction: column; gap: 15px; }
+            .supervisor-link { 
+                position: static; 
+                transform: none; 
+                margin: 0 auto;
+                display: block;
+                text-align: center;
+            }
+            .nav-center { flex-wrap: wrap; justify-content: center; }
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 10px; font-size: 13px; }
+            .container { max-width: 100%; }
+            
+            .header { flex-direction: column; gap: 15px; align-items: stretch; }
+            .header button { width: 100%; }
+            
+            .filter-bar { 
+                flex-direction: column; 
+                align-items: stretch; 
+                gap: 12px;
+            }
+            .search-input { min-width: 100%; }
+            #cmi-filters, #quiz-filters, #question-filters { 
+                flex-direction: column; 
+                align-items: stretch;
+                width: 100%;
+            }
+            #cmi-filters select, #quiz-filters select, #question-filters select {
+                width: 100%;
+            }
+            #cmi-filters label, #quiz-filters label, #question-filters label {
+                width: 100%;
+                display: block;
+                padding: 10px;
+                background: #f9fafb;
+                border-radius: 6px;
+                text-align: center;
+            }
+            
+            .season-nav { 
+                gap: 6px;
+                justify-content: center;
+            }
+            .season-btn { 
+                padding: 8px 12px; 
+                font-size: 12px;
+                flex: 1 1 auto;
+                min-width: calc(50% - 3px);
+            }
+            
+            /* Mobile CMI Layout - Stack vertically */
+            .cmi-header { 
+                display: none; /* Hide header on mobile */
+            }
+            .cmi-row { 
+                grid-template-columns: 1fr;
+                gap: 8px;
+                padding: 15px;
+            }
+            .cmi-row > div {
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .cmi-row > div:last-child {
+                border-bottom: none;
+            }
+            /* Add labels for mobile */
+            .col-date::before { content: "Date: "; font-weight: 700; color: #6b7280; }
+            .col-match::before { content: "Match: "; font-weight: 700; color: #6b7280; display: block; }
+            .col-referee::before { content: "Referee: "; font-weight: 700; color: #6b7280; display: block; }
+            .col-tags::before { content: "Tags: "; font-weight: 700; color: #6b7280; display: block; margin-bottom: 6px; }
+            .col-moderator-notes::before { content: "Notes: "; font-weight: 700; color: #6b7280; display: block; margin-bottom: 4px; }
+            .col-video::before { content: "Video: "; font-weight: 700; color: #6b7280; display: block; margin-bottom: 6px; }
+            .col-video { text-align: left; }
+            
+            /* Mobile Quiz Layout */
+            .quiz-header { display: none; }
+            .quiz-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 15px;
+            }
+            .quiz-row > div {
+                padding: 8px 0;
+            }
+            /* Add labels for mobile quiz view */
+            .quiz-row > .col-referee::before { content: "Referee: "; }
+            .quiz-row > div:nth-child(2)::before { content: "Email: "; font-weight: 700; color: #6b7280; display: block; margin-bottom: 4px; }
+            
+            /* Scrimmage section on mobile */
+            .scrim-check {
+                display: inline-flex;
+                margin-right: 20px;
+                font-size: 1.2rem;
+            }
+            .scrim-check::before {
+                content: "Scrimmage ";
+                font-weight: 700;
+                color: #6b7280;
+                font-size: 0.85rem;
+                margin-right: 8px;
+            }
+            .quiz-row > div:nth-child(3)::before { content: "S1: "; }
+            .quiz-row > div:nth-child(4)::before { content: "S2: "; }
+            
+            .quiz-scores-container {
+                flex-direction: column;
+                gap: 10px;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 12px;
+                margin-top: 8px;
+            }
+            .quiz-scores-container::before {
+                content: "Quiz Scores:";
+                font-weight: 700;
+                color: #6b7280;
+                display: block;
+                margin-bottom: 8px;
+            }
+            .quiz-score-card {
+                max-width: 100%;
+                min-width: 100%;
+            }
+            
+            /* Mobile Question Layout */
+            .question-header { display: none; }
+            .question-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 15px;
+            }
+            .question-row > div:first-child::before {
+                content: "Question: ";
+                font-weight: 700;
+                color: #6b7280;
+                display: block;
+                margin-bottom: 6px;
+            }
+            .question-row > div:nth-child(2)::before {
+                content: "Success Rate: ";
+                font-weight: 700;
+                color: #6b7280;
+                display: block;
+                margin-bottom: 6px;
+            }
+            
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            .stat-item { padding: 10px; }
+            .stat-value { font-size: 1.3rem; }
+            
+            .impersonation-banner {
+                flex-direction: column;
+                gap: 12px;
+                align-items: stretch;
+                text-align: center;
+            }
+            .impersonation-banner button {
+                width: 100%;
+            }
+            
+            .master-controls {
+                padding: 12px;
+            }
+            .master-controls > div {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .master-controls select {
+                min-width: 100%;
+            }
+            
+            .answer-stats {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .answer-bar {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body { font-size: 12px; padding: 5px; }
+            .season-btn { 
+                font-size: 11px;
+                padding: 6px 10px;
+            }
+            .list-row { padding: 12px; }
+            .meta-tag { font-size: 10px; }
+            .nav-link { font-size: 13px; padding: 8px 12px; }
         }
     </style>
 </head>
@@ -529,6 +757,13 @@
             <div class="stats-grid" id="stats-grid"></div>
         </div>
 
+        <!-- NEW: Quiz Detail Stats -->
+        <div class="quiz-detail-stats" id="quiz-detail-stats">
+            <h4 id="quiz-stats-title">Quiz Statistics</h4>
+            <p><strong id="unique-referees">0</strong> unique referees have taken this quiz</p>
+            <p>Quiz has been taken a total of <strong id="total-attempts">0</strong> times</p>
+        </div>
+
         <div class="list-header cmi-header" id="list-header">
             <div>Date</div>
             <div>Match</div>
@@ -577,22 +812,13 @@
             loginBtn.disabled = true;
             loginBtn.textContent = 'Signing In...';
             
-            console.log("Attempting login with email:", email);
-            
-            // Send email and password to backend
             fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=Current`)
             .then(res => {
-                console.log("Response received:", res.status);
                 statusDiv.textContent = '🔄 Loading data...';
                 return res.json();
             })
             .then(resp => {
-                console.log("Response data:", resp);
-                
                 if (resp.status === 'success') {
-                    console.log("Login successful!");
-                    console.log("CMI data count:", resp.data ? resp.data.length : 0);
-                    
                     statusDiv.textContent = '✅ Success! Loading dashboard...';
                     
                     setTimeout(() => {
@@ -607,10 +833,6 @@
                     quizData = resp.quizzes || [];
                     questionStats = resp.questionStats || [];
                     
-                    console.log("CMI data loaded:", cmiData.length, "reports");
-                    console.log("Quiz data loaded:", quizData.length, "results");
-                    console.log("Question stats loaded:", questionStats.length, "questions");
-                    
                     if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
                         document.getElementById('master-controls').classList.remove('hidden');
                         populateSupervisorList();
@@ -619,8 +841,6 @@
                     populateMetaTagFilter();
                     applyFilters();
                 } else {
-                    console.error("Login failed:", resp.message || "Access denied");
-                    
                     loginBtn.disabled = false;
                     loginBtn.textContent = 'Sign In';
                     
@@ -662,32 +882,18 @@
                 return;
             }
             
-            console.log("Fetching data for season:", season);
-            
             fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=${season}`)
-            .then(res => {
-                console.log("Response received:", res.status);
-                return res.json();
-            })
+            .then(res => res.json())
             .then(resp => {
-                console.log("Response data:", resp);
-                
                 if (resp.status === 'success') {
-                    console.log("Data fetch successful!");
-                    
                     actualSupervisor = resp.supervisor;
                     cmiData = resp.data || [];
                     quizData = resp.quizzes || [];
                     questionStats = resp.questionStats || [];
                     
-                    console.log("CMI data loaded:", cmiData.length, "reports");
-                    console.log("Quiz data loaded:", quizData.length, "results");
-                    console.log("Question stats loaded:", questionStats.length, "questions");
-                    
                     populateMetaTagFilter();
                     applyFilters();
                 } else {
-                    console.error("Data fetch failed:", resp.message);
                     alert("Session expired. Please log in again.");
                     location.reload();
                 }
@@ -772,6 +978,7 @@
             const seasonNav = document.getElementById('season-nav');
             const header = document.getElementById('list-header');
             const statsCard = document.getElementById('stats-card');
+            const quizDetailStats = document.getElementById('quiz-detail-stats');
 
             if(currentView === 'quiz') {
                 cmiFilters.style.display = 'none';
@@ -779,6 +986,7 @@
                 questionFilters.style.display = 'none';
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
+                quizDetailStats.classList.remove('show');
                 header.className = 'list-header quiz-header';
                 header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
                 populateQuizFilter();
@@ -788,6 +996,7 @@
                 questionFilters.style.display = 'flex';
                 seasonNav.style.display = 'none';
                 statsCard.classList.remove('show');
+                quizDetailStats.classList.remove('show');
                 header.className = 'list-header question-header';
                 header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
                 
@@ -798,6 +1007,7 @@
                 questionFilters.style.display = 'none';
                 seasonNav.style.display = 'flex';
                 statsCard.classList.remove('show');
+                quizDetailStats.classList.remove('show');
                 header.className = 'list-header cmi-header';
                 header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div>Tags</div><div>Moderator Notes</div><div style="text-align:center;">Video</div>';
             }
@@ -966,8 +1176,6 @@
                     list.appendChild(div);
                 });
             } else if (currentView === 'quiz') {
-                console.log("Quiz Data Received:", quizData);
-                
                 if (!quizData || quizData.length === 0) {
                     list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p></div>';
                     document.getElementById('stats-grid').innerHTML = '';
@@ -999,13 +1207,38 @@
                     const quizName = q.quiz;
                     const percent = parseFloat(q.percent) || 0;
                     
-                    if (!studentQuizzes[email].quizzes[quizName] || percent > parseFloat(studentQuizzes[email].quizzes[quizName].percent)) {
+                    // Track ALL attempts for each quiz
+                    if (!studentQuizzes[email].quizzes[quizName]) {
                         studentQuizzes[email].quizzes[quizName] = {
-                            score: q.score,
-                            percent: q.percent,
-                            date: q.date
+                            attempts: []
                         };
                     }
+                    
+                    studentQuizzes[email].quizzes[quizName].attempts.push({
+                        score: q.score,
+                        percent: q.percent,
+                        date: q.date
+                    });
+                });
+                
+                // Calculate best attempt for each quiz
+                Object.values(studentQuizzes).forEach(student => {
+                    Object.keys(student.quizzes).forEach(quizName => {
+                        const attempts = student.quizzes[quizName].attempts;
+                        
+                        // Find best attempt
+                        let bestAttempt = attempts[0];
+                        attempts.forEach(attempt => {
+                            const currentPercent = parseFloat(attempt.percent) || 0;
+                            const bestPercent = parseFloat(bestAttempt.percent) || 0;
+                            if (currentPercent > bestPercent) {
+                                bestAttempt = attempt;
+                            }
+                        });
+                        
+                        student.quizzes[quizName].best = bestAttempt;
+                        student.quizzes[quizName].attemptCount = attempts.length;
+                    });
                 });
                 
                 // Get all unique quiz names from the data (skip empty names)
@@ -1032,7 +1265,7 @@
                     return true;
                 }).sort((a, b) => a.name.localeCompare(b.name));
                 
-                updateQuizStats(filtered, selectedQuiz);
+                updateQuizStats(filtered, selectedQuiz, studentQuizzes);
                 
                 if (filtered.length === 0) {
                     list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
@@ -1043,7 +1276,7 @@
                     const div = document.createElement('div');
                     div.className = 'list-row quiz-row';
                     
-                    // ⭐ IMPROVED: Build quiz scores HTML - ALWAYS show quiz name
+                    // Build quiz scores HTML
                     let quizScoresHtml = '<div class="quiz-scores-container">';
                     
                     const quizzesToShow = selectedQuiz ? [selectedQuiz] : sortedAllQuizNames;
@@ -1052,10 +1285,13 @@
                         // Skip empty quiz names
                         if (!quizName || !quizName.trim()) return;
                         
-                        const quiz = student.quizzes[quizName];
+                        const quizData = student.quizzes[quizName];
                         
-                        if (quiz) {
+                        if (quizData && quizData.best) {
                             // Student has taken this quiz
+                            const quiz = quizData.best;
+                            const attemptCount = quizData.attemptCount;
+                            
                             var quizPercent = 0;
                             if (quiz.percent && quiz.percent !== '') {
                                 quizPercent = parseFloat(quiz.percent);
@@ -1082,6 +1318,7 @@
                                     <div class="quiz-name-label">${quizName}</div>
                                     <div class="quiz-score-value">${quiz.score || 'N/A'}</div>
                                     <div class="quiz-date">${quiz.date || ''}</div>
+                                    <div class="attempt-count">${attemptCount} attempt${attemptCount > 1 ? 's' : ''}</div>
                                 </div>
                             `;
                         } else {
@@ -1097,13 +1334,12 @@
                     
                     quizScoresHtml += '</div>';
 
-                    // ⭐ IMPROVED: Scrimmage checkboxes - better centered
+                    // Scrimmage checkboxes
                     const scrim1Icon = student.scrimmage1 ? '✓' : '○';
                     const scrim2Icon = student.scrimmage2 ? '✓' : '○';
                     const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
                     const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
 
-                    // ⭐ IMPROVED: Name and group alignment
                     div.innerHTML = `
                         <div class="col-referee">
                             <div class="col-referee-name">${student.name}</div>
@@ -1119,8 +1355,6 @@
                     list.appendChild(div);
                 });
             } else if (currentView === 'questions') {
-                console.log("Question stats data:", questionStats);
-                
                 if (!questionStats || questionStats.length === 0) {
                     list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Question Data Found</h3><p>Question-level data will appear here once students take quizzes.</p></div>';
                     return;
@@ -1284,11 +1518,13 @@
             return false;
         }
         
-        function updateQuizStats(filteredData, selectedQuiz) {
+        function updateQuizStats(filteredData, selectedQuiz, allStudentQuizzes) {
             const statsGrid = document.getElementById('stats-grid');
+            const quizDetailStats = document.getElementById('quiz-detail-stats');
             
             if (filteredData.length === 0) {
                 statsGrid.innerHTML = '';
+                quizDetailStats.classList.remove('show');
                 return;
             }
             
@@ -1325,6 +1561,22 @@
                         <div class="stat-label">${selectedQuiz} Attempts</div>
                     </div>
                 `;
+                
+                // NEW: Show detailed quiz statistics
+                const uniqueReferees = quizCounts[selectedQuiz] || 0;
+                let totalAttempts = 0;
+                
+                // Count total attempts for this quiz across all students (even if filtered out)
+                Object.values(allStudentQuizzes).forEach(student => {
+                    if (student.quizzes[selectedQuiz]) {
+                        totalAttempts += student.quizzes[selectedQuiz].attemptCount;
+                    }
+                });
+                
+                document.getElementById('quiz-stats-title').textContent = `${selectedQuiz} Statistics`;
+                document.getElementById('unique-referees').textContent = uniqueReferees;
+                document.getElementById('total-attempts').textContent = totalAttempts;
+                quizDetailStats.classList.add('show');
             } else {
                 // All quizzes - show count for each quiz
                 sortedQuizNames.forEach(quizName => {
@@ -1335,6 +1587,7 @@
                         </div>
                     `;
                 });
+                quizDetailStats.classList.remove('show');
             }
             
             statsGrid.innerHTML = statsHtml;
