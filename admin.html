@@ -137,7 +137,7 @@
         }
         
         .list-row.expanded { 
-            background-color: #f0fdf4; 
+            background-color: #fafbfc; 
             box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         }
         
@@ -438,6 +438,54 @@
         .stat-value { font-size: 1.5rem; font-weight: bold; color: #2c3e50; }
         .stat-label { font-size: 0.8rem; color: #666; margin-top: 4px; font-weight: 600; }
         .stat-subtext { font-size: 0.7rem; color: #999; margin-top: 3px; font-style: italic; }
+        
+        /* Alphabet Navigation */
+        .alphabet-nav {
+            position: fixed;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border-radius: 12px;
+            padding: 8px 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .alphabet-nav.show {
+            display: flex;
+        }
+        .alphabet-nav-letter {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: center;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .alphabet-nav-letter:hover {
+            background: #e5e7eb;
+            color: #2ecc71;
+        }
+        .alphabet-nav-letter.active {
+            background: #2ecc71;
+            color: white;
+        }
+        .alphabet-nav-letter.disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+        .alphabet-nav-letter.disabled:hover {
+            background: transparent;
+            color: #6b7280;
+        }
         
         /* NEW: Quiz Detail Stats */
         .quiz-detail-stats {
@@ -766,6 +814,17 @@
                 margin: 30px auto;
                 padding: 25px;
             }
+            
+            /* Alphabet Nav on Mobile */
+            .alphabet-nav {
+                right: 5px;
+                padding: 6px 4px;
+                max-height: 85vh;
+            }
+            .alphabet-nav-letter {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -785,6 +844,16 @@
             .meta-tag { font-size: 10px; }
             
             .header h2 { font-size: 1.3rem; }
+            
+            /* Smaller alphabet nav on very small screens */
+            .alphabet-nav {
+                right: 3px;
+                padding: 4px 3px;
+            }
+            .alphabet-nav-letter {
+                font-size: 0.6rem;
+                padding: 2px 5px;
+            }
         }
     </style>
 </head>
@@ -908,6 +977,9 @@
         </div>
 
         <div id="data-list" class="list-container"></div>
+        
+        <!-- Alphabet Navigation -->
+        <div id="alphabet-nav" class="alphabet-nav"></div>
     </div>
 
     <script>
@@ -1113,6 +1185,7 @@
             const header = document.getElementById('list-header');
             const statsCard = document.getElementById('stats-card');
             const quizDetailStats = document.getElementById('quiz-detail-stats');
+            const alphabetNav = document.getElementById('alphabet-nav');
 
             if(currentView === 'quiz') {
                 cmiFilters.style.display = 'none';
@@ -1121,6 +1194,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.add('show');
                 quizDetailStats.classList.remove('show');
+                alphabetNav.classList.add('show');
                 header.className = 'list-header quiz-header';
                 header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';                
                 populateQuizFilter();
@@ -1131,6 +1205,7 @@
                 seasonNav.style.display = 'none';
                 statsCard.classList.remove('show');
                 quizDetailStats.classList.add('show');
+                alphabetNav.classList.remove('show');
                 header.className = 'list-header question-header';
                 header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
                 
@@ -1142,10 +1217,75 @@
                 seasonNav.style.display = 'flex';
                 statsCard.classList.remove('show');
                 quizDetailStats.classList.remove('show');
+                alphabetNav.classList.remove('show');
                 header.className = 'list-header cmi-header';
                 header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div>Tags</div><div>Moderator Notes</div><div style="text-align:center;">Video</div>';
             }
             applyFilters();
+        }
+        
+        function buildAlphabetNav(filteredData) {
+            const alphabetNav = document.getElementById('alphabet-nav');
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            
+            // Get first letters that exist in the data
+            const existingLetters = new Set();
+            filteredData.forEach(student => {
+                const firstLetter = student.name.charAt(0).toUpperCase();
+                if (alphabet.includes(firstLetter)) {
+                    existingLetters.add(firstLetter);
+                }
+            });
+            
+            // Build alphabet navigation
+            alphabetNav.innerHTML = '';
+            alphabet.forEach(letter => {
+                const letterDiv = document.createElement('div');
+                letterDiv.className = 'alphabet-nav-letter';
+                letterDiv.textContent = letter;
+                letterDiv.dataset.letter = letter;
+                
+                if (existingLetters.has(letter)) {
+                    letterDiv.onclick = () => scrollToLetter(letter);
+                } else {
+                    letterDiv.classList.add('disabled');
+                }
+                
+                alphabetNav.appendChild(letterDiv);
+            });
+        }
+        
+        function scrollToLetter(letter) {
+            const targetRow = document.querySelector(`.quiz-row[data-letter="${letter}"]`);
+            
+            if (targetRow) {
+                // Scroll to this row with offset for fixed header
+                const offset = 100;
+                const elementPosition = targetRow.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - offset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+                
+                // Highlight briefly
+                targetRow.style.transition = 'background-color 0.3s';
+                const originalBg = targetRow.style.backgroundColor;
+                targetRow.style.backgroundColor = '#dbeafe';
+                setTimeout(() => {
+                    targetRow.style.backgroundColor = originalBg;
+                }, 1000);
+            }
+            
+            // Update active state
+            document.querySelectorAll('.alphabet-nav-letter').forEach(l => {
+                l.classList.remove('active');
+            });
+            const clickedLetter = document.querySelector(`.alphabet-nav-letter[data-letter="${letter}"]`);
+            if (clickedLetter) {
+                clickedLetter.classList.add('active');
+            }
         }
         
         function populateQuizFilter() {
@@ -1401,6 +1541,9 @@
                 
                 updateQuizStats(filtered, selectedQuiz);
                 
+                // Build alphabet navigation
+                buildAlphabetNav(filtered);
+                
                 if (filtered.length === 0) {
                     list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
                     return;
@@ -1409,6 +1552,7 @@
                 filtered.forEach(student => {
                     const div = document.createElement('div');
                     div.className = 'list-row quiz-row';
+                    div.dataset.letter = student.name.charAt(0).toUpperCase();
                     
                     // Add click handler for mobile expand/collapse
                     div.onclick = function(e) {
