@@ -310,22 +310,20 @@
             transform: translateX(4px);
         }
         
-        /* Add checkmark to selected answer */
-        .option-btn.selected::before {
-            content: "✓";
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.3rem;
-            color: #3b82f6;
-            font-weight: bold;
-        }
-        
         .option-btn.disabled { 
             cursor: not-allowed; 
             pointer-events: none; 
             opacity: 0.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 40px;
         }
 
         /* Mobile Optimizations */
@@ -481,9 +479,16 @@
         <div id="result-view" class="card hidden">
             <h1 style="color:#2c3e50;">Quiz Complete!</h1>
             <div style="font-size:3rem; font-weight:800; margin:20px 0;" id="score-display">0%</div>
-            <p id="score-detail" style="font-size:1.1rem; color:#666;">You got X out of Y correct.</p>
+            <p id="score-detail" style="font-size:1.1rem; color:#666; margin-bottom:8px;">You got X out of Y correct.</p>
+            <p style="font-size:1rem; color:#666; font-weight:600; margin-bottom:20px;">You must get 12/15 or better to receive credit</p>
             <p style="color:#22c55e; margin-top:20px; font-weight:600;">✓ Results saved successfully</p>
             <button class="btn-primary" onclick="location.reload()">Return to Login</button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><a href="https://www.trianglerefs.org/" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">Triangle Soccer Officials Association</a> &amp; NickNak Productions</p>
+            <p>© 2026 All Rights Reserved</p>
         </div>
     </div>
 
@@ -847,11 +852,9 @@
                 const scoreDisplay = document.getElementById('score-display');
                 scoreDisplay.innerText = `${percentage}%`;
                 
-                // Color code the score
+                // Color code the score: Green for 80%+, Red for below 80%
                 if (percentage >= 80) {
                     scoreDisplay.style.color = '#22c55e'; // Green
-                } else if (percentage >= 60) {
-                    scoreDisplay.style.color = '#eab308'; // Yellow
                 } else {
                     scoreDisplay.style.color = '#ef4444'; // Red
                 }
@@ -869,9 +872,5 @@
             });
         }
     </script>
-    <div class="footer">
-            <p><a href="https://www.trianglerefs.org/" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">Triangle Soccer Officials Association</a> &amp; NickNak Productions</p>
-            <p>© 2026 All Rights Reserved</p>
-        </div>
 </body>
 </html>
