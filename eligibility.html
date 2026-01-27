@@ -5,29 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eligibility & Quizzes</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f6f8; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #f4f6f8; 
+            margin: 0; 
+            padding: 20px; 
+            color: #333; 
+        }
+        .container { max-width: 900px; margin: 0 auto; }
 
-        /* --- Navigation Menu --- */
+        /* --- Navigation Menu (matching index.html) --- */
         .nav-bar { 
-            position: relative; display: flex; justify-content: center; 
-            align-items: center; margin-bottom: 40px; padding: 10px 0;
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        .nav-center { display: flex; gap: 20px; }
-        .nav-link { text-decoration: none; color: #4b5563; font-weight: 600; padding: 8px 16px; border-radius: 6px; font-size: 16px; transition: 0.2s; }
-        .nav-link:hover { background-color: #e5e7eb; color: #111827; }
-        .nav-link.active { background-color: #2ecc71; color: white; }
-        .supervisor-link {
-            position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-            text-decoration: none; color: #2c3e50; font-size: 0.9rem; font-weight: 600;
-            border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; background: white; transition: all 0.2s;
-        }
-        .supervisor-link:hover { background: #f3f4f6; border-color: #9ca3af; }
 
-        @media (max-width: 800px) {
-            .nav-bar { flex-direction: column; gap: 15px; }
-            .supervisor-link { position: static; transform: none; margin-left: auto; }
-            .nav-center { flex-wrap: wrap; justify-content: center; }
+        .nav-center {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-link { 
+            text-decoration: none; 
+            color: #4b5563; 
+            font-weight: 600; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            font-size: 15px; 
+            transition: all 0.2s;
+            white-space: nowrap;
+            border: 2px solid transparent;
+        }
+        
+        .nav-link:hover { 
+            background-color: #e5e7eb; 
+            color: #111827; 
+        }
+        
+        .nav-link.active { 
+            background-color: #2ecc71; 
+            color: white;
+            border-color: #27ae60;
+        }
+        
+        .nav-link.supervisor {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .nav-link.supervisor:hover {
+            background-color: #2980b9;
+            color: white;
         }
 
         /* --- Eligibility Section --- */
@@ -114,62 +152,291 @@
 
         /* --- Page Styles --- */
         .hidden { display: none; }
-        .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center;}
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 30px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+            text-align: center;
+        }
         
-        .btn-primary { background: #2ecc71; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; }
-        .btn-primary:hover { background: #27ae60; }
-        .btn-primary:disabled { background: #95a5a6; cursor: not-allowed; }
+        .btn-primary { 
+            background: #2ecc71; 
+            color: white; 
+            border: none; 
+            padding: 14px 24px; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            width: 100%;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover { 
+            background: #27ae60;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+        }
+        .btn-primary:disabled { 
+            background: #95a5a6; 
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
         
-        .input-field { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; margin-bottom: 15px; }
+        .input-field { 
+            width: 100%; 
+            padding: 14px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            box-sizing: border-box; 
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
 
         /* Quiz List Items */
         .quiz-list-item { 
-            padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; 
-            display: flex; justify-content: space-between; align-items: center; text-align: left;
+            padding: 15px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            text-align: left;
         }
-        .quiz-list-item:hover { border-color: #2ecc71; background: #f0fdf4; }
+        .quiz-list-item:hover { 
+            border-color: #2ecc71; 
+            background: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
         
         .quiz-info { display: flex; flex-direction: column; }
         .quiz-title { font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
         .quiz-meta { font-size: 0.85rem; color: #666; margin-top: 4px; }
         
-        .score-badge { font-size: 0.9rem; font-weight: bold; padding: 5px 10px; border-radius: 20px; background: #eee; color: #777; }
+        .score-badge { 
+            font-size: 0.9rem; 
+            font-weight: bold; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            background: #eee; 
+            color: #777; 
+        }
         .score-badge.good { background: #dcfce7; color: #166534; }
         
         /* Questions */
-        .question-block { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 30px; text-align: left; }
-        .q-text { font-size: 1.2rem; font-weight: 700; margin-bottom: 15px; }
+        .question-block { 
+            margin-bottom: 40px; 
+            border-bottom: 2px solid #e5e7eb; 
+            padding-bottom: 30px; 
+            text-align: left; 
+        }
+        .q-text { 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            margin-bottom: 15px;
+            color: #2c3e50;
+            line-height: 1.4;
+        }
         
         /* Video */
-        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; border-radius: 8px; background: #000; margin-bottom: 8px; }
-        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        .backup-link { display: inline-block; font-size: 0.85rem; color: #666; text-decoration: underline; margin-bottom: 15px; }
+        .video-wrapper { 
+            position: relative; 
+            padding-bottom: 56.25%; 
+            height: 0; 
+            overflow: hidden; 
+            max-width: 100%; 
+            border-radius: 8px; 
+            background: #000; 
+            margin-bottom: 8px; 
+        }
+        .video-wrapper iframe { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            border: 0; 
+        }
+        .backup-link { 
+            display: inline-block; 
+            font-size: 0.85rem; 
+            color: #3498db; 
+            text-decoration: underline; 
+            margin-bottom: 15px; 
+        }
         
-        .option-btn { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
-        .option-btn:hover:not(.disabled) { background-color: #f9fafb; border-color: #d1d5db; }
-        .option-btn.selected { background-color: #dbeafe; border-color: #3b82f6; font-weight: 600; }
-        .option-btn.disabled { cursor: not-allowed; pointer-events: none; }
+        /* IMPROVED: Answer Option Buttons with Better Feedback */
+        .option-btn { 
+            display: block; 
+            width: 100%; 
+            text-align: left; 
+            padding: 14px 16px; 
+            margin-bottom: 10px; 
+            background: white; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-btn:hover:not(.disabled) { 
+            background-color: #f9fafb; 
+            border-color: #d1d5db;
+            transform: translateX(4px);
+        }
+        
+        /* IMPROVED: Much more obvious selected state */
+        .option-btn.selected { 
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-color: #3b82f6;
+            border-width: 3px;
+            font-weight: 600;
+            color: #1e40af;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateX(4px);
+        }
+        
+        /* Add checkmark to selected answer */
+        .option-btn.selected::before {
+            content: "✓";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.3rem;
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .option-btn.disabled { 
+            cursor: not-allowed; 
+            pointer-events: none; 
+            opacity: 0.6;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .nav-bar {
+                padding: 15px;
+                gap: 12px;
+            }
+            
+            .nav-center {
+                gap: 8px;
+            }
+            
+            .nav-link {
+                padding: 10px 16px;
+                font-size: 14px;
+                flex: 1 1 auto;
+                text-align: center;
+                min-width: calc(50% - 4px);
+            }
+            
+            .eligibility-section {
+                padding: 20px;
+            }
+            
+            .playoff-notice {
+                font-size: 1rem;
+                padding: 10px 16px;
+            }
+            
+            .scrimmage-detail-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .scrimmage-icon {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .q-text {
+                font-size: 1.1rem;
+            }
+            
+            .option-btn {
+                padding: 12px 14px;
+                font-size: 0.95rem;
+            }
+            
+            .quiz-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .score-badge {
+                align-self: flex-start;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .nav-link {
+                min-width: 100%;
+            }
+            
+            .scrimmage-detail-card {
+                padding: 12px;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .btn-primary {
+                padding: 12px 20px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="nav-bar">
+        <!-- Updated Navigation matching index.html -->
+        <nav class="nav-bar">
             <div class="nav-center">
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="report.html" class="nav-link">CMI Form</a>
                 <a href="jersey.html" class="nav-link">Kit Search</a>
-                <span class="nav-link active">Eligibility & Quizzes</span>
+                <span class="nav-link active">Eligibility/Quizzes</span>
+                <a href="admin.html" class="nav-link supervisor">🔒 Supervisors</a>
             </div>
-            <a href="admin.html" class="supervisor-link">🔒 Supervisors</a>
-        </div>
+        </nav>
 
         <div id="login-view" class="card">
             <h2>Referee Login</h2>
             <p style="color:#666; margin-bottom:20px;">Enter your email to view your eligibility status and training modules.</p>
             <input type="email" id="loginEmail" class="input-field" placeholder="yourname@email.com">
             <button class="btn-primary" onclick="handleLogin()">Login</button>
-            <p id="login-msg" style="color:red; margin-top:10px; display:none;"></p>
+            <p id="login-msg" style="color:#e74c3c; margin-top:15px; display:none; padding:12px; background:#fee; border-radius:6px;"></p>
         </div>
 
         <div id="eligibility-display" class="eligibility-section hidden">
@@ -177,7 +444,7 @@
                 <span>📋</span> Scrimmage Attendance
             </h3>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 15px;">
                 <div id="scrimmage1-detail" class="scrimmage-detail-card"></div>
                 <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
             </div>
@@ -188,33 +455,33 @@
         </div>
 
         <div id="selection-view" class="hidden">
-            <h2 id="welcome-header" style="text-align:center;">Training Quizzes</h2>
+            <h2 id="welcome-header" style="text-align:center; color:#2c3e50;">Training Quizzes</h2>
             <p style="text-align:center; color:#666; margin-bottom:30px;">Select a topic to begin.</p>
             <div id="quiz-list-container"></div>
-            <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer;">Logout</button>
+            <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline;">Logout</button>
         </div>
 
         <div id="intro-view" class="card hidden">
             <h2 id="intro-title">Quiz Title</h2>
-            <p style="color:#666;">Confirm your details to begin.</p>
+            <p style="color:#666; margin-bottom:20px;">Confirm your details to begin.</p>
             <input type="text" id="firstName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="text" id="lastName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="email" id="userEmail" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
             <br>
-            <button onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer;">Back</button>
+            <button onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer; text-decoration:underline;">Back</button>
         </div>
 
         <div id="quiz-view" class="card hidden">
-            <h2 id="active-quiz-title" style="border-bottom:2px solid #2ecc71; padding-bottom:10px; margin-bottom:20px;"></h2>
+            <h2 id="active-quiz-title" style="border-bottom:2px solid #2ecc71; padding-bottom:10px; margin-bottom:20px; color:#2c3e50;"></h2>
             <div id="questions-container"></div>
             <button id="finishBtn" class="btn-primary" onclick="submitQuiz()">Submit Quiz</button>
         </div>
 
         <div id="result-view" class="card hidden">
-            <h1>Quiz Complete!</h1>
+            <h1 style="color:#2c3e50;">Quiz Complete!</h1>
             <div style="font-size:3rem; font-weight:800; margin:20px 0;" id="score-display">0%</div>
-            <p id="score-detail">You got X out of Y correct.</p>
+            <p id="score-detail" style="font-size:1.1rem; color:#666;">You got X out of Y correct.</p>
             <p style="color:#22c55e; margin-top:20px; font-weight:600;">✓ Results saved successfully</p>
             <button class="btn-primary" onclick="location.reload()">Return to Login</button>
         </div>
@@ -488,16 +755,40 @@
         }
 
         function selectAnswer(index, selectedText) {
+            // Store the answer
             userAnswers[index] = selectedText;
             
+            // Get the options container for this question
             const parent = document.getElementById(`options-${index}`);
+            if (!parent) {
+                console.error('Could not find options container for question', index);
+                return;
+            }
+            
+            // Get all buttons in this question
             const allBtns = parent.querySelectorAll('.option-btn');
+            
+            // Remove 'selected' class from all buttons
             allBtns.forEach(btn => {
                 btn.classList.remove('selected');
-                if(btn.innerText === selectedText) {
+            });
+            
+            // Add 'selected' class to the clicked button
+            allBtns.forEach(btn => {
+                if (btn.innerText === selectedText) {
                     btn.classList.add('selected');
                 }
             });
+            
+            // Scroll to next question smoothly (better UX)
+            if (index < currentQuizData.length - 1) {
+                const nextQuestion = document.getElementById(`q-block-${index + 1}`);
+                if (nextQuestion) {
+                    setTimeout(() => {
+                        nextQuestion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 200);
+                }
+            }
         }
 
         function submitQuiz() {
@@ -578,5 +869,9 @@
             });
         }
     </script>
+    <div class="footer">
+            <p><a href="https://www.trianglerefs.org/" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">Triangle Soccer Officials Association</a> &amp; NickNak Productions</p>
+            <p>© 2026 All Rights Reserved</p>
+        </div>
 </body>
 </html>
