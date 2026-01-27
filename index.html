@@ -98,47 +98,16 @@
             color: white;
             border-color: #27ae60;
         }
-
-        /* Supervisor Section - Improved */
-        .supervisor-section {
-            border-top: 1px solid #e5e7eb;
-            padding-top: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
         
-        .supervisor-label {
-            color: #6b7280;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .supervisor-link {
-            text-decoration: none;
+        .nav-link.supervisor {
+            background-color: #3498db;
             color: white;
-            font-size: 0.95rem;
-            font-weight: 600;
-            padding: 8px 20px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+            border-color: #2980b9;
         }
         
-        .supervisor-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
-        }
-        
-        .supervisor-link:active {
-            transform: translateY(0);
+        .nav-link.supervisor:hover {
+            background-color: #2980b9;
+            color: white;
         }
 
         /* Header Content */
@@ -175,6 +144,7 @@
             border: 2px solid #eee; 
             display: flex; 
             flex-direction: column;
+            text-align: center;
         }
         
         .card:hover { 
@@ -187,19 +157,22 @@
             margin: 0 0 10px 0; 
             color: #2c3e50; 
             font-size: 1.4rem; 
+            text-align: center;
         }
         
         .card p { 
             margin: 0; 
             font-size: 0.95rem; 
             color: #666; 
-            line-height: 1.6; 
+            line-height: 1.6;
+            text-align: center;
         }
         
         .icon { 
             font-size: 2.5rem; 
             margin-bottom: 15px; 
-            display: block; 
+            display: block;
+            text-align: center;
         }
 
         /* Footer */
@@ -258,18 +231,6 @@
                 min-width: calc(50% - 4px);
             }
             
-            .supervisor-section {
-                padding-top: 12px;
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .supervisor-link {
-                width: 100%;
-                justify-content: center;
-                padding: 12px 20px;
-            }
-            
             .grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -308,7 +269,7 @@
         </div>
         <div class="logo-container">
             <!-- Replace 'assets/logo2.png' with your actual image path -->
-            <img src="assets/TSOA_logo.svg" alt="Organization 2" class="logo-img" onerror="this.style.display='none'">
+            <a href="https://www.trianglerefs.org/"><img src="assets/TSOA_logo.svg" alt="Organization 2" class="logo-img" onerror="this.style.display='none'"></a>
         </div>
     </div>
 
@@ -320,14 +281,7 @@
                 <a href="report.html" class="nav-link">CMI Form</a>
                 <a href="jersey.html" class="nav-link">Kit Search</a>
                 <a href="eligibility.html" class="nav-link">Eligibility/Quizzes</a>
-            </div>
-            
-            <div class="supervisor-section">
-                <span class="supervisor-label">For Supervisors:</span>
-                <a href="admin.html" class="supervisor-link">
-                    <span>🔒</span>
-                    <span>Supervisor Portal</span>
-                </a>
+                <a href="admin.html" class="nav-link supervisor">🔒 Supervisors</a>
             </div>
         </nav>
 
@@ -339,13 +293,13 @@
             <a href="report.html" class="card">
                 <span class="icon">📝</span>
                 <h2>CMI Report Form</h2>
-                <p>Submit the 2026 Girl's Critical Match Incident reports</p>
+                <p>Submit post-game Critical Match Incident reports for review.</p>
             </a>
 
             <a href="jersey.html" class="card">
                 <span class="icon">👕</span>
                 <h2>Kit Search</h2>
-                <p>Check home and away jersey colors for upcoming matches</p>
+                <p>Check home and away jersey colors for upcoming matches.</p>
             </a>
 
             <a href="eligibility.html" class="card">
@@ -356,10 +310,9 @@
         </div>
         
         <div class="footer">
-            <p>Triangle Soccer Officials Association &amp; NickNak Productions</p>
+            <p><a href="https://www.trianglerefs.org/" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">Triangle Soccer Officials Association</a> &amp; NCHSAA</p>
             <p>© 2026 All Rights Reserved</p>
         </div>
     </div>
 </body>
 </html>
-
