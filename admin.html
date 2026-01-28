@@ -263,14 +263,19 @@
             cursor: default; /* Not clickable on desktop */
         }
         
-        /* Desktop: Hide the mobile attendance row */
+        /* Desktop: Hide the mobile attendance row (3rd child) */
         .quiz-attendance-row {
             display: none;
         }
         
-        /* Desktop: Show scrimmage columns */
+        /* Desktop: Ensure scrimmage columns (4th and 5th child) are visible */
         .quiz-row > div:nth-child(4),
         .quiz-row > div:nth-child(5) {
+            display: flex !important;
+        }
+        
+        /* Desktop: Ensure quiz scores container (6th child) is visible */
+        .quiz-row > div:nth-child(6) {
             display: flex;
         }
 
@@ -653,6 +658,11 @@
                 display: none !important;
             }
             
+            /* Mobile: Hide quiz scores by default */
+            .quiz-row > div:nth-child(6) {
+                display: none;
+            }
+            
             /* Mobile: Show expand indicator */
             .quiz-row > .col-referee::after {
                 content: " ▼";
@@ -678,6 +688,11 @@
                 color: #6b7280; 
                 display: inline; 
                 margin-right: 4px; 
+            }
+            
+            /* Mobile: Show quiz scores when expanded */
+            .quiz-row.expanded > div:nth-child(6) {
+                display: flex !important;
             }
             
             /* Scrimmage attendance row */
@@ -706,11 +721,8 @@
             }
             
             /* Scrimmage section on mobile - inline style */
-            .scrim-check {
-                display: inline-flex;
+            .quiz-attendance-row .scrim-check {
                 font-size: 1.2rem;
-                align-items: center;
-                gap: 6px;
             }
             
             .quiz-scores-container {
@@ -719,10 +731,6 @@
                 border-top: 1px solid #e5e7eb;
                 padding-top: 12px;
                 margin-top: 8px;
-                display: none; /* Hidden by default */
-            }
-            .quiz-row.expanded .quiz-scores-container {
-                display: flex; /* Show when expanded */
             }
             .quiz-scores-container::before {
                 content: "Quiz Scores:";
@@ -963,7 +971,7 @@
         <!-- NEW: Quiz Detail Stats -->
         <div class="quiz-detail-stats" id="quiz-detail-stats">
             <h4 id="quiz-stats-title">Quiz Statistics</h4>
-            <p><strong id="unique-referees">0</strong> unique referees have taken this quiz</p>
+            <p><strong id="unique-referees">0</strong> total referees have taken this quiz</p>
             <p>Quiz has been taken a total of <strong id="total-attempts">0</strong> times</p>
         </div>
 
@@ -1645,8 +1653,8 @@
                                 <span class="scrim-check ${scrim2Class}">${scrim2Icon}</span>
                             </div>
                         </div>
-                        <div class="scrim-check ${scrim1Class}" style="display:none;">${scrim1Icon}</div>
-                        <div class="scrim-check ${scrim2Class}" style="display:none;">${scrim2Icon}</div>
+                        <div class="scrim-check ${scrim1Class}">${scrim1Icon}</div>
+                        <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
                         ${quizScoresHtml}
                     `;
                     list.appendChild(div);
@@ -1871,7 +1879,7 @@
             statsHtml += `
                 <div class="stat-item">
                     <div class="stat-value">${filteredData.length}</div>
-                    <div class="stat-label">Total Referees</div>
+                    <div class="stat-label">Rostered Referees</div>
                 </div>
             `;
             
