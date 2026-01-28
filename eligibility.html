@@ -68,11 +68,23 @@
             color: white;
         }
 
+        /* Welcome Header */
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-header h2 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin: 0;
+        }
+
         /* --- Eligibility Section --- */
         .eligibility-section {
             background: white;
             border-radius: 12px;
-            padding: 30px;
+            padding: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 30px;
         }
@@ -96,10 +108,10 @@
             background: #f9fafb;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            padding: 15px;
+            padding: 12px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         
         .scrimmage-detail-card.attended {
@@ -109,11 +121,6 @@
         
         .scrimmage-detail-card.not-attended {
             border-left: 4px solid #ef4444;
-        }
-        
-        .scrimmage-icon {
-            font-size: 2rem;
-            flex-shrink: 0;
         }
         
         .scrimmage-info {
@@ -148,6 +155,24 @@
         .scrimmage-status.not-attended {
             background: #fee2e2;
             color: #991b1b;
+        }
+
+        /* Quiz Section Header */
+        .quiz-section-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .quiz-section-header h2 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+            margin: 0 0 10px 0;
+        }
+        
+        .quiz-section-subtext {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.4;
         }
 
         /* --- Page Styles --- */
@@ -336,6 +361,10 @@
                 padding: 0;
             }
             
+            .welcome-header h2 {
+                font-size: 1.6rem;
+            }
+            
             .nav-bar {
                 padding: 15px;
                 gap: 12px;
@@ -365,11 +394,8 @@
             .scrimmage-detail-card {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .scrimmage-icon {
-                font-size: 1.5rem;
+                gap: 8px;
+                padding: 12px;
             }
             
             .card {
@@ -401,8 +427,8 @@
                 min-width: 100%;
             }
             
-            .scrimmage-detail-card {
-                padding: 12px;
+            .welcome-header h2 {
+                font-size: 1.4rem;
             }
             
             h2 {
@@ -429,6 +455,11 @@
             </div>
         </nav>
 
+        <!-- Welcome Header -->
+        <div id="welcome-header-container" class="welcome-header hidden">
+            <h2 id="welcome-header">Welcome</h2>
+        </div>
+
         <div id="login-view" class="card">
             <h2>Referee Login</h2>
             <p style="color:#666; margin-bottom:20px;">Enter your email to view your eligibility status and training modules.</p>
@@ -438,11 +469,11 @@
         </div>
 
         <div id="eligibility-display" class="eligibility-section hidden">
-            <h3 style="color: #2c3e50; font-size: 1.3rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <span>📋</span> Scrimmage Attendance
+            <h3 style="color: #2c3e50; font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 600;">
+                Scrimmage Attendance
             </h3>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 12px;">
                 <div id="scrimmage1-detail" class="scrimmage-detail-card"></div>
                 <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
             </div>
@@ -453,8 +484,10 @@
         </div>
 
         <div id="selection-view" class="hidden">
-            <h2 id="welcome-header" style="text-align:center; color:#2c3e50;">Training Quizzes</h2>
-            <p style="text-align:center; color:#666; margin-bottom:30px;">Select a topic to begin.</p>
+            <div class="quiz-section-header">
+                <h2>Quizzes</h2>
+                <p class="quiz-section-subtext">You must complete all 3 optional quizzes at 12/15 or better to be eligible for playoffs</p>
+            </div>
             <div id="quiz-list-container"></div>
             <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline;">Logout</button>
         </div>
@@ -577,12 +610,18 @@
                     document.getElementById('userEmail').value = email;
                     document.getElementById('firstName').value = currentUser.firstName;
                     document.getElementById('lastName').value = currentUser.lastName;
-                    if (currentUser.firstName) document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
+                    
+                    // Update welcome header at top of page
+                    if (currentUser.firstName) {
+                        document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
+                        document.getElementById('welcome-header-container').classList.remove('hidden');
+                    }
                     
                     displayEligibility();
                     renderQuizList();
                     
                     document.getElementById('login-view').classList.add('hidden');
+                    document.getElementById('welcome-header-container').classList.remove('hidden');
                     document.getElementById('eligibility-display').classList.remove('hidden');
                     document.getElementById('selection-view').classList.remove('hidden');
                 })
@@ -616,7 +655,6 @@
             const scrim1Card = document.getElementById('scrimmage1-detail');
             scrim1Card.className = `scrimmage-detail-card ${scrim1.attended ? 'attended' : 'not-attended'}`;
             scrim1Card.innerHTML = `
-                <div class="scrimmage-icon">${scrim1.attended ? '✅' : '📅'}</div>
                 <div class="scrimmage-info">
                     <div class="scrimmage-name">${scrim1.name}</div>
                     <div class="scrimmage-date">${scrim1.date ? scrim1.date : 'Date TBD'}</div>
@@ -630,7 +668,6 @@
             const scrim2Card = document.getElementById('scrimmage2-detail');
             scrim2Card.className = `scrimmage-detail-card ${scrim2.attended ? 'attended' : 'not-attended'}`;
             scrim2Card.innerHTML = `
-                <div class="scrimmage-icon">${scrim2.attended ? '✅' : '📅'}</div>
                 <div class="scrimmage-info">
                     <div class="scrimmage-name">${scrim2.name}</div>
                     <div class="scrimmage-date">${scrim2.date ? scrim2.date : 'Date TBD'}</div>
