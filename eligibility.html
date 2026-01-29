@@ -56,17 +56,6 @@
             color: white;
             border-color: #27ae60;
         }
-        
-        .nav-link.supervisor {
-            background-color: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
-        
-        .nav-link.supervisor:hover {
-            background-color: #2980b9;
-            color: white;
-        }
 
         /* Welcome Header */
         .welcome-header {
@@ -245,9 +234,40 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.08);
         }
         
+        /* Closed Quiz Styling */
+        .quiz-list-item.closed {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+        
+        .quiz-list-item.closed:hover {
+            border-color: #d1d5db;
+            background: #f9fafb;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .quiz-closed-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
         .quiz-info { display: flex; flex-direction: column; }
         .quiz-title { font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
         .quiz-meta { font-size: 0.85rem; color: #666; margin-top: 4px; }
+        .quiz-dates { 
+            font-size: 0.75rem; 
+            color: #999; 
+            margin-top: 4px;
+            font-style: italic;
+        }
         
         .score-badge { 
             font-size: 0.9rem; 
@@ -417,6 +437,11 @@
                 gap: 10px;
             }
             
+            .quiz-closed-badge {
+                margin-left: 0;
+                margin-top: 4px;
+            }
+            
             .score-badge {
                 align-self: flex-start;
             }
@@ -451,7 +476,7 @@
                 <a href="report.html" class="nav-link">CMI Form</a>
                 <a href="jersey.html" class="nav-link">Kit Search</a>
                 <span class="nav-link active">Eligibility/Quizzes</span>
-                <a href="admin.html" class="nav-link supervisor">🔒 Supervisors</a>
+                <a href="admin.html" class="nav-link">🔒 Supervisors</a>
             </div>
         </nav>
 
@@ -531,6 +556,7 @@
 
         let allQuizzes = {};
         let userScores = {}; 
+        let quizStatus = {}; // NEW: Track which quizzes are active/closed
         let currentQuizData = [];
         let currentQuizName = "";
         let score = 0;
@@ -604,6 +630,7 @@
                     }
                     allQuizzes = data.quizzes;
                     userScores = data.scores || {}; 
+                    quizStatus = data.quizStatus || {}; // NEW: Capture quiz status
                     currentUser = data.user || { firstName: "", lastName: "", email: email }; 
                     eligibilityData = data.eligibility || null;
                     
@@ -681,18 +708,33 @@
         function renderQuizList() {
             const container = document.getElementById('quiz-list-container');
             container.innerHTML = '';
-            const titles = Object.keys(allQuizzes);
+            
+            // Get all quiz names from both active quizzes and scores (for closed quizzes)
+            const allQuizNames = new Set([
+                ...Object.keys(allQuizzes),
+                ...Object.keys(userScores)
+            ]);
+            
+            const titles = Array.from(allQuizNames);
+            
             if (titles.length === 0) { 
                 container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; 
                 return; 
             }
 
             titles.forEach(title => {
-                const count = allQuizzes[title].length;
+                const statusInfo = quizStatus[title] || { status: 'active', startDate: '', endDate: '' };
+                const isClosed = statusInfo.status === 'closed' || statusInfo === 'closed';
+                const isActive = statusInfo.status === 'active' || statusInfo === 'active' || allQuizzes[title];
+                const count = allQuizzes[title] ? allQuizzes[title].length : 0;
                 const questionsShown = Math.min(QUESTIONS_PER_QUIZ, count);
                 const highScore = userScores[title]; 
-                let badgeHtml = "";
                 
+                let badgeHtml = "";
+                let statusBadgeHtml = "";
+                let datesHtml = "";
+                
+                // Show score if available
                 if (highScore !== undefined && highScore.score) {
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.score}</span>`;
                 } else if (highScore !== undefined && typeof highScore === 'number') {
@@ -701,21 +743,66 @@
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.percent}%</span>`;
                 }
                 
+                // Show closed badge if quiz is closed
+                if (isClosed) {
+                    statusBadgeHtml = `<span class="quiz-closed-badge">Closed</span>`;
+                }
+                
+                // Build dates display
+                if (typeof statusInfo === 'object') {
+                    const startDate = statusInfo.startDate || '';
+                    const endDate = statusInfo.endDate || '';
+                    
+                    if (startDate && endDate) {
+                        datesHtml = `<div class="quiz-dates">Available: ${startDate} - ${endDate}</div>`;
+                    } else if (startDate) {
+                        datesHtml = `<div class="quiz-dates">Opens: ${startDate}</div>`;
+                    } else if (endDate) {
+                        datesHtml = `<div class="quiz-dates">Closes: ${endDate}</div>`;
+                    }
+                }
+                
                 const div = document.createElement('div');
-                div.className = 'quiz-list-item';
+                div.className = `quiz-list-item ${isClosed ? 'closed' : ''}`;
+                
                 div.innerHTML = `
                     <div class="quiz-info">
-                        <span class="quiz-title">${title}</span>
-                        <span class="quiz-meta">${questionsShown} Questions</span>
+                        <span class="quiz-title">${title}${statusBadgeHtml}</span>
+                        <span class="quiz-meta">${isClosed ? 'No longer accepting responses' : questionsShown + ' Questions'}</span>
+                        ${datesHtml}
                     </div>
                     ${badgeHtml}
                 `;
-                div.onclick = () => showIntro(title);
+                
+                // Only make clickable if quiz is active
+                if (!isClosed && isActive) {
+                    div.onclick = () => showIntro(title);
+                } else if (isClosed) {
+                    div.onclick = () => {
+                        alert(`This quiz is no longer accepting responses.\n\nYour score: ${badgeHtml ? highScore.score || highScore.percent || highScore : 'Not taken'}`);
+                    };
+                }
+                
                 container.appendChild(div);
             });
         }
 
         function showIntro(title) {
+            // Safety check: prevent taking closed quizzes
+            const statusInfo = quizStatus[title] || { status: 'active' };
+            const status = typeof statusInfo === 'object' ? statusInfo.status : statusInfo;
+            
+            if (status === 'closed') {
+                alert('This quiz is no longer accepting responses.');
+                return;
+            }
+            
+            // Safety check: ensure quiz questions exist
+            if (!allQuizzes[title] || allQuizzes[title].length === 0) {
+                alert('This quiz is not currently available.');
+                return;
+            }
+            
             currentQuizName = title;
             // ⭐ Store original questions but don't randomize yet
             currentQuizData = allQuizzes[title];
@@ -834,6 +921,16 @@
         }
 
         function submitQuiz() {
+            // Safety check: prevent submitting closed quizzes
+            const statusInfo = quizStatus[currentQuizName] || { status: 'active' };
+            const status = typeof statusInfo === 'object' ? statusInfo.status : statusInfo;
+            
+            if (status === 'closed') {
+                alert('This quiz is no longer accepting responses. Your answers will not be saved.');
+                location.reload();
+                return;
+            }
+            
             const total = currentQuizData.length;
             const answeredCount = Object.keys(userAnswers).length;
             
