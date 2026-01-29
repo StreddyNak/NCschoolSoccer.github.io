@@ -709,10 +709,12 @@
             const container = document.getElementById('quiz-list-container');
             container.innerHTML = '';
             
-            // Get all quiz names from both active quizzes and scores (for closed quizzes)
+            // Get all quiz names from active quizzes, scores, AND quiz status
+            // This ensures closed quizzes show even if student never took them
             const allQuizNames = new Set([
-                ...Object.keys(allQuizzes),
-                ...Object.keys(userScores)
+                ...Object.keys(allQuizzes),      // Active quizzes with questions
+                ...Object.keys(userScores),       // Quizzes student has taken
+                ...Object.keys(quizStatus)        // ALL quizzes (active and closed)
             ]);
             
             const titles = Array.from(allQuizNames);
@@ -741,6 +743,9 @@
                     badgeHtml = `<span class="score-badge good">Best: ${highScore}%</span>`;
                 } else if (highScore !== undefined && typeof highScore === 'object') {
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.percent}%</span>`;
+                } else if (isClosed) {
+                    // ⭐ NEW: Show "Not Taken" badge for closed quizzes without scores
+                    badgeHtml = `<span class="score-badge" style="background:#f3f4f6; color:#9ca3af;">Not Taken</span>`;
                 }
                 
                 // Show closed badge if quiz is closed
@@ -765,10 +770,15 @@
                 const div = document.createElement('div');
                 div.className = `quiz-list-item ${isClosed ? 'closed' : ''}`;
                 
+                // ⭐ UPDATED: Show message for closed quizzes, or question count for active
+                const subtitleText = isClosed 
+                    ? 'No longer accepting responses' 
+                    : (questionsShown > 0 ? questionsShown + ' Questions' : 'Coming Soon');
+                
                 div.innerHTML = `
                     <div class="quiz-info">
                         <span class="quiz-title">${title}${statusBadgeHtml}</span>
-                        <span class="quiz-meta">${isClosed ? 'No longer accepting responses' : questionsShown + ' Questions'}</span>
+                        <span class="quiz-meta">${subtitleText}</span>
                         ${datesHtml}
                     </div>
                     ${badgeHtml}
@@ -779,7 +789,10 @@
                     div.onclick = () => showIntro(title);
                 } else if (isClosed) {
                     div.onclick = () => {
-                        alert(`This quiz is no longer accepting responses.\n\nYour score: ${badgeHtml ? highScore.score || highScore.percent || highScore : 'Not taken'}`);
+                        const scoreMessage = highScore 
+                            ? `Your score: ${highScore.score || highScore.percent || highScore}` 
+                            : 'You did not take this quiz.';
+                        alert(`This quiz is no longer accepting responses.\n\n${scoreMessage}`);
                     };
                 }
                 
