@@ -15,7 +15,6 @@
         }
         .container { max-width: 900px; margin: 0 auto; }
 
-        /* --- Navigation Menu (matching index.html) --- */
         .nav-bar { 
             background: white;
             border-radius: 12px;
@@ -603,7 +602,6 @@
 <body>
 
     <div class="container">
-        <!-- Updated Navigation matching index.html -->
         <nav class="nav-bar">
             <div class="nav-center">
                 <a href="index.html" class="nav-link">Home</a>
@@ -695,7 +693,7 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyCKkdHudV8CA1hcdV_KN2KEyOeZ5nmaQ_5-fWO40BPpIZwjMO1z3F4lalyP3wMYRf7lQ/exec";
-        const QUESTIONS_PER_QUIZ = 15; // ⭐ Configure how many questions to show
+        const QUESTIONS_PER_QUIZ = 15; // Configure how many questions to show
 
         let allQuizzes = {};
         let userScores = {}; 
@@ -707,7 +705,7 @@
         let userAnswers = {};
         let eligibilityData = null;
 
-        // ===== ⭐ NEW: RANDOMIZATION FUNCTIONS =====
+        // ===== RANDOMIZATION FUNCTIONS =====
         
         /**
          * Fisher-Yates shuffle algorithm - ensures truly random shuffling
@@ -887,7 +885,7 @@
                 } else if (highScore !== undefined && typeof highScore === 'object') {
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.percent}%</span>`;
                 } else if (isClosed) {
-                    // ⭐ NEW: Show "Not Taken" badge for closed quizzes without scores
+                    // Show "Not Taken" badge for closed quizzes without scores
                     badgeHtml = `<span class="score-badge" style="background:#f3f4f6; color:#9ca3af;">Not Taken</span>`;
                 }
                 
@@ -896,11 +894,11 @@
                     statusBadgeHtml = `<span class="quiz-closed-badge">Closed</span>`;
                 }
                 
-                // ⭐ NEW: Build video button if instructional video exists
+                // Build video button if instructional video exists
                 let videoButtonHtml = "";
                 if (typeof statusInfo === 'object' && statusInfo.instructionalVideo) {
                     const videoUrl = statusInfo.instructionalVideo;
-                    videoButtonHtml = `<a href="${videoUrl}" target="_blank" class="video-button" onclick="event.stopPropagation();">📺 Watch Video</a>`;
+                    videoButtonHtml = `<a href="${videoUrl}" target="_blank" class="video-button" onclick="event.stopPropagation();">📺 Watch Instructional Video</a>`;
                 }
                 
                 // Build dates display
@@ -920,7 +918,7 @@
                 const div = document.createElement('div');
                 div.className = `quiz-list-item ${isClosed ? 'closed' : ''}`;
                 
-                // ⭐ UPDATED: Show message for closed quizzes, or question count for active
+                // Show message for closed quizzes, or question count for active
                 const subtitleText = isClosed 
                     ? 'No longer accepting responses' 
                     : (questionsShown > 0 ? questionsShown + ' Questions' : 'Coming Soon');
@@ -968,7 +966,7 @@
             }
             
             currentQuizName = title;
-            // ⭐ Store original questions but don't randomize yet
+            // Store original questions but don't randomize yet
             currentQuizData = allQuizzes[title];
             
             document.getElementById('eligibility-display').classList.add('hidden');
@@ -976,10 +974,10 @@
             document.getElementById('intro-view').classList.remove('hidden');
             document.getElementById('intro-title').innerText = title;
             
-            // ⭐ Scroll to top to show intro/video at top of page
+            // Scroll to top to show intro/video at top of page
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
-            // ⭐ NEW: Display instructional video if available
+            // NEW: Display instructional video if available
             const videoSection = document.getElementById('video-section');
             const videoContainer = document.getElementById('video-container');
             
@@ -1012,7 +1010,7 @@
         }
 
         function startQuiz() {
-            // ⭐ NOW apply randomization when quiz starts
+            // NOW apply randomization when quiz starts
             const originalQuestions = allQuizzes[currentQuizName];
             currentQuizData = prepareQuizQuestions(originalQuestions, QUESTIONS_PER_QUIZ);
             
@@ -1020,7 +1018,7 @@
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
             
-            // ⭐ Scroll to top to show question 1
+            // Scroll to top to show question 1
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
             score = 0;
@@ -1183,7 +1181,7 @@
             // Submit to backend
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
             .then(() => {
-                // ⭐ Go directly to result view (no review)
+                // Go directly to result view (no review)
                 const scoreDisplay = document.getElementById('score-display');
                 scoreDisplay.innerText = `${percentage}%`;
                 
@@ -1199,7 +1197,7 @@
                 document.getElementById('quiz-view').classList.add('hidden');
                 document.getElementById('result-view').classList.remove('hidden');
                 
-                // ⭐ Scroll to top to show results
+                // Scroll to top to show results
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             })
             .catch(err => {
