@@ -222,9 +222,10 @@
             margin-bottom: 10px; 
             cursor: pointer; 
             transition: all 0.2s; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            display: grid;
+            grid-template-columns: 1fr auto auto; /* Info, score badge, video button */
+            gap: 12px;
+            align-items: center;
             text-align: left;
         }
         .quiz-list-item:hover { 
@@ -317,6 +318,53 @@
             border-radius: 20px;
             font-size: 0.85rem;
             margin-bottom: 12px;
+        }
+        
+        /* Video Button on Quiz Card */
+        .video-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .video-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .video-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Link below embedded video */
+        .watch-external-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        .watch-external-link:hover {
+            background: rgba(255, 255, 255, 0.25);
+            text-decoration: none;
         }
         
         .score-badge { 
@@ -485,6 +533,12 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+            
+            .quiz-list-item .video-button {
+                align-self: flex-end; /* Push to right on mobile */
+                margin-top: 8px;
             }
             
             .quiz-closed-badge {
@@ -531,6 +585,17 @@
             .video-badge {
                 font-size: 0.75rem;
                 padding: 4px 10px;
+            }
+            
+            .watch-external-link {
+                font-size: 0.85rem;
+                text-align: center;
+                display: block;
+            }
+            
+            .video-button {
+                font-size: 0.8rem;
+                padding: 6px 12px;
             }
         }
     </style>
@@ -831,9 +896,11 @@
                     statusBadgeHtml = `<span class="quiz-closed-badge">Closed</span>`;
                 }
                 
-                // ⭐ NEW: Add video badge if instructional video exists
+                // ⭐ NEW: Build video button if instructional video exists
+                let videoButtonHtml = "";
                 if (typeof statusInfo === 'object' && statusInfo.instructionalVideo) {
-                    statusBadgeHtml += `<span class="quiz-closed-badge" style="background:#667eea; border-color:#5568d3; margin-left:5px;">📺 Video</span>`;
+                    const videoUrl = statusInfo.instructionalVideo;
+                    videoButtonHtml = `<a href="${videoUrl}" target="_blank" class="video-button" onclick="event.stopPropagation();">📺 Watch Video</a>`;
                 }
                 
                 // Build dates display
@@ -865,6 +932,7 @@
                         ${datesHtml}
                     </div>
                     ${badgeHtml}
+                    ${videoButtonHtml}
                 `;
                 
                 // Only make clickable if quiz is active
@@ -925,8 +993,13 @@
                     embedUrl = `https://www.youtube.com/embed/${videoId}`;
                 }
                 
-                // Create iframe for video
-                videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                // Create iframe for video with external link below
+                videoContainer.innerHTML = `
+                    <iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <a href="${videoUrl}" target="_blank" class="watch-external-link">
+                        🎬 Watch in YouTube App / Fullscreen
+                    </a>
+                `;
                 videoSection.classList.remove('hidden');
             } else {
                 // No video available
