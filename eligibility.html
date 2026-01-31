@@ -269,6 +269,56 @@
             font-style: italic;
         }
         
+        /* Instructional Video Styling */
+        .video-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .video-section h3 {
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+            color: white;
+        }
+        
+        .video-section p {
+            margin: 0 0 15px 0;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+        
         .score-badge { 
             font-size: 0.9rem; 
             font-weight: bold; 
@@ -463,6 +513,25 @@
             .btn-primary {
                 padding: 12px 20px;
             }
+            
+            /* Video section mobile styling */
+            .video-section {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .video-section h3 {
+                font-size: 1rem;
+            }
+            
+            .video-section p {
+                font-size: 0.85rem;
+            }
+            
+            .video-badge {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+            }
         }
     </style>
 </head>
@@ -519,6 +588,15 @@
 
         <div id="intro-view" class="card hidden">
             <h2 id="intro-title">Quiz Title</h2>
+            
+            <!-- Instructional Video Section -->
+            <div id="video-section" class="video-section hidden">
+                <div class="video-badge">📺 Required Training Video</div>
+                <h3>Watch Before Starting</h3>
+                <p>Please watch this instructional video before attempting the quiz. It will help you understand the key concepts.</p>
+                <div class="video-container" id="video-container"></div>
+            </div>
+            
             <p style="color:#666; margin-bottom:20px;">Confirm your details to begin.</p>
             <input type="text" id="firstName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="text" id="lastName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
@@ -753,6 +831,11 @@
                     statusBadgeHtml = `<span class="quiz-closed-badge">Closed</span>`;
                 }
                 
+                // ⭐ NEW: Add video badge if instructional video exists
+                if (typeof statusInfo === 'object' && statusInfo.instructionalVideo) {
+                    statusBadgeHtml += `<span class="quiz-closed-badge" style="background:#667eea; border-color:#5568d3; margin-left:5px;">📺 Video</span>`;
+                }
+                
                 // Build dates display
                 if (typeof statusInfo === 'object') {
                     const startDate = statusInfo.startDate || '';
@@ -824,6 +907,32 @@
             document.getElementById('selection-view').classList.add('hidden');
             document.getElementById('intro-view').classList.remove('hidden');
             document.getElementById('intro-title').innerText = title;
+            
+            // ⭐ NEW: Display instructional video if available
+            const videoSection = document.getElementById('video-section');
+            const videoContainer = document.getElementById('video-container');
+            
+            if (typeof statusInfo === 'object' && statusInfo.instructionalVideo) {
+                const videoUrl = statusInfo.instructionalVideo;
+                
+                // Convert YouTube URLs to embed format
+                let embedUrl = videoUrl;
+                if (videoUrl.includes('youtube.com/watch?v=')) {
+                    const videoId = videoUrl.split('v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                } else if (videoUrl.includes('youtu.be/')) {
+                    const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                }
+                
+                // Create iframe for video
+                videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                videoSection.classList.remove('hidden');
+            } else {
+                // No video available
+                videoSection.classList.add('hidden');
+                videoContainer.innerHTML = '';
+            }
         }
 
         function startQuiz() {
