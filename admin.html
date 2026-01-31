@@ -362,7 +362,7 @@
         /* Question Analysis styling */
         .question-header { grid-template-columns: 1fr 120px 2fr; }
         .question-row { grid-template-columns: 1fr 120px 2fr; align-items: start; }
-        .question-text { font-weight: 600; color: #2c3e50; line-height: 1.4; }
+        .question-text { font-weight: 600; color: #2c3e50; line-height: 1.4; font-size: 1.11rem; }
         .success-rate { font-size: 1.2rem; font-weight: bold; color: #374151; }
         .wrong-answers { font-size: 0.85rem; color: #666; margin-top: 5px; }
         .lowest-performer { background: #fef3c7 !important; border-left-color: #eab308 !important; }
@@ -434,30 +434,16 @@
             font-weight: 600;
             color: #374151;
         }
-        
         /* Video link styling for question analysis */
         .question-video-link {
-            margin-top: 12px;
-            padding: 10px;
-            background: #f0f9ff;
-            border-left: 3px solid #3b82f6;
-            border-radius: 4px;
-        }
-        
-        .question-video-link-label {
-            font-weight: 600;
-            color: #1e40af;
-            font-size: 0.85rem;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            margin-top: 6px;
+            margin-bottom: 8px;
         }
         
         .question-video-link a {
             color: #3b82f6;
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -1833,29 +1819,27 @@
                         wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
                     }
                     
-                    // ⭐ NEW: Build video link if available
+                    // ⭐ NEW: Build video link (simple, no border, under question title)
                     let videoLinkHtml = '';
                     if (q.videoUrl && q.videoUrl.trim() !== '') {
                         videoLinkHtml = `
                             <div class="question-video-link">
-                                <div class="question-video-link-label">📹 Reference Video</div>
-                                <a href="${q.videoUrl}" target="_blank">
-                                    <span>Watch Video</span>
-                                    <span style="font-size: 0.75rem;">↗</span>
-                                </a>
+                                <a href="${q.videoUrl}" target="_blank">Video for question ↗</a>
                             </div>
                         `;
                     }
                     
                     div.innerHTML = `
-                        <div class="question-text">${q.questionText}</div>
+                        <div class="question-text">
+                            ${q.questionText}
+                            ${videoLinkHtml}
+                        </div>
                         <div style="text-align:center;">
                             <div class="success-rate">${q.successRate}%</div>
                         </div>
                         <div>
                             <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
                             ${wrongAnswersHtml}
-                            ${videoLinkHtml}
                         </div>
                         ${answerBreakdownHtml}
                     `;
