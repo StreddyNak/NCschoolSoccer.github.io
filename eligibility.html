@@ -223,8 +223,8 @@
             cursor: pointer; 
             transition: all 0.2s; 
             display: grid;
-            grid-template-columns: 1fr auto auto; /* Info, score badge, video button */
-            gap: 12px;
+            grid-template-columns: 1fr auto auto; /* Info, video button (center), score badge */
+            gap: 15px;
             align-items: center;
             text-align: left;
         }
@@ -931,8 +931,8 @@
                         <span class="quiz-meta">${subtitleText}</span>
                         ${datesHtml}
                     </div>
-                    ${badgeHtml}
                     ${videoButtonHtml}
+                    ${badgeHtml}
                 `;
                 
                 // Only make clickable if quiz is active
@@ -976,6 +976,9 @@
             document.getElementById('intro-view').classList.remove('hidden');
             document.getElementById('intro-title').innerText = title;
             
+            // ⭐ Scroll to top to show intro/video at top of page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             // ⭐ NEW: Display instructional video if available
             const videoSection = document.getElementById('video-section');
             const videoContainer = document.getElementById('video-container');
@@ -1016,6 +1019,9 @@
             document.getElementById('intro-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
+            
+            // ⭐ Scroll to top to show question 1
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             
             score = 0;
             userAnswers = {};
@@ -1192,6 +1198,9 @@
                 
                 document.getElementById('quiz-view').classList.add('hidden');
                 document.getElementById('result-view').classList.remove('hidden');
+                
+                // ⭐ Scroll to top to show results
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             })
             .catch(err => {
                 console.error("Submission error:", err);
