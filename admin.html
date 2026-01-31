@@ -435,6 +435,40 @@
             color: #374151;
         }
         
+        /* Video link styling for question analysis */
+        .question-video-link {
+            margin-top: 12px;
+            padding: 10px;
+            background: #f0f9ff;
+            border-left: 3px solid #3b82f6;
+            border-radius: 4px;
+        }
+        
+        .question-video-link-label {
+            font-weight: 600;
+            color: #1e40af;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .question-video-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+        
+        .question-video-link a:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        
         /* Stats Card */
         .stats-card { background: white; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: none; }
         .stats-card.show { display: block; }
@@ -1799,6 +1833,20 @@
                         wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
                     }
                     
+                    // ⭐ NEW: Build video link if available
+                    let videoLinkHtml = '';
+                    if (q.videoUrl && q.videoUrl.trim() !== '') {
+                        videoLinkHtml = `
+                            <div class="question-video-link">
+                                <div class="question-video-link-label">📹 Reference Video</div>
+                                <a href="${q.videoUrl}" target="_blank">
+                                    <span>Watch Video</span>
+                                    <span style="font-size: 0.75rem;">↗</span>
+                                </a>
+                            </div>
+                        `;
+                    }
+                    
                     div.innerHTML = `
                         <div class="question-text">${q.questionText}</div>
                         <div style="text-align:center;">
@@ -1807,9 +1855,11 @@
                         <div>
                             <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
                             ${wrongAnswersHtml}
+                            ${videoLinkHtml}
                         </div>
                         ${answerBreakdownHtml}
                     `;
+
                     
                     // Add click handler to expand/collapse
                     div.onclick = function(e) {
