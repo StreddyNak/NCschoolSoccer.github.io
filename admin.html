@@ -366,7 +366,16 @@
         .success-rate { font-size: 1.2rem; font-weight: bold; color: #374151; }
         .wrong-answers { font-size: 0.85rem; color: #666; margin-top: 5px; }
         .lowest-performer { background: #fef3c7 !important; border-left-color: #eab308 !important; }
-        
+
+        /* Question Header Styling */
+        .question-header-text { font-weight: 800; color: #1a1a1a; margin-bottom: 8px; font-size: 1.15rem; line-height: 1.3; }
+        .question-body-text { font-weight: 500; color: #4b5563; line-height: 1.4; }
+
+        /* Mobile adjustments for question headers */
+        @media (max-width: 768px) {
+        .question-header-text { font-size: 1rem; }
+        .question-body-text { font-size: 0.9rem; }
+        }
         /* Answer breakdown in expanded view */
         .answer-breakdown {
             display: none;
@@ -1829,19 +1838,60 @@
                         `;
                     }
                     
-                    div.innerHTML = `
-                        <div class="question-text">
-                            ${q.questionText}
-                            ${videoLinkHtml}
-                        </div>
-                        <div style="text-align:center;">
-                            <div class="success-rate">${q.successRate}%</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
-                            ${wrongAnswersHtml}
-                        </div>
-                        ${answerBreakdownHtml}
+                    // ... answer breakdown code stays the same ...
+        
+        let wrongAnswersHtml = '';
+        if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
+            wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
+        }
+        
+        let videoLinkHtml = '';
+        if (q.videoUrl && q.videoUrl.trim() !== '') {
+            videoLinkHtml = `
+                <div class="question-video-link">
+                    <a href="${q.videoUrl}" target="_blank">Video for question ↗</a>
+                </div>
+            `;
+        }
+        
+        // ⭐ NEW: Build question display with optional header
+        let questionDisplayHtml = '<div class="question-text">';
+        
+        if (q.questionHeader && q.questionHeader.trim() !== '') {
+            // Has separate header - show both
+            questionDisplayHtml += `
+                <div class="question-header-text">${q.questionHeader}</div>
+                <div class="question-body-text">${q.questionText}</div>
+            `;
+        } else {
+            // No separate header - show question only (backward compatible)
+            questionDisplayHtml += `<div>${q.questionText}</div>`;
+        }
+        
+        questionDisplayHtml += videoLinkHtml;
+        questionDisplayHtml += '</div>';
+        
+        // ⭐ UPDATED: Use the new questionDisplayHtml
+        div.innerHTML = `
+            ${questionDisplayHtml}
+            <div style="text-align:center;">
+                <div class="success-rate">${q.successRate}%</div>
+            </div>
+            <div>
+                <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
+                ${wrongAnswersHtml}
+            </div>
+            ${answerBreakdownHtml}
+        `;
+        
+        div.onclick = function(e) {
+            if (e.target.tagName === 'A') return;
+            div.classList.toggle('expanded');
+        };
+        
+        list.appendChild(div);
+    });
+}
                     `;
 
                     
