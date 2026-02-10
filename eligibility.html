@@ -1,26 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eligibility & Quizzes</title>
     <style>
-        * { box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            background: #f4f6f8; 
-            margin: 0; 
-            padding: 20px; 
-            color: #333; 
+        * {
+            box-sizing: border-box;
         }
-        .container { max-width: 900px; margin: 0 auto; }
 
-        .nav-bar { 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .nav-bar {
             background: white;
             border-radius: 12px;
             padding: 15px 20px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -33,25 +41,25 @@
             flex-wrap: wrap;
         }
 
-        .nav-link { 
-            text-decoration: none; 
-            color: #4b5563; 
-            font-weight: 600; 
-            padding: 10px 20px; 
-            border-radius: 8px; 
-            font-size: 15px; 
+        .nav-link {
+            text-decoration: none;
+            color: #4b5563;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
             transition: all 0.2s;
             white-space: nowrap;
             border: 2px solid transparent;
         }
-        
-        .nav-link:hover { 
-            background-color: #e5e7eb; 
-            color: #111827; 
+
+        .nav-link:hover {
+            background-color: #e5e7eb;
+            color: #111827;
         }
-        
-        .nav-link.active { 
-            background-color: #2ecc71; 
+
+        .nav-link.active {
+            background-color: #2ecc71;
             color: white;
             border-color: #27ae60;
         }
@@ -61,7 +69,7 @@
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .welcome-header h2 {
             color: #2c3e50;
             font-size: 2rem;
@@ -73,10 +81,10 @@
             background: white;
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
-        
+
         .playoff-notice {
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
             border: 2px solid #22c55e;
@@ -87,11 +95,11 @@
             font-size: 1.1rem;
             color: #166534;
         }
-        
+
         .playoff-notice.hidden {
             display: none;
         }
-        
+
         .scrimmage-detail-card {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
@@ -101,32 +109,32 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .scrimmage-detail-card.attended {
             border-left: 4px solid #22c55e;
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
         }
-        
+
         .scrimmage-detail-card.not-attended {
             border-left: 4px solid #ef4444;
         }
-        
+
         .scrimmage-info {
             flex-grow: 1;
         }
-        
+
         .scrimmage-name {
             font-weight: 700;
             color: #2c3e50;
             font-size: 1rem;
             margin-bottom: 4px;
         }
-        
+
         .scrimmage-date {
             font-size: 0.85rem;
             color: #666;
         }
-        
+
         .scrimmage-status {
             font-size: 0.9rem;
             font-weight: 600;
@@ -134,12 +142,12 @@
             border-radius: 12px;
             white-space: nowrap;
         }
-        
+
         .scrimmage-status.attended {
             background: #dcfce7;
             color: #166534;
         }
-        
+
         .scrimmage-status.not-attended {
             background: #fee2e2;
             color: #991b1b;
@@ -150,13 +158,13 @@
             text-align: center;
             margin-bottom: 25px;
         }
-        
+
         .quiz-section-header h2 {
             color: #2c3e50;
             font-size: 1.8rem;
             margin: 0 0 10px 0;
         }
-        
+
         .quiz-section-subtext {
             color: #666;
             font-size: 0.95rem;
@@ -164,76 +172,84 @@
         }
 
         /* --- Page Styles --- */
-        .hidden { display: none; }
-        .card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 30px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
-            margin-bottom: 20px; 
+        .hidden {
+            display: none;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
             text-align: center;
         }
-        
-        .btn-primary { 
-            background: #2ecc71; 
-            color: white; 
-            border: none; 
-            padding: 14px 24px; 
-            border-radius: 8px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 1rem; 
+
+        .btn-primary {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
             width: 100%;
             transition: all 0.2s;
         }
-        .btn-primary:hover { 
+
+        .btn-primary:hover {
             background: #27ae60;
             transform: translateY(-1px);
             box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
         }
-        .btn-primary:disabled { 
-            background: #95a5a6; 
+
+        .btn-primary:disabled {
+            background: #95a5a6;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        
-        .input-field { 
-            width: 100%; 
-            padding: 14px; 
-            border: 2px solid #e5e7eb; 
-            border-radius: 8px; 
-            font-size: 1rem; 
-            box-sizing: border-box; 
+
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
             margin-bottom: 15px;
             transition: border-color 0.2s;
         }
+
         .input-field:focus {
             outline: none;
             border-color: #2ecc71;
         }
 
         /* Quiz List Items */
-        .quiz-list-item { 
-            padding: 15px; 
-            border: 2px solid #e5e7eb; 
-            border-radius: 8px; 
-            margin-bottom: 10px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
+        .quiz-list-item {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
             display: grid;
-            grid-template-columns: 1fr auto auto; /* Info, video button (center), score badge */
+            grid-template-columns: 1fr auto auto;
+            /* Info, video button (center), score badge */
             gap: 15px;
             align-items: center;
             text-align: left;
         }
-        .quiz-list-item:hover { 
-            border-color: #2ecc71; 
+
+        .quiz-list-item:hover {
+            border-color: #2ecc71;
             background: #f0fdf4;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
         }
-        
+
         /* Closed Quiz Styling */
         .quiz-list-item.closed {
             background: #f9fafb;
@@ -241,14 +257,14 @@
             cursor: not-allowed;
             opacity: 0.75;
         }
-        
+
         .quiz-list-item.closed:hover {
             border-color: #d1d5db;
             background: #f9fafb;
             transform: none;
             box-shadow: none;
         }
-        
+
         .quiz-closed-badge {
             background: #fee2e2;
             color: #991b1b;
@@ -258,17 +274,31 @@
             font-weight: 600;
             margin-left: 8px;
         }
-        
-        .quiz-info { display: flex; flex-direction: column; }
-        .quiz-title { font-weight: bold; font-size: 1.1rem; color: #2c3e50; }
-        .quiz-meta { font-size: 0.85rem; color: #666; margin-top: 4px; }
-        .quiz-dates { 
-            font-size: 0.75rem; 
-            color: #999; 
+
+        .quiz-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quiz-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .quiz-meta {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .quiz-dates {
+            font-size: 0.75rem;
+            color: #999;
             margin-top: 4px;
             font-style: italic;
         }
-        
+
         /* Instructional Video Styling */
         .video-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -277,28 +307,29 @@
             margin-bottom: 25px;
             color: white;
         }
-        
+
         .video-section h3 {
             margin: 0 0 8px 0;
             font-size: 1.1rem;
             color: white;
         }
-        
+
         .video-section p {
             margin: 0 0 15px 0;
             font-size: 0.9rem;
             opacity: 0.95;
         }
-        
+
         .video-container {
             position: relative;
-            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            padding-bottom: 56.25%;
+            /* 16:9 aspect ratio */
             height: 0;
             overflow: hidden;
             border-radius: 8px;
             background: #000;
         }
-        
+
         .video-container iframe {
             position: absolute;
             top: 0;
@@ -307,7 +338,7 @@
             height: 100%;
             border: none;
         }
-        
+
         .video-badge {
             display: inline-flex;
             align-items: center;
@@ -318,7 +349,7 @@
             font-size: 0.85rem;
             margin-bottom: 12px;
         }
-        
+
         /* Video Button on Quiz Card */
         .video-button {
             display: inline-flex;
@@ -336,16 +367,16 @@
             cursor: pointer;
             white-space: nowrap;
         }
-        
+
         .video-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
-        
+
         .video-button:active {
             transform: translateY(0);
         }
-        
+
         /* Link below embedded video */
         .watch-external-link {
             display: inline-flex;
@@ -360,89 +391,96 @@
             border-radius: 6px;
             transition: all 0.2s;
         }
-        
+
         .watch-external-link:hover {
             background: rgba(255, 255, 255, 0.25);
             text-decoration: none;
         }
-        
-        .score-badge { 
-            font-size: 0.9rem; 
-            font-weight: bold; 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            background: #eee; 
-            color: #777; 
+
+        .score-badge {
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #eee;
+            color: #777;
         }
-        .score-badge.good { background: #dcfce7; color: #166534; }
-        
+
+        .score-badge.good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
         /* Questions */
-        .question-block { 
-            margin-bottom: 40px; 
-            border-bottom: 2px solid #e5e7eb; 
-            padding-bottom: 30px; 
-            text-align: left; 
+        .question-block {
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 30px;
+            text-align: left;
         }
-        .q-text { 
-            font-size: 1.2rem; 
-            font-weight: 700; 
+
+        .q-text {
+            font-size: 1.2rem;
+            font-weight: 700;
             margin-bottom: 15px;
             color: #2c3e50;
             line-height: 1.4;
         }
-        
+
         /* Video */
-        .video-wrapper { 
-            position: relative; 
-            padding-bottom: 56.25%; 
-            height: 0; 
-            overflow: hidden; 
-            max-width: 100%; 
-            border-radius: 8px; 
-            background: #000; 
-            margin-bottom: 8px; 
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            border-radius: 8px;
+            background: #000;
+            margin-bottom: 8px;
         }
-        .video-wrapper iframe { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            border: 0; 
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
         }
-        .backup-link { 
-            display: inline-block; 
-            font-size: 0.85rem; 
-            color: #3498db; 
-            text-decoration: underline; 
-            margin-bottom: 15px; 
+
+        .backup-link {
+            display: inline-block;
+            font-size: 0.85rem;
+            color: #3498db;
+            text-decoration: underline;
+            margin-bottom: 15px;
         }
-        
+
         /* IMPROVED: Answer Option Buttons with Better Feedback */
-        .option-btn { 
-            display: block; 
-            width: 100%; 
-            text-align: left; 
-            padding: 14px 16px; 
-            margin-bottom: 10px; 
-            background: white; 
-            border: 2px solid #e5e7eb; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 1rem; 
+        .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
         }
-        
-        .option-btn:hover:not(.disabled) { 
-            background-color: #f9fafb; 
+
+        .option-btn:hover:not(.disabled) {
+            background-color: #f9fafb;
             border-color: #d1d5db;
             transform: translateX(4px);
         }
-        
+
         /* IMPROVED: Much more obvious selected state */
-        .option-btn.selected { 
+        .option-btn.selected {
             background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
             border-color: #3b82f6;
             border-width: 3px;
@@ -451,10 +489,10 @@
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             transform: translateX(4px);
         }
-        
-        .option-btn.disabled { 
-            cursor: not-allowed; 
-            pointer-events: none; 
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+            pointer-events: none;
             opacity: 0.6;
         }
 
@@ -473,24 +511,24 @@
             body {
                 padding: 15px;
             }
-            
+
             .container {
                 padding: 0;
             }
-            
+
             .welcome-header h2 {
                 font-size: 1.6rem;
             }
-            
+
             .nav-bar {
                 padding: 15px;
                 gap: 12px;
             }
-            
+
             .nav-center {
                 gap: 8px;
             }
-            
+
             .nav-link {
                 padding: 10px 16px;
                 font-size: 14px;
@@ -498,100 +536,102 @@
                 text-align: center;
                 min-width: calc(50% - 4px);
             }
-            
+
             .eligibility-section {
                 padding: 20px;
             }
-            
+
             .playoff-notice {
                 font-size: 1rem;
                 padding: 10px 16px;
             }
-            
+
             .scrimmage-detail-card {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 8px;
                 padding: 12px;
             }
-            
+
             .card {
                 padding: 20px;
             }
-            
+
             .q-text {
                 font-size: 1.1rem;
             }
-            
+
             .option-btn {
                 padding: 12px 14px;
                 font-size: 0.95rem;
             }
-            
+
             .quiz-list-item {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
-                grid-template-columns: 1fr; /* Stack on mobile */
+                grid-template-columns: 1fr;
+                /* Stack on mobile */
             }
-            
+
             .quiz-list-item .video-button {
-                align-self: flex-end; /* Push to right on mobile */
+                align-self: flex-end;
+                /* Push to right on mobile */
                 margin-top: 8px;
             }
-            
+
             .quiz-closed-badge {
                 margin-left: 0;
                 margin-top: 4px;
             }
-            
+
             .score-badge {
                 align-self: flex-start;
             }
         }
-        
+
         @media (max-width: 480px) {
             .nav-link {
                 min-width: 100%;
             }
-            
+
             .welcome-header h2 {
                 font-size: 1.4rem;
             }
-            
+
             h2 {
                 font-size: 1.5rem;
             }
-            
+
             .btn-primary {
                 padding: 12px 20px;
             }
-            
+
             /* Video section mobile styling */
             .video-section {
                 padding: 15px;
                 margin-bottom: 20px;
             }
-            
+
             .video-section h3 {
                 font-size: 1rem;
             }
-            
+
             .video-section p {
                 font-size: 0.85rem;
             }
-            
+
             .video-badge {
                 font-size: 0.75rem;
                 padding: 4px 10px;
             }
-            
+
             .watch-external-link {
                 font-size: 0.85rem;
                 text-align: center;
                 display: block;
             }
-            
+
             .video-button {
                 font-size: 0.8rem;
                 padding: 6px 12px;
@@ -599,6 +639,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -619,22 +660,26 @@
 
         <div id="login-view" class="card">
             <h2>Referee Login</h2>
-            <p style="color:#666; margin-bottom:20px;">Enter your email to view your eligibility status and training modules.</p>
+            <p style="color:#666; margin-bottom:20px;">Enter your email to view your eligibility status and training
+                modules.</p>
             <input type="email" id="loginEmail" class="input-field" placeholder="yourname@email.com">
             <button class="btn-primary" onclick="handleLogin()">Login</button>
-            <p id="login-msg" style="color:#e74c3c; margin-top:15px; display:none; padding:12px; background:#fee; border-radius:6px;"></p>
+            <p id="login-msg"
+                style="color:#e74c3c; margin-top:15px; display:none; padding:12px; background:#fee; border-radius:6px;">
+            </p>
         </div>
 
         <div id="eligibility-display" class="eligibility-section hidden">
             <h3 style="color: #2c3e50; font-size: 1.1rem; margin: 0 0 12px 0; font-weight: 600;">
                 Scrimmage Attendance
             </h3>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 12px;">
+
+            <div
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin-bottom: 12px;">
                 <div id="scrimmage1-detail" class="scrimmage-detail-card"></div>
                 <div id="scrimmage2-detail" class="scrimmage-detail-card"></div>
             </div>
-            
+
             <div id="playoff-notice" class="playoff-notice hidden">
                 You have completed the scrimmages requirement for playoff eligibility!
             </div>
@@ -643,34 +688,40 @@
         <div id="selection-view" class="hidden">
             <div class="quiz-section-header">
                 <h2>Quizzes</h2>
-                <p class="quiz-section-subtext">You must complete all 3 optional quizzes at 12/15 or better to be eligible for playoffs</p>
+                <p class="quiz-section-subtext">You must complete all 3 optional quizzes at 12/15 or better to be
+                    eligible for playoffs</p>
             </div>
             <div id="quiz-list-container"></div>
-            <button onclick="location.reload()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline;">Logout</button>
+            <button onclick="location.reload()"
+                style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer; text-decoration:underline;">Logout</button>
         </div>
 
         <div id="intro-view" class="card hidden">
             <h2 id="intro-title">Quiz Title</h2>
-            
+
             <!-- Instructional Video Section -->
             <div id="video-section" class="video-section hidden">
                 <div class="video-badge">📺 Required Training Video</div>
                 <h3>Watch Before Starting</h3>
-                <p>Please watch this instructional video before attempting the quiz. It will help you understand the key concepts.</p>
+                <p>Please watch this instructional video before attempting the quiz. It will help you understand the key
+                    concepts.</p>
                 <div class="video-container" id="video-container"></div>
             </div>
-            
+
             <p style="color:#666; margin-bottom:20px;">Confirm your details to begin.</p>
             <input type="text" id="firstName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="text" id="lastName" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <input type="email" id="userEmail" class="input-field" readonly style="background:#f9f9f9; color:#666;">
             <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
             <br>
-            <button onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');" style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer; text-decoration:underline;">Back</button>
+            <button
+                onclick="document.getElementById('intro-view').classList.add('hidden'); document.getElementById('selection-view').classList.remove('hidden');"
+                style="background:none; border:none; color:#666; margin-top:15px; cursor:pointer; text-decoration:underline;">Back</button>
         </div>
 
         <div id="quiz-view" class="card hidden">
-            <h2 id="active-quiz-title" style="border-bottom:2px solid #2ecc71; padding-bottom:10px; margin-bottom:20px; color:#2c3e50;"></h2>
+            <h2 id="active-quiz-title"
+                style="border-bottom:2px solid #2ecc71; padding-bottom:10px; margin-bottom:20px; color:#2c3e50;"></h2>
             <div id="questions-container"></div>
             <button id="finishBtn" class="btn-primary" onclick="submitQuiz()">Submit Quiz</button>
         </div>
@@ -678,15 +729,19 @@
         <div id="result-view" class="card hidden">
             <h1 style="color:#2c3e50;">Quiz Complete!</h1>
             <div style="font-size:3rem; font-weight:800; margin:20px 0;" id="score-display">0%</div>
-            <p id="score-detail" style="font-size:1.1rem; color:#666; margin-bottom:8px;">You got X out of Y correct.</p>
-            <p style="font-size:1rem; color:#666; font-weight:600; margin-bottom:20px;">You must get 12/15 or better to receive credit</p>
+            <p id="score-detail" style="font-size:1.1rem; color:#666; margin-bottom:8px;">You got X out of Y correct.
+            </p>
+            <p style="font-size:1rem; color:#666; font-weight:600; margin-bottom:20px;">You must get 12/15 or better to
+                receive credit</p>
             <p style="color:#22c55e; margin-top:20px; font-weight:600;">✓ Results saved successfully</p>
             <button class="btn-primary" onclick="location.reload()">Return to Login</button>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p><a href="https://www.trianglerefs.org/" target="_blank" rel="noopener noreferrer" style="color: #3498db; text-decoration: none;">Triangle Soccer Officials Association</a> &amp; NickNak Productions</p>
+            <p><a href="https://www.trianglerefs.org/" target="_blank" rel="noopener noreferrer"
+                    style="color: #3498db; text-decoration: none;">Triangle Soccer Officials Association</a> &amp;
+                NickNak Productions</p>
             <p>© 2026 All Rights Reserved</p>
         </div>
     </div>
@@ -696,7 +751,7 @@
         const QUESTIONS_PER_QUIZ = 15; // Configure how many questions to show
 
         let allQuizzes = {};
-        let userScores = {}; 
+        let userScores = {};
         let quizStatus = {}; // NEW: Track which quizzes are active/closed
         let currentQuizData = [];
         let currentQuizName = "";
@@ -706,7 +761,7 @@
         let eligibilityData = null;
 
         // ===== RANDOMIZATION FUNCTIONS =====
-        
+
         /**
          * Fisher-Yates shuffle algorithm - ensures truly random shuffling
          */
@@ -718,7 +773,7 @@
             }
             return shuffled;
         }
-        
+
         /**
          * Prepare quiz with randomization:
          * 1. Shuffle all questions
@@ -727,20 +782,20 @@
          */
         function prepareQuizQuestions(questions, maxQuestions = QUESTIONS_PER_QUIZ) {
             console.log(`Preparing quiz: ${questions.length} total questions, selecting ${maxQuestions}`);
-            
+
             // Step 1: Shuffle questions
             let shuffled = shuffleArray(questions);
-            
+
             // Step 2: Take only first N questions
             shuffled = shuffled.slice(0, Math.min(maxQuestions, questions.length));
-            
+
             // Step 3: Shuffle answer options for each question
             shuffled = shuffled.map((q, index) => {
                 const correctAnswer = q.answer;
-                
+
                 // Shuffle the options array
                 const shuffledOptions = shuffleArray(q.options);
-                
+
                 return {
                     ...q,
                     questionNumber: index + 1,
@@ -748,11 +803,11 @@
                     correctAnswer: correctAnswer // Keep track of correct answer
                 };
             });
-            
+
             console.log(`Quiz prepared: ${shuffled.length} randomized questions with shuffled answers`);
             return shuffled;
         }
-        
+
         // ===== LOGIN & DATA LOADING =====
 
         function handleLogin() {
@@ -770,24 +825,24 @@
                         btn.innerText = "Login"; btn.disabled = false; return;
                     }
                     allQuizzes = data.quizzes;
-                    userScores = data.scores || {}; 
+                    userScores = data.scores || {};
                     quizStatus = data.quizStatus || {}; // NEW: Capture quiz status
-                    currentUser = data.user || { firstName: "", lastName: "", email: email }; 
+                    currentUser = data.user || { firstName: "", lastName: "", email: email };
                     eligibilityData = data.eligibility || null;
-                    
+
                     document.getElementById('userEmail').value = email;
                     document.getElementById('firstName').value = currentUser.firstName;
                     document.getElementById('lastName').value = currentUser.lastName;
-                    
+
                     // Update welcome header at top of page
                     if (currentUser.firstName) {
                         document.getElementById('welcome-header').innerText = `Welcome, ${currentUser.firstName}`;
                         document.getElementById('welcome-header-container').classList.remove('hidden');
                     }
-                    
+
                     displayEligibility();
                     renderQuizList();
-                    
+
                     document.getElementById('login-view').classList.add('hidden');
                     document.getElementById('welcome-header-container').classList.remove('hidden');
                     document.getElementById('eligibility-display').classList.remove('hidden');
@@ -805,19 +860,19 @@
                 console.log("No eligibility data available");
                 return;
             }
-            
+
             const playoffNotice = document.getElementById('playoff-notice');
             if (eligibilityData.playoffEligible) {
                 playoffNotice.classList.remove('hidden');
             } else {
                 playoffNotice.classList.add('hidden');
             }
-            
+
             if (eligibilityData.scrimmages && eligibilityData.scrimmages.length >= 2) {
                 displayScrimmageDetails(eligibilityData.scrimmages);
             }
         }
-        
+
         function displayScrimmageDetails(scrimmages) {
             const scrim1 = scrimmages[0];
             const scrim1Card = document.getElementById('scrimmage1-detail');
@@ -831,7 +886,7 @@
                     ${scrim1.attended ? 'Attended' : 'Not Attended'}
                 </div>
             `;
-            
+
             const scrim2 = scrimmages[1];
             const scrim2Card = document.getElementById('scrimmage2-detail');
             scrim2Card.className = `scrimmage-detail-card ${scrim2.attended ? 'attended' : 'not-attended'}`;
@@ -849,7 +904,7 @@
         function renderQuizList() {
             const container = document.getElementById('quiz-list-container');
             container.innerHTML = '';
-            
+
             // Get all quiz names from active quizzes, scores, AND quiz status
             // This ensures closed quizzes show even if student never took them
             const allQuizNames = new Set([
@@ -857,12 +912,12 @@
                 ...Object.keys(userScores),       // Quizzes student has taken
                 ...Object.keys(quizStatus)        // ALL quizzes (active and closed)
             ]);
-            
+
             const titles = Array.from(allQuizNames);
-            
-            if (titles.length === 0) { 
-                container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>"; 
-                return; 
+
+            if (titles.length === 0) {
+                container.innerHTML = "<p style='text-align:center'>No quizzes assigned to your group.</p>";
+                return;
             }
 
             titles.forEach(title => {
@@ -871,12 +926,12 @@
                 const isActive = statusInfo.status === 'active' || statusInfo === 'active' || allQuizzes[title];
                 const count = allQuizzes[title] ? allQuizzes[title].length : 0;
                 const questionsShown = Math.min(QUESTIONS_PER_QUIZ, count);
-                const highScore = userScores[title]; 
-                
+                const highScore = userScores[title];
+
                 let badgeHtml = "";
                 let statusBadgeHtml = "";
                 let datesHtml = "";
-                
+
                 // Show score if available
                 if (highScore !== undefined && highScore.score) {
                     badgeHtml = `<span class="score-badge good">Best: ${highScore.score}</span>`;
@@ -888,24 +943,24 @@
                     // Show "Not Taken" badge for closed quizzes without scores
                     badgeHtml = `<span class="score-badge" style="background:#f3f4f6; color:#9ca3af;">Not Taken</span>`;
                 }
-                
+
                 // Show closed badge if quiz is closed
                 if (isClosed) {
                     statusBadgeHtml = `<span class="quiz-closed-badge">Closed</span>`;
                 }
-                
+
                 // Build video button if instructional video exists
                 let videoButtonHtml = "";
                 if (typeof statusInfo === 'object' && statusInfo.instructionalVideo) {
                     const videoUrl = statusInfo.instructionalVideo;
                     videoButtonHtml = `<a href="${videoUrl}" target="_blank" class="video-button" onclick="event.stopPropagation();">📺 Watch Instructional Video</a>`;
                 }
-                
+
                 // Build dates display
                 if (typeof statusInfo === 'object') {
                     const startDate = statusInfo.startDate || '';
                     const endDate = statusInfo.endDate || '';
-                    
+
                     if (startDate && endDate) {
                         datesHtml = `<div class="quiz-dates">Available: ${startDate} - ${endDate}</div>`;
                     } else if (startDate) {
@@ -914,15 +969,15 @@
                         datesHtml = `<div class="quiz-dates">Closes: ${endDate}</div>`;
                     }
                 }
-                
+
                 const div = document.createElement('div');
                 div.className = `quiz-list-item ${isClosed ? 'closed' : ''}`;
-                
+
                 // Show message for closed quizzes, or question count for active
-                const subtitleText = isClosed 
-                    ? 'No longer accepting responses' 
+                const subtitleText = isClosed
+                    ? 'No longer accepting responses'
                     : (questionsShown > 0 ? questionsShown + ' Questions' : 'Coming Soon');
-                
+
                 div.innerHTML = `
                     <div class="quiz-info">
                         <span class="quiz-title">${title}${statusBadgeHtml}</span>
@@ -932,19 +987,19 @@
                     ${videoButtonHtml}
                     ${badgeHtml}
                 `;
-                
+
                 // Only make clickable if quiz is active
                 if (!isClosed && isActive) {
                     div.onclick = () => showIntro(title);
                 } else if (isClosed) {
                     div.onclick = () => {
-                        const scoreMessage = highScore 
-                            ? `Your score: ${highScore.score || highScore.percent || highScore}` 
+                        const scoreMessage = highScore
+                            ? `Your score: ${highScore.score || highScore.percent || highScore}`
                             : 'You did not take this quiz.';
                         alert(`This quiz is no longer accepting responses.\n\n${scoreMessage}`);
                     };
                 }
-                
+
                 container.appendChild(div);
             });
         }
@@ -953,37 +1008,37 @@
             // Safety check: prevent taking closed quizzes
             const statusInfo = quizStatus[title] || { status: 'active' };
             const status = typeof statusInfo === 'object' ? statusInfo.status : statusInfo;
-            
+
             if (status === 'closed') {
                 alert('This quiz is no longer accepting responses.');
                 return;
             }
-            
+
             // Safety check: ensure quiz questions exist
             if (!allQuizzes[title] || allQuizzes[title].length === 0) {
                 alert('This quiz is not currently available.');
                 return;
             }
-            
+
             currentQuizName = title;
             // Store original questions but don't randomize yet
             currentQuizData = allQuizzes[title];
-            
+
             document.getElementById('eligibility-display').classList.add('hidden');
             document.getElementById('selection-view').classList.add('hidden');
             document.getElementById('intro-view').classList.remove('hidden');
             document.getElementById('intro-title').innerText = title;
-            
+
             // Scroll to top to show intro/video at top of page
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
+
             // NEW: Display instructional video if available
             const videoSection = document.getElementById('video-section');
             const videoContainer = document.getElementById('video-container');
-            
+
             if (typeof statusInfo === 'object' && statusInfo.instructionalVideo) {
                 const videoUrl = statusInfo.instructionalVideo;
-                
+
                 // Convert YouTube URLs to embed format
                 let embedUrl = videoUrl;
                 if (videoUrl.includes('youtube.com/watch?v=')) {
@@ -993,7 +1048,7 @@
                     const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
                     embedUrl = `https://www.youtube.com/embed/${videoId}`;
                 }
-                
+
                 // Create iframe for video with external link below
                 videoContainer.innerHTML = `
                     <iframe src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -1013,14 +1068,14 @@
             // NOW apply randomization when quiz starts
             const originalQuestions = allQuizzes[currentQuizName];
             currentQuizData = prepareQuizQuestions(originalQuestions, QUESTIONS_PER_QUIZ);
-            
+
             document.getElementById('intro-view').classList.add('hidden');
             document.getElementById('quiz-view').classList.remove('hidden');
             document.getElementById('active-quiz-title').innerText = currentQuizName;
-            
+
             // Scroll to top to show question 1
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
+
             score = 0;
             userAnswers = {};
             renderQuestions();
@@ -1030,7 +1085,7 @@
             if (!url || url.length < 5) return "";
             url = url.trim();
             let embed = "";
-            
+
             const ytMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
             if (ytMatch && ytMatch[1]) {
                 embed = `<div class="video-wrapper"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
@@ -1040,7 +1095,7 @@
                     embed = `<div class="video-wrapper"><iframe src="https://player.vimeo.com/video/${vimeoMatch[1]}" frameborder="0" allowfullscreen></iframe></div>`;
                 }
             }
-            
+
             return `${embed}<a href="${url}" target="_blank" class="backup-link">Open Video in New Tab (if player fails)</a>`;
         }
 
@@ -1053,12 +1108,25 @@
                 qDiv.className = 'question-block';
                 qDiv.id = `q-block-${index}`;
 
+
+                // Add question header if it exists
+                if (q.questionHeader && q.questionHeader.trim() !== '') {
+                    const header = document.createElement('div');
+                    header.style.fontSize = '0.95rem';
+                    header.style.fontWeight = '600';
+                    header.style.color = '#667eea';
+                    header.style.marginBottom = '8px';
+                    header.innerText = q.questionHeader;
+                    qDiv.appendChild(header);
+                }
+
                 const title = document.createElement('div');
                 title.className = 'q-text';
                 title.innerText = `${q.questionNumber}. ${q.question}`;
                 qDiv.appendChild(title);
 
-                if(q.video) {
+
+                if (q.video) {
                     const vidDiv = document.createElement('div');
                     vidDiv.innerHTML = getVideoHtml(q.video);
                     qDiv.appendChild(vidDiv);
@@ -1067,13 +1135,13 @@
                 const optsDiv = document.createElement('div');
                 optsDiv.className = 'options-group';
                 optsDiv.id = `options-${index}`;
-                
+
                 // ⭐ Options are already shuffled by prepareQuizQuestions
                 q.options.forEach(optText => {
                     const btn = document.createElement('button');
                     btn.className = 'option-btn';
                     btn.innerText = optText;
-                    btn.onclick = function() { selectAnswer(index, optText); };
+                    btn.onclick = function () { selectAnswer(index, optText); };
                     optsDiv.appendChild(btn);
                 });
                 qDiv.appendChild(optsDiv);
@@ -1085,29 +1153,29 @@
         function selectAnswer(index, selectedText) {
             // Store the answer
             userAnswers[index] = selectedText;
-            
+
             // Get the options container for this question
             const parent = document.getElementById(`options-${index}`);
             if (!parent) {
                 console.error('Could not find options container for question', index);
                 return;
             }
-            
+
             // Get all buttons in this question
             const allBtns = parent.querySelectorAll('.option-btn');
-            
+
             // Remove 'selected' class from all buttons
             allBtns.forEach(btn => {
                 btn.classList.remove('selected');
             });
-            
+
             // Add 'selected' class to the clicked button
             allBtns.forEach(btn => {
                 if (btn.innerText === selectedText) {
                     btn.classList.add('selected');
                 }
             });
-            
+
             // Scroll to next question smoothly (better UX)
             if (index < currentQuizData.length - 1) {
                 const nextQuestion = document.getElementById(`q-block-${index + 1}`);
@@ -1123,18 +1191,18 @@
             // Safety check: prevent submitting closed quizzes
             const statusInfo = quizStatus[currentQuizName] || { status: 'active' };
             const status = typeof statusInfo === 'object' ? statusInfo.status : statusInfo;
-            
+
             if (status === 'closed') {
                 alert('This quiz is no longer accepting responses. Your answers will not be saved.');
                 location.reload();
                 return;
             }
-            
+
             const total = currentQuizData.length;
             const answeredCount = Object.keys(userAnswers).length;
-            
-            if(answeredCount < total) {
-                if(!confirm(`You have only answered ${answeredCount} of ${total} questions. Submit anyway?`)) return;
+
+            if (answeredCount < total) {
+                if (!confirm(`You have only answered ${answeredCount} of ${total} questions. Submit anyway?`)) return;
             }
 
             // Calculate score
@@ -1147,7 +1215,7 @@
             });
 
             const percentage = Math.round((score / total) * 100);
-            
+
             const finishBtn = document.getElementById('finishBtn');
             finishBtn.innerText = "Submitting Results...";
             finishBtn.disabled = true;
@@ -1157,7 +1225,7 @@
             currentQuizData.forEach((q, index) => {
                 const userAnswer = userAnswers[index] || "";
                 const isCorrect = userAnswer.trim() === q.correctAnswer.trim();
-                
+
                 questionResults.push({
                     questionNumber: q.questionNumber,
                     questionText: q.question,
@@ -1180,33 +1248,34 @@
 
             // Submit to backend
             fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
-            .then(() => {
-                // Go directly to result view (no review)
-                const scoreDisplay = document.getElementById('score-display');
-                scoreDisplay.innerText = `${percentage}%`;
-                
-                // Color code the score: Green for 80%+, Red for below 80%
-                if (percentage >= 80) {
-                    scoreDisplay.style.color = '#22c55e'; // Green
-                } else {
-                    scoreDisplay.style.color = '#ef4444'; // Red
-                }
-                
-                document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
-                
-                document.getElementById('quiz-view').classList.add('hidden');
-                document.getElementById('result-view').classList.remove('hidden');
-                
-                // Scroll to top to show results
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            })
-            .catch(err => {
-                console.error("Submission error:", err);
-                alert("Error submitting results. Please try again or contact your supervisor.");
-                finishBtn.innerText = "Submit Quiz";
-                finishBtn.disabled = false;
-            });
+                .then(() => {
+                    // Go directly to result view (no review)
+                    const scoreDisplay = document.getElementById('score-display');
+                    scoreDisplay.innerText = `${percentage}%`;
+
+                    // Color code the score: Green for 80%+, Red for below 80%
+                    if (percentage >= 80) {
+                        scoreDisplay.style.color = '#22c55e'; // Green
+                    } else {
+                        scoreDisplay.style.color = '#ef4444'; // Red
+                    }
+
+                    document.getElementById('score-detail').innerText = `You got ${score} out of ${total} correct.`;
+
+                    document.getElementById('quiz-view').classList.add('hidden');
+                    document.getElementById('result-view').classList.remove('hidden');
+
+                    // Scroll to top to show results
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                })
+                .catch(err => {
+                    console.error("Submission error:", err);
+                    alert("Error submitting results. Please try again or contact your supervisor.");
+                    finishBtn.innerText = "Submit Quiz";
+                    finishBtn.disabled = false;
+                });
         }
     </script>
 </body>
+
 </html>
