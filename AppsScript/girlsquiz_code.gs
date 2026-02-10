@@ -154,9 +154,9 @@ function getQuizStatus(quizName) {
       var rowQuizName = String(row[0]).trim(); // Column A
       
       if (rowQuizName === quizName) {
-        var status = String(row[12]).toLowerCase().trim() || 'active'; // Column M
-        var startDate = formatDate(row[13]); // Column N
-        var endDate = formatDate(row[14]); // Column O
+        var status = String(row[13]).toLowerCase().trim() || 'active'; // Column N - Status
+        var startDate = formatDate(row[14]); // Column O - Start Date
+        var endDate = formatDate(row[15]); // Column P - End Date
         
         Logger.log("Quiz '" + quizName + "' status: " + status);
         return { status: status, startDate: startDate, endDate: endDate };
@@ -277,11 +277,12 @@ function getQuizQuestions(userEmail) {
         var row = data[i];
         var qName = row[0];
         
-        // ⭐ NEW: Get quiz status, dates, and instructional video
-        var quizStatus = String(row[12]).toLowerCase().trim() || 'active'; // Column M
-        var startDate = row[13]; // Column N
-        var endDate = row[14]; // Column O
-        var instructionalVideo = String(row[15] || '').trim(); // Column P - instructional video URL
+        // ⭐ FIXED: Get quiz status, dates, and instructional video with CORRECT column indices
+        var assignToGroup = String(row[12]).toLowerCase().trim(); // Column M - Assign to Group
+        var quizStatus = String(row[13]).toLowerCase().trim() || 'active'; // Column N - Status
+        var startDate = row[14]; // Column O - Start Date
+        var endDate = row[15]; // Column P - End Date
+        var instructionalVideo = String(row[16] || '').trim(); // Column Q - Instructional Video URL
         
         // ⭐ NEW: Track status, dates, and video for each quiz (use first occurrence)
         if (qName && !response.quizStatus[qName]) {
@@ -293,22 +294,22 @@ function getQuizQuestions(userEmail) {
           };
         }
         
-        var rawTargetGroups = String(row[11]).toLowerCase();
+        var rawTargetGroups = assignToGroup; // Use the correct column
 
-        var isPublic = (!row[11] || rawTargetGroups === "");
+        var isPublic = (!assignToGroup || assignToGroup === "");
         var quizAllowedGroups = rawTargetGroups.split(",").map(function(item) { return item.trim(); });
         var isAllowed = userGroups.some(function(uGroup) { return quizAllowedGroups.includes(uGroup); });
 
         if (qName && (isPublic || isAllowed || isMaster) && quizStatus === 'active') {
   if (!response.quizzes[qName]) response.quizzes[qName] = [];
-  var rawOptions = [row[4], row[5], row[6], row[7], row[8], row[9]]; // ⚠️ UPDATED INDICES
+  var rawOptions = [row[4], row[5], row[6], row[7], row[8], row[9]]; // Columns E-J (indices 4-9)
   response.quizzes[qName].push({
-    questionHeader: row[1],
-    question: row[2],
-    video: row[3],
+    questionHeader: row[1],  // Column B
+    question: row[2],        // Column C
+    video: row[3],           // Column D
     options: rawOptions.filter(String),
-    answer: row[10],
-    explanation: row[11]
+    answer: row[10],         // Column K
+    explanation: row[11]     // Column L
   });
 }
       }

@@ -1838,66 +1838,37 @@
                         `;
                     }
                     
-                    // ... answer breakdown code stays the same ...
-        
-        let wrongAnswersHtml = '';
-        if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
-            wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
-        }
-        
-        let videoLinkHtml = '';
-        if (q.videoUrl && q.videoUrl.trim() !== '') {
-            videoLinkHtml = `
-                <div class="question-video-link">
-                    <a href="${q.videoUrl}" target="_blank">Video for question ↗</a>
-                </div>
-            `;
-        }
-        
-        // ⭐ NEW: Build question display with optional header
-        let questionDisplayHtml = '<div class="question-text">';
-        
-        if (q.questionHeader && q.questionHeader.trim() !== '') {
-            // Has separate header - show both
-            questionDisplayHtml += `
-                <div class="question-header-text">${q.questionHeader}</div>
-                <div class="question-body-text">${q.questionText}</div>
-            `;
-        } else {
-            // No separate header - show question only (backward compatible)
-            questionDisplayHtml += `<div>${q.questionText}</div>`;
-        }
-        
-        questionDisplayHtml += videoLinkHtml;
-        questionDisplayHtml += '</div>';
-        
-        // ⭐ UPDATED: Use the new questionDisplayHtml
-        div.innerHTML = `
-            ${questionDisplayHtml}
-            <div style="text-align:center;">
-                <div class="success-rate">${q.successRate}%</div>
-            </div>
-            <div>
-                <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
-                ${wrongAnswersHtml}
-            </div>
-            ${answerBreakdownHtml}
-        `;
-        
-        div.onclick = function(e) {
-            if (e.target.tagName === 'A') return;
-            div.classList.toggle('expanded');
-        };
-        
-        list.appendChild(div);
-    });
-}
-                    `;
-
+                    // Build question display with optional header
+                    let questionDisplayHtml = '<div class="question-text">';
                     
-                    // Add click handler to expand/collapse
+                    if (q.questionHeader && q.questionHeader.trim() !== '') {
+                        // Has separate header - show both
+                        questionDisplayHtml += `
+                            <div class="question-header-text">${q.questionHeader}</div>
+                            <div class="question-body-text">${q.questionText}</div>
+                        `;
+                    } else {
+                        // No separate header - show question only (backward compatible)
+                        questionDisplayHtml += `<div>${q.questionText}</div>`;
+                    }
+                    
+                    questionDisplayHtml += videoLinkHtml;
+                    questionDisplayHtml += '</div>';
+                    
+                    // Use the new questionDisplayHtml
+                    div.innerHTML = `
+                        ${questionDisplayHtml}
+                        <div style="text-align:center;">
+                            <div class="success-rate">${q.successRate}%</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.9rem; color:#2c3e50; margin-bottom:3px;"><strong>Correct:</strong> ${q.correctAnswer}</div>
+                            ${wrongAnswersHtml}
+                        </div>
+                        ${answerBreakdownHtml}
+                    `;
+                    
                     div.onclick = function(e) {
-                        // Don't collapse if clicking on links
                         if (e.target.tagName === 'A') return;
                         div.classList.toggle('expanded');
                     };
