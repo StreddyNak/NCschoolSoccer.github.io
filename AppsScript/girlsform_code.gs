@@ -756,7 +756,8 @@ for (var i = 1; i < questionsData.length; i++) {
   var questionText = String(questionsData[i][2] || '').trim();
   var videoUrl = String(questionsData[i][3] || '').trim();
       
-      if (quizName && questionText) {
+      // ⭐ FIXED: Allow questions with EITHER a header OR question text (not just question text)
+      if (quizName && (questionHeader || questionText)) {
   var key = quizName + '|' + questionText;
   videoLookup[key] = {
     videoUrl: videoUrl,
