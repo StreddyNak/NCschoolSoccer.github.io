@@ -369,7 +369,16 @@
 
         /* Question Header Styling */
         .question-header-text { font-weight: 800; color: #1a1a1a; margin-bottom: 8px; font-size: 1.15rem; line-height: 1.3; }
-        .question-body-text { font-weight: 500; color: #4b5563; line-height: 1.4; }
+        .question-body-text { 
+            font-weight: 500; 
+            color: #4b5563; 
+            line-height: 1.4; 
+            display: none; /* Hidden in row view */
+            margin-top: 8px;
+        }
+        .list-row.expanded .question-body-text { 
+            display: block; /* Shown in expanded view */
+        }
 
         /* Mobile adjustments for question headers */
         @media (max-width: 768px) {
@@ -1842,14 +1851,18 @@
                     let questionDisplayHtml = '<div class="question-text">';
                     
                     if (q.questionHeader && q.questionHeader.trim() !== '') {
-                        // Has separate header - show both
+                        // Has separate header - show both (body hidden by CSS in row view)
                         questionDisplayHtml += `
                             <div class="question-header-text">${q.questionHeader}</div>
                             <div class="question-body-text">${q.questionText}</div>
                         `;
                     } else {
-                        // No separate header - show question only (backward compatible)
-                        questionDisplayHtml += `<div>${q.questionText}</div>`;
+                        // No separate header - create a fallback header and hide full text in row
+                        const fallbackHeader = q.questionText.length > 60 ? q.questionText.substring(0, 60) + '...' : q.questionText;
+                        questionDisplayHtml += `
+                            <div class="question-header-text">${fallbackHeader}</div>
+                            <div class="question-body-text">${q.questionText}</div>
+                        `;
                     }
                     
                     questionDisplayHtml += videoLinkHtml;
