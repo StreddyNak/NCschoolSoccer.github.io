@@ -589,8 +589,9 @@ function getAllRosterStudents(supervisorRegion) {
 
 // ===== GET QUESTION STATISTICS (FILTERED BY SUPERVISOR REGION) =====
 // ===== GET QUESTION STATISTICS (FILTERED BY SUPERVISOR REGION) =====
-// ⭐ REWRITTEN to show ALL questions from Quiz Questions sheet
-// and correctly handle questions with duplicate/empty text (by checking Q#)
+// ⭐ REWRITTEN (HYBRID) to show:
+// 1. All Active questions (even if unanswered)
+// 2. All Historical/Answered questions (even if inactive or mismatching)
 function getQuestionStats(supervisorRegion) {
   try {
     if (QUIZ_SHEET_ID === "YOUR_QUIZ_SHEET_ID_HERE") {
@@ -606,10 +607,9 @@ function getQuestionStats(supervisorRegion) {
       return [];
     }
     
-    // --- STEP 1: LOAD MASTER LIST OF QUESTIONS ---
+    // --- STEP 1: LOAD MASTER LIST (ACTIVE QUESTIONS) ---
     var questionsData = questionsSheet.getDataRange().getValues();
     
-    // We need to support multiple questions having the same Text (or empty Text).
     // Map: "QuizName|QuestionText" => [QuestionObject, QuestionObject...]
     var masterQuestionsMap = {};
     var allQuestionsList = [];
@@ -619,12 +619,15 @@ function getQuestionStats(supervisorRegion) {
     for (var i = 1; i < questionsData.length; i++) {
       var quizName = String(questionsData[i][0] || '').trim();
       var questionHeader = String(questionsData[i][1] || '').trim();
-      var questionText = String(questionsData[i][2] || '').trim(); // May be empty duplicates
+      var questionText = String(questionsData[i][2] || '').trim(); 
       var videoUrl = String(questionsData[i][3] || '').trim();
       var correctAnswer = String(questionsData[i][10] || '').trim();
       var assignToGroup = String(questionsData[i][12] || '').toLowerCase().trim();
       var status = String(questionsData[i][13] || 'active').toLowerCase().trim();
       
+      // We still filter Master List by Status, but we WON'T filter Results.
+      // This means "inactive" questions won't show empty placeholders, 
+      // but WILL show up if they have results (handled in Step 2).
       if (status !== 'active') continue;
       if (!quizName) continue;
       if (!questionHeader && !questionText) continue;
@@ -642,7 +645,7 @@ function getQuestionStats(supervisorRegion) {
       
       var qObj = {
         quiz: quizName,
-        questionNumber: i, // Store Row Index (approximate Q#)
+        questionNumber: i, // Store Row Index
         questionText: questionText,
         questionHeader: questionHeader,
         videoUrl: videoUrl,
@@ -654,12 +657,12 @@ function getQuestionStats(supervisorRegion) {
         wrongAnswers: {},
         studentGroups: {},
         mostCommonWrongAnswer: "",
-        mostCommonWrongCount: 0
+        mostCommonWrongCount: 0,
+        isMaster: true // Flag to indicate this came from Master List
       };
       
       allQuestionsList.push(qObj);
       
-      // Add to generic look-up map
       var key = quizName + "|" + questionText;
       if (!masterQuestionsMap[key]) {
         masterQuestionsMap[key] = [];
@@ -667,9 +670,9 @@ function getQuestionStats(supervisorRegion) {
       masterQuestionsMap[key].push(qObj); 
     }
     
-    Logger.log("Loaded " + allQuestionsList.length + " questions from master list");
+    Logger.log("Loaded " + allQuestionsList.length + " active questions from master list");
     
-    // --- STEP 2: OVERLAY STATISTICS ---
+    // --- STEP 2: OVERLAY & MERGE STATISTICS ---
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var resultsSheet = ss.getSheetByName("Question Results");
     
@@ -694,58 +697,83 @@ function getQuestionStats(supervisorRegion) {
             }
           }
           
-          var quizName = String(row[4]);
-          var resultQNum = parseInt(row[5]); // The Question Number from the form submission
-          var resultQText = String(row[6]);
+          var quizName = String(row[4]).trim(); // Trim quiz name too
+          var resultQNum = parseInt(row[5]); 
+          var resultQText = String(row[6] || "").trim(); // ⭐ FIXED: Ensure we trim the result text!
           var studentAnswer = String(row[7]);
           var isCorrect = row[9] === true || String(row[9]).toLowerCase() === 'true';
+          var correctAnswer = String(row[8]);
           
           var key = quizName + "|" + resultQText;
           var candidates = masterQuestionsMap[key];
           
+          var targetQuestion = null;
+          
           if (candidates && candidates.length > 0) {
-            var targetQuestion = null;
-            
+            // MATCH FOUND IN MASTER LIST
             if (candidates.length === 1) {
-              // Unique text match - perfect
               targetQuestion = candidates[0];
             } else {
-              // Ambiguous text match (e.g. empty text). Use Number to disambiguate.
-              // Note: resultQNum typically matches the row index in non-randomized quizzes
-              // We check if resultQNum matches 'questionNumber' (which we stored as row index)
-              // Or we just accept that stats might be imprecise for duplicates if numbers don't align.
-              
-              // Try to find exact number match
+              // Ambiguous match? Try Q#
               targetQuestion = candidates.find(function(c) { return c.questionNumber === resultQNum; });
-              
-              // Fallback: if no number match, perhaps just assign to same index in candidates?
-              // Or just dump it on the first one?
-              if (!targetQuestion) {
-                 targetQuestion = candidates[0];
+              if (!targetQuestion) targetQuestion = candidates[0];
+            }
+          } else {
+            // NO MATCH FOUND (e.g. Inactive Quiz like PAI, or text Changed)
+            // CREATE AD-HOC ENTRY so we don't lose data!
+            
+            // First, check if we already created an ad-hoc entry for this key
+            if (!masterQuestionsMap[key]) {
+               masterQuestionsMap[key] = [];
+            }
+            // Use the first one if it exists (from previous iteration of this loop)
+            if (masterQuestionsMap[key].length > 0) {
+              targetQuestion = masterQuestionsMap[key][0];
+            } else {
+              // Create new
+              targetQuestion = {
+                quiz: quizName,
+                questionNumber: resultQNum,
+                questionText: resultQText,
+                questionHeader: "", // No header info available in results
+                videoUrl: "",      // No video info available
+                correctAnswer: correctAnswer,
+                totalAttempts: 0,
+                correctAttempts: 0,
+                incorrectAttempts: 0,
+                successRate: 0,
+                wrongAnswers: {},
+                studentGroups: {},
+                mostCommonWrongAnswer: "",
+                mostCommonWrongCount: 0,
+                isMaster: false
+              };
+              allQuestionsList.push(targetQuestion); // Add to main list
+              masterQuestionsMap[key].push(targetQuestion); // Add to map
+            }
+          }
+            
+          // Update Stats
+          if (targetQuestion) {
+            targetQuestion.totalAttempts++;
+            if (isCorrect) {
+              targetQuestion.correctAttempts++;
+            } else {
+              targetQuestion.incorrectAttempts++;
+              if (studentAnswer) {
+                if (!targetQuestion.wrongAnswers[studentAnswer]) {
+                  targetQuestion.wrongAnswers[studentAnswer] = 0;
+                }
+                targetQuestion.wrongAnswers[studentAnswer]++;
               }
             }
             
-            if (targetQuestion) {
-              targetQuestion.totalAttempts++;
-              if (isCorrect) {
-                targetQuestion.correctAttempts++;
-              } else {
-                targetQuestion.incorrectAttempts++;
-                if (studentAnswer) {
-                  if (!targetQuestion.wrongAnswers[studentAnswer]) {
-                    targetQuestion.wrongAnswers[studentAnswer] = 0;
-                  }
-                  targetQuestion.wrongAnswers[studentAnswer]++;
-                }
-              }
-              
-              if (!targetQuestion.studentGroups[studentGroup]) {
-                targetQuestion.studentGroups[studentGroup] = { total: 0, correct: 0 };
-              }
-              targetQuestion.studentGroups[studentGroup].total++;
-              if (isCorrect) {
-                 targetQuestion.studentGroups[studentGroup].correct++;
-              }
+            if (!targetQuestion.studentGroups[studentGroup]) {
+              targetQuestion.studentGroups[studentGroup] = { total: 0, correct: 0 };
+            }
+            targetQuestion.studentGroups[studentGroup].total++;
+            if (isCorrect) {
+               targetQuestion.studentGroups[studentGroup].correct++;
             }
           }
         }
@@ -753,7 +781,6 @@ function getQuestionStats(supervisorRegion) {
     }
     
     // --- STEP 3: CALCULATE RATES & FORMAT ---
-    // We already have the list in 'allQuestionsList', no need to flatten map
     var result = allQuestionsList;
     
     for (var i = 0; i < result.length; i++) {
@@ -794,8 +821,7 @@ function getQuestionStats(supervisorRegion) {
   }
 }
 
-// ===== ENRICH HELPER - NOW A PASS-THROUGH =====
-// Data is now already enriched in getQuestionStats
+// ===== ENRICH HELPER - PASS-THROUGH =====
 function enrichQuestionStatsWithVideos(questionStats) {
   return questionStats;
 }
