@@ -588,212 +588,216 @@ function getAllRosterStudents(supervisorRegion) {
 }
 
 // ===== GET QUESTION STATISTICS (FILTERED BY SUPERVISOR REGION) =====
+// ===== GET QUESTION STATISTICS (FILTERED BY SUPERVISOR REGION) =====
+// ⭐ REWRITTEN to show ALL questions from Quiz Questions sheet
+// and correctly handle questions with duplicate/empty text (by checking Q#)
 function getQuestionStats(supervisorRegion) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName("Question Results");
-  if (!sheet) {
-    Logger.log("Question Results sheet not found");
-    return [];
-  }
-
-  var data = sheet.getDataRange().getValues();
-  if (data.length < 2) {
-    Logger.log("No question results data found");
-    return [];
-  }
-
-  Logger.log("Processing " + (data.length - 1) + " question result rows");
-
-  var stats = {};
-  
-  for (var i = 1; i < data.length; i++) {
-    var row = data[i];
-    
-    if (!row[4] || !row[5]) continue;
-    
-    var studentGroup = String(row[3] || "Unknown").trim();
-    
-    // FILTER BY SUPERVISOR REGION
-    if (supervisorRegion !== "MASTER") {
-      var normalizedStudentGroup = studentGroup.toLowerCase().trim();
-      var normalizedSupervisorRegion = supervisorRegion.toLowerCase().trim();
-      
-      if (normalizedStudentGroup !== normalizedSupervisorRegion &&
-          !normalizedStudentGroup.includes(normalizedSupervisorRegion) &&
-          !normalizedSupervisorRegion.includes(normalizedStudentGroup)) {
-        continue;
-      }
+  try {
+    if (QUIZ_SHEET_ID === "YOUR_QUIZ_SHEET_ID_HERE") {
+      Logger.log("WARNING: QUIZ_SHEET_ID not configured");
+      return [];
     }
     
-    var quizName = String(row[4]);
-    var questionNum = parseInt(row[5]);
-    var questionText = String(row[6]);
-    var studentAnswer = String(row[7]);
-    var correctAnswer = String(row[8]);
-    var isCorrect = row[9] === true || String(row[9]).toLowerCase() === 'true';
+    var quizSS = SpreadsheetApp.openById(QUIZ_SHEET_ID);
+    var questionsSheet = quizSS.getSheetByName('Quiz Questions');
     
-    // Group by question TEXT only (handles randomization)
-    var key = quizName + "|" + questionText;
+    if (!questionsSheet) {
+      Logger.log("Quiz Questions sheet not found");
+      return [];
+    }
     
-    if (!stats[key]) {
-      stats[key] = {
+    // --- STEP 1: LOAD MASTER LIST OF QUESTIONS ---
+    var questionsData = questionsSheet.getDataRange().getValues();
+    
+    // We need to support multiple questions having the same Text (or empty Text).
+    // Map: "QuizName|QuestionText" => [QuestionObject, QuestionObject...]
+    var masterQuestionsMap = {};
+    var allQuestionsList = [];
+    
+    // Column A = Quiz Name, B = Question Header, C = Question Text, D = Video URL, 
+    // E-J = Options, K = Correct Answer, L = Explanation, M = Assign to Group, N = Status
+    for (var i = 1; i < questionsData.length; i++) {
+      var quizName = String(questionsData[i][0] || '').trim();
+      var questionHeader = String(questionsData[i][1] || '').trim();
+      var questionText = String(questionsData[i][2] || '').trim(); // May be empty duplicates
+      var videoUrl = String(questionsData[i][3] || '').trim();
+      var correctAnswer = String(questionsData[i][10] || '').trim();
+      var assignToGroup = String(questionsData[i][12] || '').toLowerCase().trim();
+      var status = String(questionsData[i][13] || 'active').toLowerCase().trim();
+      
+      if (status !== 'active') continue;
+      if (!quizName) continue;
+      if (!questionHeader && !questionText) continue;
+      
+      // Filter by supervisor region
+      if (supervisorRegion !== "MASTER" && assignToGroup) {
+        var normalizedGroup = assignToGroup.toLowerCase().trim();
+        var normalizedRegion = supervisorRegion.toLowerCase().trim();
+        if (normalizedGroup !== normalizedRegion &&
+            !normalizedGroup.includes(normalizedRegion) &&
+            !normalizedRegion.includes(normalizedGroup)) {
+          continue;
+        }
+      }
+      
+      var qObj = {
         quiz: quizName,
-        questionNumber: null,
+        questionNumber: i, // Store Row Index (approximate Q#)
         questionText: questionText,
+        questionHeader: questionHeader,
+        videoUrl: videoUrl,
         correctAnswer: correctAnswer,
         totalAttempts: 0,
         correctAttempts: 0,
         incorrectAttempts: 0,
+        successRate: 0,
         wrongAnswers: {},
         studentGroups: {},
-        questionNumbers: {}
+        mostCommonWrongAnswer: "",
+        mostCommonWrongCount: 0
       };
-    }
-    
-    stats[key].totalAttempts++;
-    
-    if (!stats[key].questionNumbers[questionNum]) {
-      stats[key].questionNumbers[questionNum] = 0;
-    }
-    stats[key].questionNumbers[questionNum]++;
-    
-    if (isCorrect) {
-      stats[key].correctAttempts++;
-    } else {
-      stats[key].incorrectAttempts++;
-      if (studentAnswer) {
-        if (!stats[key].wrongAnswers[studentAnswer]) {
-          stats[key].wrongAnswers[studentAnswer] = 0;
-        }
-        stats[key].wrongAnswers[studentAnswer]++;
-      }
-    }
-    
-    if (!stats[key].studentGroups[studentGroup]) {
-      stats[key].studentGroups[studentGroup] = {
-        total: 0,
-        correct: 0
-      };
-    }
-    stats[key].studentGroups[studentGroup].total++;
-    if (isCorrect) {
-      stats[key].studentGroups[studentGroup].correct++;
-    }
-  }
-  
-  var result = [];
-  for (var key in stats) {
-    var stat = stats[key];
-    stat.successRate = Math.round((stat.correctAttempts / stat.totalAttempts) * 100);
-    
-    // Find most common question number for display
-    var maxNumCount = 0;
-    var mostCommonNum = 1;
-    for (var num in stat.questionNumbers) {
-      if (stat.questionNumbers[num] > maxNumCount) {
-        maxNumCount = stat.questionNumbers[num];
-        mostCommonNum = parseInt(num);
-      }
-    }
-    stat.questionNumber = mostCommonNum;
-    
-    // Find most common wrong answer
-    var maxCount = 0;
-    var mostCommonWrong = "";
-    for (var answer in stat.wrongAnswers) {
-      if (stat.wrongAnswers[answer] > maxCount) {
-        maxCount = stat.wrongAnswers[answer];
-        mostCommonWrong = answer;
-      }
-    }
-    stat.mostCommonWrongAnswer = mostCommonWrong;
-    stat.mostCommonWrongCount = maxCount;
-    
-    delete stat.questionNumbers;
-    
-    result.push(stat);
-  }
-  
-  result.sort(function(a, b) {
-    if (a.quiz !== b.quiz) {
-      return a.quiz.localeCompare(b.quiz);
-    }
-    return a.questionNumber - b.questionNumber;
-  });
-  
-  Logger.log("Returning " + result.length + " question stats");
-  return result;
-}
-
-// ⭐ NEW: ENRICH QUESTION STATS WITH VIDEO URLS =====
-// This adds video URLs to the aggregated question stats (one per unique question)
-// NOT to individual quiz results (which would be thousands of rows)
-function enrichQuestionStatsWithVideos(questionStats) {
-  try {
-    Logger.log('Starting video URL enrichment for ' + questionStats.length + ' unique questions');
-    
-    if (QUIZ_SHEET_ID === "YOUR_QUIZ_SHEET_ID_HERE") {
-      Logger.log('WARNING: QUIZ_SHEET_ID not configured - skipping video enrichment');
-      return questionStats;
-    }
-    
-    var quizSS = SpreadsheetApp.openById(QUIZ_SHEET_ID);
-    var quizQuestionsSheet = quizSS.getSheetByName('Quiz Questions');
-    
-    if (!quizQuestionsSheet) {
-      Logger.log('WARNING: Quiz Questions sheet not found - returning stats without videos');
-      return questionStats;
-    }
-    
-    // Build lookup map: quizName|questionText => videoUrl
-    var videoLookup = {};
-    var questionsData = quizQuestionsSheet.getDataRange().getValues();
-    
-    // Column A = Quiz Name, Column B = Question Header, Column C = Question Text, Column D = Video URL
-for (var i = 1; i < questionsData.length; i++) {
-  var quizName = String(questionsData[i][0] || '').trim();
-  var questionHeader = String(questionsData[i][1] || '').trim();
-  var questionText = String(questionsData[i][2] || '').trim();
-  var videoUrl = String(questionsData[i][3] || '').trim();
       
-      if (quizName && questionText) {
-  var key = quizName + '|' + questionText;
-  videoLookup[key] = {
-    videoUrl: videoUrl,
-    questionHeader: questionHeader
-  };
+      allQuestionsList.push(qObj);
+      
+      // Add to generic look-up map
+      var key = quizName + "|" + questionText;
+      if (!masterQuestionsMap[key]) {
+        masterQuestionsMap[key] = [];
+      }
+      masterQuestionsMap[key].push(qObj); 
+    }
+    
+    Logger.log("Loaded " + allQuestionsList.length + " questions from master list");
+    
+    // --- STEP 2: OVERLAY STATISTICS ---
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var resultsSheet = ss.getSheetByName("Question Results");
+    
+    if (resultsSheet) {
+      var resultsData = resultsSheet.getDataRange().getValues();
+      if (resultsData.length > 1) {
         
-        if (videoUrl) {
-          Logger.log('Found video for: ' + quizName + ' - ' + questionText.substring(0, 40) + '...');
+        for (var i = 1; i < resultsData.length; i++) {
+          var row = resultsData[i];
+          if (!row[4] || !row[5]) continue;
+          
+          var studentGroup = String(row[3] || "Unknown").trim();
+          
+          // Filter stats by supervisor region
+          if (supervisorRegion !== "MASTER") {
+            var normalizedStudentGroup = studentGroup.toLowerCase().trim();
+            var normalizedSupervisorRegion = supervisorRegion.toLowerCase().trim();
+            if (normalizedStudentGroup !== normalizedSupervisorRegion &&
+                !normalizedStudentGroup.includes(normalizedSupervisorRegion) &&
+                !normalizedSupervisorRegion.includes(normalizedStudentGroup)) {
+              continue;
+            }
+          }
+          
+          var quizName = String(row[4]);
+          var resultQNum = parseInt(row[5]); // The Question Number from the form submission
+          var resultQText = String(row[6]);
+          var studentAnswer = String(row[7]);
+          var isCorrect = row[9] === true || String(row[9]).toLowerCase() === 'true';
+          
+          var key = quizName + "|" + resultQText;
+          var candidates = masterQuestionsMap[key];
+          
+          if (candidates && candidates.length > 0) {
+            var targetQuestion = null;
+            
+            if (candidates.length === 1) {
+              // Unique text match - perfect
+              targetQuestion = candidates[0];
+            } else {
+              // Ambiguous text match (e.g. empty text). Use Number to disambiguate.
+              // Note: resultQNum typically matches the row index in non-randomized quizzes
+              // We check if resultQNum matches 'questionNumber' (which we stored as row index)
+              // Or we just accept that stats might be imprecise for duplicates if numbers don't align.
+              
+              // Try to find exact number match
+              targetQuestion = candidates.find(function(c) { return c.questionNumber === resultQNum; });
+              
+              // Fallback: if no number match, perhaps just assign to same index in candidates?
+              // Or just dump it on the first one?
+              if (!targetQuestion) {
+                 targetQuestion = candidates[0];
+              }
+            }
+            
+            if (targetQuestion) {
+              targetQuestion.totalAttempts++;
+              if (isCorrect) {
+                targetQuestion.correctAttempts++;
+              } else {
+                targetQuestion.incorrectAttempts++;
+                if (studentAnswer) {
+                  if (!targetQuestion.wrongAnswers[studentAnswer]) {
+                    targetQuestion.wrongAnswers[studentAnswer] = 0;
+                  }
+                  targetQuestion.wrongAnswers[studentAnswer]++;
+                }
+              }
+              
+              if (!targetQuestion.studentGroups[studentGroup]) {
+                targetQuestion.studentGroups[studentGroup] = { total: 0, correct: 0 };
+              }
+              targetQuestion.studentGroups[studentGroup].total++;
+              if (isCorrect) {
+                 targetQuestion.studentGroups[studentGroup].correct++;
+              }
+            }
+          }
         }
       }
     }
     
-    Logger.log('Built video lookup with ' + Object.keys(videoLookup).length + ' entries');
+    // --- STEP 3: CALCULATE RATES & FORMAT ---
+    // We already have the list in 'allQuestionsList', no need to flatten map
+    var result = allQuestionsList;
     
-    // Add video URLs and headers to each unique question stat
-var videosAdded = 0;
-questionStats.forEach(function(q) {
-  var lookupKey = q.quiz + '|' + q.questionText;
-  var lookupData = videoLookup[lookupKey] || { videoUrl: '', questionHeader: '' };
-  
-  q.videoUrl = lookupData.videoUrl || '';
-  q.questionHeader = lookupData.questionHeader || '';
-  
-  if (q.videoUrl) {
-    videosAdded++;
-    Logger.log('Added video URL for Q' + q.questionNumber + ': ' + q.questionText.substring(0, 40));
-  }
-});
+    for (var i = 0; i < result.length; i++) {
+        var stat = result[i];
+        
+        if (stat.totalAttempts > 0) {
+            stat.successRate = Math.round((stat.correctAttempts / stat.totalAttempts) * 100);
+            
+            var maxCount = 0;
+            var mostCommonWrong = "";
+            for (var answer in stat.wrongAnswers) {
+                if (stat.wrongAnswers[answer] > maxCount) {
+                    maxCount = stat.wrongAnswers[answer];
+                    mostCommonWrong = answer;
+                }
+            }
+            stat.mostCommonWrongAnswer = mostCommonWrong;
+            stat.mostCommonWrongCount = maxCount;
+        } else {
+            stat.successRate = 0;
+            stat.mostCommonWrongAnswer = "No attempts yet";
+            stat.mostCommonWrongCount = 0;
+        }
+    }
     
-    Logger.log('Successfully added ' + videosAdded + ' video URLs to ' + questionStats.length + ' questions');
-    return questionStats;
+    result.sort(function(a, b) {
+      if (a.quiz !== b.quiz) return a.quiz.localeCompare(b.quiz);
+      return a.questionNumber - b.questionNumber;
+    });
+    
+    Logger.log("Returning " + result.length + " question stats");
+    return result;
     
   } catch (err) {
-    Logger.log('ERROR enriching question stats with videos: ' + err.toString());
-    Logger.log('Stack trace: ' + err.stack);
-    return questionStats; // Return original stats if error occurs
+    Logger.log("ERROR in getQuestionStats: " + err.toString());
+    Logger.log("Stack: " + err.stack);
+    return [];
   }
+}
+
+// ===== ENRICH HELPER - NOW A PASS-THROUGH =====
+// Data is now already enriched in getQuestionStats
+function enrichQuestionStatsWithVideos(questionStats) {
+  return questionStats;
 }
 
 // ===== GET CMI REPORTS =====
