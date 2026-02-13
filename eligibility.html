@@ -496,6 +496,33 @@
             opacity: 0.6;
         }
 
+        /* Error state for unanswered questions */
+        .question-block.unanswered {
+            border: 2px solid #ef4444;
+            background-color: #fef2f2;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            scroll-margin-top: 100px;
+        }
+
+        .error-banner {
+            background-color: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .error-banner ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+            font-weight: 400;
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -722,6 +749,7 @@
         <div id="quiz-view" class="card hidden">
             <h2 id="active-quiz-title"
                 style="border-bottom:2px solid #2ecc71; padding-bottom:10px; margin-bottom:20px; color:#2c3e50;"></h2>
+            <div id="quiz-error-container" class="hidden"></div>
             <div id="questions-container"></div>
             <button id="finishBtn" class="btn-primary" onclick="submitQuiz()">Submit Quiz</button>
         </div>
@@ -1176,6 +1204,12 @@
                 }
             });
 
+            // Remove unanswered highlight if it exists
+            const qBlock = document.getElementById(`q-block-${index}`);
+            if (qBlock) {
+                qBlock.classList.remove('unanswered');
+            }
+
             // Scroll to next question smoothly (better UX)
             if (index < currentQuizData.length - 1) {
                 const nextQuestion = document.getElementById(`q-block-${index + 1}`);
@@ -1199,11 +1233,52 @@
             }
 
             const total = currentQuizData.length;
-            const answeredCount = Object.keys(userAnswers).length;
+            const unanswered = [];
 
-            if (answeredCount < total) {
-                if (!confirm(`You have only answered ${answeredCount} of ${total} questions. Submit anyway?`)) return;
+            // Identify unanswered questions
+            for (let i = 0; i < total; i++) {
+                if (!userAnswers.hasOwnProperty(i)) {
+                    unanswered.push(i);
+                }
             }
+
+            const errorContainer = document.getElementById('quiz-error-container');
+
+            if (unanswered.length > 0) {
+                // Highlight unanswered question blocks
+                unanswered.forEach(index => {
+                    const qBlock = document.getElementById(`q-block-${index}`);
+                    if (qBlock) qBlock.classList.add('unanswered');
+                });
+
+                // Show error message
+                errorContainer.className = 'error-banner';
+                const missingNumbers = unanswered.map(idx => currentQuizData[idx].questionNumber).sort((a, b) => a - b);
+
+                errorContainer.innerHTML = `
+                    <div>Please answer all questions before submitting. You are missing:</div>
+                    <ul>
+                        ${missingNumbers.map(n => `<li>Question ${n}</li>`).join('')}
+                    </ul>
+                `;
+
+                errorContainer.classList.remove('hidden');
+
+                // Scroll to the first unanswered question or error message
+                const firstMissingIdx = unanswered[0];
+                const firstMissingBlock = document.getElementById(`q-block-${firstMissingIdx}`);
+                if (firstMissingBlock) {
+                    firstMissingBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                return;
+            }
+
+            // High answered, hide error if visible
+            errorContainer.classList.add('hidden');
+            errorContainer.innerHTML = '';
 
             // Calculate score
             score = 0;
