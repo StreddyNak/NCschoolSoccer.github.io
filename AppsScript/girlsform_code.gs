@@ -266,7 +266,7 @@ function handleAdminLogin(token, seasonKey) {
           supervisorRegion = "MASTER";
           supervisorNameOnly = "MASTER";
         } else if (region) {
-          assignedSupervisor = supName + " (" + region + ")";
+          assignedSupervisor = supName; // MATCHING PASSWORD LOGIN: Use name as-is
           supervisorRegion = region;
         } else {
           assignedSupervisor = supName;
