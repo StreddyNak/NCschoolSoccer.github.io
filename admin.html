@@ -1281,6 +1281,7 @@
             }
         }
     </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -1298,6 +1299,20 @@
     <div id="login-view">
         <h2>Supervisor Portal</h2>
         <p style="margin-bottom:25px; color:#666;">Please sign in with your credentials.</p>
+
+        <!-- Google Sign In -->
+        <div id="g_id_onload" data-client_id="386687978224-im996q9ra5omcpe8i5mplipln2tta1rv.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse" data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with"
+            data-shape="rectangular" data-logo_alignment="left" data-width="400">
+        </div>
+
+        <div style="display:flex; align-items:center; margin:20px 0;">
+            <div style="flex:1; height:1px; background:#ddd;"></div>
+            <div style="padding:0 10px; color:#999; font-size:12px;">OR</div>
+            <div style="flex:1; height:1px; background:#ddd;"></div>
+        </div>
 
         <input type="email" id="loginEmail" class="login-input" placeholder="Email Address" autocomplete="email">
         <input type="password" id="loginPassword" class="login-input" placeholder="Password"
@@ -1442,10 +1457,9 @@
         function handleLogin() {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
-
-            const loginBtn = document.getElementById('loginBtn');
-            const errorDiv = document.getElementById('login-error');
             const statusDiv = document.getElementById('login-status');
+            const errorDiv = document.getElementById('login-error');
+            const loginBtn = document.getElementById('loginBtn');
 
             if (!email || !password) {
                 errorDiv.style.display = 'block';
@@ -1464,52 +1478,84 @@
                     statusDiv.textContent = '🔄 Loading data...';
                     return res.json();
                 })
-                .then(resp => {
-                    if (resp.status === 'success') {
-                        statusDiv.textContent = '✅ Success! Loading dashboard...';
+                .then(resp => processLoginResponse(resp))
+                .catch(err => handleLoginError(err));
+        }
 
-                        setTimeout(() => {
-                            document.getElementById('login-view').classList.add('hidden');
-                            document.getElementById('dashboard-view').classList.remove('hidden');
-                        }, 500);
+        function handleCredentialResponse(response) {
+            const statusDiv = document.getElementById('login-status');
+            const errorDiv = document.getElementById('login-error');
 
-                        actualSupervisor = resp.supervisor;
+            console.log("Encoded JWT ID token: " + response.credential);
 
-                        document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
-                        cmiData = resp.data || [];
-                        quizData = resp.quizzes || [];
-                        questionStats = resp.questionStats || [];
+            errorDiv.style.display = 'none';
+            statusDiv.textContent = '🔄 Verifying Google Token...';
+            statusDiv.style.display = 'block';
 
-                        if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
-                            document.getElementById('master-controls').classList.remove('hidden');
-                            populateSupervisorList();
-                        }
-
-                        populateMetaTagFilter();
-                        applyFilters();
-                    } else {
-                        loginBtn.disabled = false;
-                        loginBtn.textContent = 'Sign In';
-
-                        statusDiv.textContent = '';
-                        statusDiv.style.display = 'none';
-
-                        errorDiv.style.display = 'block';
-                        errorDiv.innerText = resp.message || "Invalid email or password.";
-                    }
+            // Send ID token to server
+            fetch(`${SCRIPT_URL}?action=googleLogin&token=${encodeURIComponent(response.credential)}&season=Current`)
+                .then(res => {
+                    statusDiv.textContent = '🔄 Loading data...';
+                    return res.json();
                 })
-                .catch(err => {
-                    console.error("Fetch error:", err);
+                .then(resp => processLoginResponse(resp))
+                .catch(err => handleLoginError(err));
+        }
 
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Sign In';
+        function processLoginResponse(resp) {
+            const loginBtn = document.getElementById('loginBtn');
+            const statusDiv = document.getElementById('login-status');
+            const errorDiv = document.getElementById('login-error');
 
-                    statusDiv.textContent = '';
-                    statusDiv.style.display = 'none';
+            if (resp.status === 'success') {
+                statusDiv.textContent = '✅ Success! Loading dashboard...';
 
-                    errorDiv.style.display = 'block';
-                    errorDiv.innerText = "Connection error. Please try again.";
-                });
+                setTimeout(() => {
+                    document.getElementById('login-view').classList.add('hidden');
+                    document.getElementById('dashboard-view').classList.remove('hidden');
+                }, 500);
+
+                actualSupervisor = resp.supervisor;
+
+                document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
+                cmiData = resp.data || [];
+                quizData = resp.quizzes || [];
+                questionStats = resp.questionStats || [];
+
+                if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
+                    document.getElementById('master-controls').classList.remove('hidden');
+                    populateSupervisorList();
+                }
+
+                populateMetaTagFilter();
+                applyFilters();
+            } else {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+
+                statusDiv.textContent = '';
+                statusDiv.style.display = 'none';
+
+                errorDiv.style.display = 'block';
+                errorDiv.innerText = resp.message || "Authentication failed.";
+            }
+        }
+
+        function handleLoginError(err) {
+            const loginBtn = document.getElementById('loginBtn');
+            const statusDiv = document.getElementById('login-status');
+            const errorDiv = document.getElementById('login-error');
+
+            console.error("Fetch error:", err);
+
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Sign In';
+
+            statusDiv.textContent = '';
+            statusDiv.style.display = 'none';
+
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = "Connection error. Please try again.";
         }
 
         function switchSeason(seasonName) {
