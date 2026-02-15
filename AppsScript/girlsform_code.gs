@@ -215,10 +215,11 @@ function handlePasswordLogin(email, password, seasonKey, requestedViewRegion) {
     var reports = getCMIReports(currentViewRegion, seasonKey, mapData.map);
     Logger.log("CMI reports found: " + reports.length);
     
-    var quizzes = getQuizResults(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
+    // REVERTED: Quiz/Stats always use the User's assigned region (not the requested view)
+    var quizzes = getQuizResults(userRegion);
     Logger.log("Quiz results found: " + quizzes.length);
     
-    var questionStats = getQuestionStats(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
+    var questionStats = getQuestionStats(userRegion);
     Logger.log("Question stats found: " + questionStats.length);
     
     // Add video URLs to question stats
@@ -308,8 +309,9 @@ function handleAdminLogin(token, seasonKey, requestedViewRegion) {
     Logger.log("View Region: " + currentViewRegion);
 
     var reports = getCMIReports(currentViewRegion, seasonKey, mapData.map);
-    var quizzes = getQuizResults(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
-    var questionStats = getQuestionStats(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
+    // REVERTED: Quiz/Stats always use the User's assigned region
+    var quizzes = getQuizResults(userRegion);
+    var questionStats = getQuestionStats(userRegion);
     
     // Add video URLs to question stats
     questionStats = enrichQuestionStatsWithVideos(questionStats);

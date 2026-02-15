@@ -1377,6 +1377,12 @@
             <input type="text" id="searchInput" class="search-input" placeholder="Search..." onkeyup="applyFilters()">
 
             <div id="cmi-filters" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <!-- Region Filter (Moved here) -->
+                <select id="regionSelect" onchange="switchRegion()"
+                    style="padding:8px 12px; border:2px solid #3498db; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px; display:none;">
+                    <option value="">My Region</option>
+                </select>
+
                 <select id="tagFilter" onchange="applyFilters()"
                     style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size: 13px;">
                     <option value="">All Types</option>
