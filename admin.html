@@ -1337,220 +1337,265 @@
 
         <!-- Impersonation Banner -->
         <div id="impersonation-banner" class="impersonation-banner hidden">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-size:1.2rem;">👤</span>
-                <div>
-                    <strong>Impersonation Mode Active</strong><br>
-                    <small>Viewing as: <span id="impersonated-name"></span></small>
+
+
+            <div class="filter-bar">
+                <select id="viewSelect" onchange="toggleView()"
+                    style="padding:8px 12px; border:2px solid #2ecc71; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px;">
+                    <option value="cmi">Show CMI Reports</option>
+                    <option value="quiz">Show Referee Roster</option>
+                    <option value="questions">Question Analysis</option>
+                </select>
+
+                <input type="text" id="searchInput" class="search-input" placeholder="Search..."
+                    onkeyup="applyFilters()">
+
+                <div id="cmi-filters" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <!-- Region Filter (Moved here) -->
+                    <select id="regionSelect" onchange="switchRegion()"
+                        style="padding:8px 12px; border:2px solid #3498db; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px; display:none;">
+                        <option value="">My Region</option>
+                    </select>
+
+                    <select id="tagFilter" onchange="applyFilters()"
+                        style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size: 13px;">
+                        <option value="">All Types</option>
+                        <option value="Red">Red Cards</option>
+                        <option value="Penalty">PKs</option>
+                        <option value="Goal">No Goal</option>
+                    </select>
+                    <select id="metaTagFilter" onchange="applyFilters()"
+                        style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:160px; font-size: 13px;">
+                        <option value="">All Tags</option>
+                    </select>
+                    <label style="font-size:12px; font-weight:600;"><input type="checkbox" id="videoToggle"
+                            onchange="applyFilters()"> Video Only</label>
+                </div>
+
+                <div id="quiz-filters" style="display:none; gap:10px; align-items:center;">
+                    <select id="quizNameFilter" onchange="applyFilters()"
+                        style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:200px; font-size: 13px;">
+                        <option value="">All Quizzes</option>
+                    </select>
+                </div>
+
+                <div id="question-filters" style="display:none; gap:10px; align-items:center;">
+                    <select id="questionQuizFilter" onchange="applyFilters()"
+                        style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:200px; font-size: 13px;">
+                        <option value="">Select Quiz</option>
+                    </select>
+                    <label style="font-size:12px; font-weight:600;">
+                        <input type="checkbox" id="problemsOnlyToggle" onchange="applyFilters()"> Show Problem Questions
+                        Only (<70%) </label>
                 </div>
             </div>
-            <button onclick="exitImpersonation()"
-                style="background:white; color:#e74c3c; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; font-weight:600; font-size: 12px;">Exit
-                Impersonation</button>
-        </div>
 
-        <!-- Master Admin Controls -->
-        <div id="master-controls" class="master-controls hidden">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <label style="font-weight:600; color:#666; font-size: 13px;">🔧 View as Supervisor:</label>
-                <select id="impersonate-select" onchange="handleImpersonation()"
-                    style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size: 13px; min-width:200px;">
-                    <option value="">-- Select Supervisor --</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="filter-bar">
-            <select id="viewSelect" onchange="toggleView()"
-                style="padding:8px 12px; border:2px solid #2ecc71; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px;">
-                <option value="cmi">Show CMI Reports</option>
-                <option value="quiz">Show Referee Roster</option>
-                <option value="questions">Question Analysis</option>
-            </select>
-
-            <input type="text" id="searchInput" class="search-input" placeholder="Search..." onkeyup="applyFilters()">
-
-            <div id="cmi-filters" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <!-- Region Filter (Moved here) -->
-                <select id="regionSelect" onchange="switchRegion()"
-                    style="padding:8px 12px; border:2px solid #3498db; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px; display:none;">
-                    <option value="">My Region</option>
-                </select>
-
-                <select id="tagFilter" onchange="applyFilters()"
-                    style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; font-size: 13px;">
-                    <option value="">All Types</option>
-                    <option value="Red">Red Cards</option>
-                    <option value="Penalty">PKs</option>
-                    <option value="Goal">No Goal</option>
-                </select>
-                <select id="metaTagFilter" onchange="applyFilters()"
-                    style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:160px; font-size: 13px;">
-                    <option value="">All Tags</option>
-                </select>
-                <label style="font-size:12px; font-weight:600;"><input type="checkbox" id="videoToggle"
-                        onchange="applyFilters()"> Video Only</label>
+            <div class="season-nav" id="season-nav">
+                <button class="season-btn active" onclick="switchSeason('Current')">Current Season</button>
+                <button class="season-btn" onclick="switchSeason('Boys 2025')">Boys 2025</button>
+                <button class="season-btn" onclick="switchSeason('Girls 2025')">Girls 2025</button>
+                <button class="season-btn" onclick="switchSeason('Boys 2024')">Boys 2024</button>
+                <button class="season-btn" onclick="switchSeason('Girls 2024')">Girls 2024</button>
             </div>
 
-            <div id="quiz-filters" style="display:none; gap:10px; align-items:center;">
-                <select id="quizNameFilter" onchange="applyFilters()"
-                    style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:200px; font-size: 13px;">
-                    <option value="">All Quizzes</option>
-                </select>
+            <div class="stats-card" id="stats-card">
+                <div class="stats-grid" id="stats-grid"></div>
             </div>
 
-            <div id="question-filters" style="display:none; gap:10px; align-items:center;">
-                <select id="questionQuizFilter" onchange="applyFilters()"
-                    style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:200px; font-size: 13px;">
-                    <option value="">Select Quiz</option>
-                </select>
-                <label style="font-size:12px; font-weight:600;">
-                    <input type="checkbox" id="problemsOnlyToggle" onchange="applyFilters()"> Show Problem Questions
-                    Only (<70%) </label>
+            <!-- NEW: Quiz Detail Stats -->
+            <div class="quiz-detail-stats" id="quiz-detail-stats">
+                <h4 id="quiz-stats-title">Quiz Statistics</h4>
+                <p><strong id="unique-referees">0</strong> total referees have taken this quiz</p>
+                <p>Quiz has been taken a total of <strong id="total-attempts">0</strong> times</p>
             </div>
+
+            <div class="list-header cmi-header" id="list-header">
+                <div>Date</div>
+                <div>Match</div>
+                <div>Referee</div>
+                <div>Tags</div>
+                <div>Moderator Notes</div>
+                <div style="text-align:center;">Video</div>
+            </div>
+
+            <div id="data-list" class="list-container"></div>
+
+            <!-- Alphabet Navigation -->
+            <div id="alphabet-nav" class="alphabet-nav"></div>
         </div>
 
-        <div class="season-nav" id="season-nav">
-            <button class="season-btn active" onclick="switchSeason('Current')">Current Season</button>
-            <button class="season-btn" onclick="switchSeason('Boys 2025')">Boys 2025</button>
-            <button class="season-btn" onclick="switchSeason('Girls 2025')">Girls 2025</button>
-            <button class="season-btn" onclick="switchSeason('Boys 2024')">Boys 2024</button>
-            <button class="season-btn" onclick="switchSeason('Girls 2024')">Girls 2024</button>
-        </div>
+        <script>
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
+            let cmiData = [], quizData = [], questionStats = [], currentView = 'cmi';
+            let actualSupervisor = null;
+            let impersonatedSupervisor = null;
+            let allSupervisors = [];
 
-        <div class="stats-card" id="stats-card">
-            <div class="stats-grid" id="stats-grid"></div>
-        </div>
-
-        <!-- NEW: Quiz Detail Stats -->
-        <div class="quiz-detail-stats" id="quiz-detail-stats">
-            <h4 id="quiz-stats-title">Quiz Statistics</h4>
-            <p><strong id="unique-referees">0</strong> total referees have taken this quiz</p>
-            <p>Quiz has been taken a total of <strong id="total-attempts">0</strong> times</p>
-        </div>
-
-        <div class="list-header cmi-header" id="list-header">
-            <div>Date</div>
-            <div>Match</div>
-            <div>Referee</div>
-            <div>Tags</div>
-            <div>Moderator Notes</div>
-            <div style="text-align:center;">Video</div>
-        </div>
-
-        <div id="data-list" class="list-container"></div>
-
-        <!-- Alphabet Navigation -->
-        <div id="alphabet-nav" class="alphabet-nav"></div>
-    </div>
-
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
-        let cmiData = [], quizData = [], questionStats = [], currentView = 'cmi';
-        let actualSupervisor = null;
-        let impersonatedSupervisor = null;
-        let allSupervisors = [];
-
-        // Handle Enter key on password field
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
+            // Handle Enter key on password field
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleLogin();
+                    }
+                });
             });
-        });
 
-        function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const statusDiv = document.getElementById('login-status');
-            const errorDiv = document.getElementById('login-error');
-            const loginBtn = document.getElementById('loginBtn');
+            function handleLogin() {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                const statusDiv = document.getElementById('login-status');
+                const errorDiv = document.getElementById('login-error');
+                const loginBtn = document.getElementById('loginBtn');
 
-            if (!email || !password) {
-                errorDiv.style.display = 'block';
-                errorDiv.innerText = 'Please enter both email and password';
-                return;
+                if (!email || !password) {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = 'Please enter both email and password';
+                    return;
+                }
+
+                errorDiv.style.display = 'none';
+                statusDiv.textContent = '🔄 Authenticating...';
+                statusDiv.style.display = 'block';
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Signing In...';
+
+                fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=Current`)
+                    .then(res => {
+                        statusDiv.textContent = '🔄 Loading data...';
+                        return res.json();
+                    })
+                    .then(resp => processLoginResponse(resp))
+                    .catch(err => handleLoginError(err));
             }
 
-            errorDiv.style.display = 'none';
-            statusDiv.textContent = '🔄 Authenticating...';
-            statusDiv.style.display = 'block';
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Signing In...';
+            let googleToken = ""; // Store token for subsequent requests
 
-            fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=Current`)
-                .then(res => {
-                    statusDiv.textContent = '🔄 Loading data...';
-                    return res.json();
-                })
-                .then(resp => processLoginResponse(resp))
-                .catch(err => handleLoginError(err));
-        }
+            function handleCredentialResponse(response) {
+                const statusDiv = document.getElementById('login-status');
+                const errorDiv = document.getElementById('login-error');
 
-        let googleToken = ""; // Store token for subsequent requests
+                googleToken = response.credential; // Store it
 
-        function handleCredentialResponse(response) {
-            const statusDiv = document.getElementById('login-status');
-            const errorDiv = document.getElementById('login-error');
+                console.log("Encoded JWT ID token: " + response.credential);
 
-            googleToken = response.credential; // Store it
+                errorDiv.style.display = 'none';
+                statusDiv.textContent = '🔄 Verifying Google Token...';
+                statusDiv.style.display = 'block';
 
-            console.log("Encoded JWT ID token: " + response.credential);
+                // Send ID token to server
+                fetch(`${SCRIPT_URL}?action=googleLogin&token=${encodeURIComponent(response.credential)}&season=Current`)
+                    .then(res => {
+                        statusDiv.textContent = '🔄 Loading data...';
+                        return res.json();
+                    })
+                    .then(resp => processLoginResponse(resp))
+                    .catch(err => handleLoginError(err));
+            }
 
-            errorDiv.style.display = 'none';
-            statusDiv.textContent = '🔄 Verifying Google Token...';
-            statusDiv.style.display = 'block';
+            let currentRegion = "";
 
-            // Send ID token to server
-            fetch(`${SCRIPT_URL}?action=googleLogin&token=${encodeURIComponent(response.credential)}&season=Current`)
-                .then(res => {
-                    statusDiv.textContent = '🔄 Loading data...';
-                    return res.json();
-                })
-                .then(resp => processLoginResponse(resp))
-                .catch(err => handleLoginError(err));
-        }
+            function processLoginResponse(resp) {
+                const loginBtn = document.getElementById('loginBtn');
+                const statusDiv = document.getElementById('login-status');
+                const errorDiv = document.getElementById('login-error');
 
-        let currentRegion = "";
+                if (resp.status === 'success') {
+                    statusDiv.textContent = '✅ Success! Loading dashboard...';
 
-        function processLoginResponse(resp) {
-            const loginBtn = document.getElementById('loginBtn');
-            const statusDiv = document.getElementById('login-status');
-            const errorDiv = document.getElementById('login-error');
+                    setTimeout(() => {
+                        document.getElementById('login-view').classList.add('hidden');
+                        document.getElementById('dashboard-view').classList.remove('hidden');
+                    }, 500);
 
-            if (resp.status === 'success') {
-                statusDiv.textContent = '✅ Success! Loading dashboard...';
+                    actualSupervisor = resp.supervisor;
+                    currentRegion = resp.currentViewRegion || "";
 
-                setTimeout(() => {
-                    document.getElementById('login-view').classList.add('hidden');
-                    document.getElementById('dashboard-view').classList.remove('hidden');
-                }, 500);
+                    document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
+                    cmiData = resp.data || [];
 
-                actualSupervisor = resp.supervisor;
-                currentRegion = resp.currentViewRegion || "";
+                    // DEBUG: Verify data count
+                    console.log(`Debug: Received ${cmiData.length} records for region ${resp.currentViewRegion}`);
+                    // alert(`Debug: Loaded ${cmiData.length} reports for region: ${resp.currentViewRegion}`); 
 
-                document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
-                cmiData = resp.data || [];
+                    quizData = resp.quizzes || [];
+                    questionStats = resp.questionStats || [];
 
-                // DEBUG: Verify data count
-                console.log(`Debug: Received ${cmiData.length} records for region ${resp.currentViewRegion}`);
-                // alert(`Debug: Loaded ${cmiData.length} reports for region: ${resp.currentViewRegion}`); 
+                    // Populate Region Dropdown
+                    populateRegionDropdown(resp.allRegions, resp.userRegion, resp.currentViewRegion);
 
-                quizData = resp.quizzes || [];
-                questionStats = resp.questionStats || [];
+                    if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
+                        // document.getElementById('master-controls').classList.remove('hidden'); // Removed
+                    }
 
-                // Populate Region Dropdown
-                populateRegionDropdown(resp.allRegions, resp.userRegion, resp.currentViewRegion);
+                    populateMetaTagFilter();
+                    applyFilters();
+                } else {
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
 
-                if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
-                    document.getElementById('master-controls').classList.remove('hidden');
-                    populateSupervisorList();
+                    statusDiv.textContent = '';
+                    statusDiv.style.display = 'none';
+
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = resp.message || "Authentication failed.";
+                }
+            }
+
+            function populateRegionDropdown(allRegions, userRegion, currentView) {
+                const select = document.getElementById('regionSelect');
+                if (!allRegions || allRegions.length === 0) {
+                    select.style.display = 'none';
+                    return;
                 }
 
-                populateMetaTagFilter();
-                applyFilters();
-            } else {
+                select.style.display = 'inline-block';
+                select.innerHTML = '';
+
+                // 1. My Region Option
+                const myRegionOpt = document.createElement('option');
+                myRegionOpt.value = userRegion === 'MASTER' ? 'ALL' : userRegion;
+                myRegionOpt.textContent = `My Region (${userRegion})`;
+                select.appendChild(myRegionOpt);
+
+                // 2. Show All Option
+                const allOpt = document.createElement('option');
+                allOpt.value = 'ALL';
+                allOpt.textContent = 'Show All Regions';
+                select.appendChild(allOpt);
+
+                // 3. Other Regions
+                allRegions.forEach(region => {
+                    if (region !== userRegion && region !== 'MASTER') {
+                        const opt = document.createElement('option');
+                        opt.value = region;
+                        opt.textContent = region;
+                        select.appendChild(opt);
+                    }
+                });
+
+                // Set selected value
+                select.value = currentView;
+            }
+
+            function switchRegion() {
+                const selectedRegion = document.getElementById('regionSelect').value;
+                // Refresh data with new region
+                const activeSeasonBtn = document.querySelector('.season-btn.active');
+                const season = activeSeasonBtn ? activeSeasonBtn.innerText : 'Current';
+
+                // Show loading state
+                document.getElementById('data-list').innerHTML = '<div style="text-align:center; padding:20px;">🔄 Loading region data...</div>';
+
+                fetchData(season, selectedRegion);
+            }
+
+            function handleLoginError(err) {
+                const loginBtn = document.getElementById('loginBtn');
+                const statusDiv = document.getElementById('login-status');
+                const errorDiv = document.getElementById('login-error');
+
+                console.error("Fetch error:", err);
+
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Sign In';
 
@@ -1558,428 +1603,316 @@
                 statusDiv.style.display = 'none';
 
                 errorDiv.style.display = 'block';
-                errorDiv.innerText = resp.message || "Authentication failed.";
-            }
-        }
-
-        function populateRegionDropdown(allRegions, userRegion, currentView) {
-            const select = document.getElementById('regionSelect');
-            if (!allRegions || allRegions.length === 0) {
-                select.style.display = 'none';
-                return;
+                errorDiv.innerText = "Connection error. Please try again.";
             }
 
-            select.style.display = 'inline-block';
-            select.innerHTML = '';
-
-            // 1. My Region Option
-            const myRegionOpt = document.createElement('option');
-            myRegionOpt.value = userRegion === 'MASTER' ? 'ALL' : userRegion;
-            myRegionOpt.textContent = `My Region (${userRegion})`;
-            select.appendChild(myRegionOpt);
-
-            // 2. Show All Option
-            const allOpt = document.createElement('option');
-            allOpt.value = 'ALL';
-            allOpt.textContent = 'Show All Regions';
-            select.appendChild(allOpt);
-
-            // 3. Other Regions
-            allRegions.forEach(region => {
-                if (region !== userRegion && region !== 'MASTER') {
-                    const opt = document.createElement('option');
-                    opt.value = region;
-                    opt.textContent = region;
-                    select.appendChild(opt);
-                }
-            });
-
-            // Set selected value
-            select.value = currentView;
-        }
-
-        function switchRegion() {
-            const selectedRegion = document.getElementById('regionSelect').value;
-            // Refresh data with new region
-            const activeSeasonBtn = document.querySelector('.season-btn.active');
-            const season = activeSeasonBtn ? activeSeasonBtn.innerText : 'Current';
-
-            // Show loading state
-            document.getElementById('data-list').innerHTML = '<div style="text-align:center; padding:20px;">🔄 Loading region data...</div>';
-
-            fetchData(season, selectedRegion);
-        }
-
-        function handleLoginError(err) {
-            const loginBtn = document.getElementById('loginBtn');
-            const statusDiv = document.getElementById('login-status');
-            const errorDiv = document.getElementById('login-error');
-
-            console.error("Fetch error:", err);
-
-            loginBtn.disabled = false;
-            loginBtn.textContent = 'Sign In';
-
-            statusDiv.textContent = '';
-            statusDiv.style.display = 'none';
-
-            errorDiv.style.display = 'block';
-            errorDiv.innerText = "Connection error. Please try again.";
-        }
-
-        function switchSeason(seasonName) {
-            document.querySelectorAll('.season-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.innerText.includes(seasonName)) btn.classList.add('active');
-            });
-
-            // Keep current region filter
-            const selectedRegion = document.getElementById('regionSelect').value;
-            fetchData(seasonName, selectedRegion);
-        }
-
-        function fetchData(season, viewRegion) {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            let url = "";
-
-            if (password) {
-                // Password Login
-                url = `${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=${season}`;
-            } else if (googleToken) {
-                // Google Login (Re-use toke)
-                url = `${SCRIPT_URL}?action=googleLogin&token=${encodeURIComponent(googleToken)}&season=${season}`;
-            } else {
-                console.error("No credentials available");
-                alert("Session expired. Please log in again.");
-                location.reload();
-                return;
-            }
-
-            if (viewRegion) {
-                url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
-            }
-
-            fetch(url)
-                .then(res => res.json())
-                .then(resp => {
-                    if (resp.status === 'success') {
-                        actualSupervisor = resp.supervisor;
-                        cmiData = resp.data || [];
-                        quizData = resp.quizzes || [];
-                        questionStats = resp.questionStats || [];
-
-                        // Update dropdown selection just in case
-                        if (resp.currentViewRegion) {
-                            document.getElementById('regionSelect').value = resp.currentViewRegion;
-                        }
-
-                        populateMetaTagFilter();
-                        applyFilters();
-                    } else {
-                        alert("Session expired or credentials missing. Please log in again.");
-                        location.reload();
-                    }
-                })
-                .catch(err => {
-                    console.error("Fetch error:", err);
-                    alert("Error loading data. Please try again.");
+            function switchSeason(seasonName) {
+                document.querySelectorAll('.season-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.innerText.includes(seasonName)) btn.classList.add('active');
                 });
-        }
 
-        function populateSupervisorList() {
-            const supervisorSet = new Set();
-            cmiData.forEach(item => {
-                if (item.supervisor && item.supervisor !== 'MASTER') {
-                    supervisorSet.add(item.supervisor);
-                }
-            });
-
-            allSupervisors = Array.from(supervisorSet).sort();
-
-            const dropdown = document.getElementById('impersonate-select');
-            dropdown.innerHTML = '<option value="">-- View as Yourself (MASTER) --</option>';
-
-            allSupervisors.forEach(sup => {
-                const option = document.createElement('option');
-                option.value = sup;
-                option.textContent = sup;
-                dropdown.appendChild(option);
-            });
-        }
-
-        function populateMetaTagFilter() {
-            const tagSet = new Set();
-
-            cmiData.forEach(item => {
-                if (item.tags) {
-                    const tags = item.tags.split(',').map(t => t.trim()).filter(t => t);
-                    tags.forEach(tag => tagSet.add(tag));
-                }
-            });
-
-            const sortedTags = Array.from(tagSet).sort();
-
-            const dropdown = document.getElementById('metaTagFilter');
-            dropdown.innerHTML = '<option value="">All Tags</option>';
-
-            sortedTags.forEach(tag => {
-                const option = document.createElement('option');
-                option.value = tag;
-                option.textContent = tag;
-                dropdown.appendChild(option);
-            });
-        }
-
-        function handleImpersonation() {
-            const selectedSupervisor = document.getElementById('impersonate-select').value;
-
-            if (selectedSupervisor) {
-                impersonatedSupervisor = selectedSupervisor;
-                document.getElementById('impersonation-banner').classList.remove('hidden');
-                document.getElementById('impersonated-name').textContent = selectedSupervisor;
-            } else {
-                impersonatedSupervisor = null;
-                document.getElementById('impersonation-banner').classList.add('hidden');
+                // Keep current region filter
+                const selectedRegion = document.getElementById('regionSelect').value;
+                fetchData(seasonName, selectedRegion);
             }
 
-            applyFilters();
-        }
+            function fetchData(season, viewRegion) {
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
 
-        function exitImpersonation() {
-            impersonatedSupervisor = null;
-            document.getElementById('impersonate-select').value = '';
-            document.getElementById('impersonation-banner').classList.add('hidden');
-            applyFilters();
-        }
+                let url = "";
 
-        function toggleView() {
-            currentView = document.getElementById('viewSelect').value;
-            const cmiFilters = document.getElementById('cmi-filters');
-            const quizFilters = document.getElementById('quiz-filters');
-            const questionFilters = document.getElementById('question-filters');
-            const seasonNav = document.getElementById('season-nav');
-            const header = document.getElementById('list-header');
-            const statsCard = document.getElementById('stats-card');
-            const quizDetailStats = document.getElementById('quiz-detail-stats');
-            const alphabetNav = document.getElementById('alphabet-nav');
-
-            if (currentView === 'quiz') {
-                cmiFilters.style.display = 'none';
-                quizFilters.style.display = 'flex';
-                questionFilters.style.display = 'none';
-                seasonNav.style.display = 'none';
-                statsCard.classList.add('show');
-                quizDetailStats.classList.remove('show');
-                alphabetNav.classList.add('show');
-                header.className = 'list-header quiz-header';
-                header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';
-                populateQuizFilter();
-            } else if (currentView === 'questions') {
-                cmiFilters.style.display = 'none';
-                quizFilters.style.display = 'none';
-                questionFilters.style.display = 'flex';
-                seasonNav.style.display = 'none';
-                statsCard.classList.remove('show');
-                quizDetailStats.classList.add('show');
-                alphabetNav.classList.remove('show');
-                header.className = 'list-header question-header';
-                header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
-
-                populateQuestionQuizFilter();
-            } else {
-                cmiFilters.style.display = 'flex';
-                quizFilters.style.display = 'none';
-                questionFilters.style.display = 'none';
-                seasonNav.style.display = 'flex';
-                statsCard.classList.remove('show');
-                quizDetailStats.classList.remove('show');
-                alphabetNav.classList.remove('show');
-                header.className = 'list-header cmi-header';
-                header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div>Tags</div><div>Moderator Notes</div><div style="text-align:center;">Video</div>';
-            }
-            applyFilters();
-        }
-
-        function buildAlphabetNav(filteredData) {
-            const alphabetNav = document.getElementById('alphabet-nav');
-            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-
-            // Get first letters that exist in the data
-            const existingLetters = new Set();
-            filteredData.forEach(student => {
-                const firstLetter = student.name.charAt(0).toUpperCase();
-                if (alphabet.includes(firstLetter)) {
-                    existingLetters.add(firstLetter);
-                }
-            });
-
-            // Build alphabet navigation
-            alphabetNav.innerHTML = '';
-            alphabet.forEach(letter => {
-                const letterDiv = document.createElement('div');
-                letterDiv.className = 'alphabet-nav-letter';
-                letterDiv.textContent = letter;
-                letterDiv.dataset.letter = letter;
-
-                if (existingLetters.has(letter)) {
-                    letterDiv.onclick = () => scrollToLetter(letter);
+                if (password) {
+                    // Password Login
+                    url = `${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=${season}`;
+                } else if (googleToken) {
+                    // Google Login (Re-use toke)
+                    url = `${SCRIPT_URL}?action=googleLogin&token=${encodeURIComponent(googleToken)}&season=${season}`;
                 } else {
-                    letterDiv.classList.add('disabled');
+                    console.error("No credentials available");
+                    alert("Session expired. Please log in again.");
+                    location.reload();
+                    return;
                 }
 
-                alphabetNav.appendChild(letterDiv);
-            });
-        }
+                if (viewRegion) {
+                    url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
+                }
 
-        function scrollToLetter(letter) {
-            const targetRow = document.querySelector(`.quiz-row[data-letter="${letter}"]`);
+                fetch(url)
+                    .then(res => res.json())
+                    .then(resp => {
+                        if (resp.status === 'success') {
+                            actualSupervisor = resp.supervisor;
+                            cmiData = resp.data || [];
+                            quizData = resp.quizzes || [];
+                            questionStats = resp.questionStats || [];
 
-            if (targetRow) {
-                // Scroll to this row with offset for fixed header
-                const offset = 100;
-                const elementPosition = targetRow.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - offset;
+                            // Update dropdown selection just in case
+                            if (resp.currentViewRegion) {
+                                document.getElementById('regionSelect').value = resp.currentViewRegion;
+                            }
 
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-
-                // Highlight briefly
-                targetRow.style.transition = 'background-color 0.3s';
-                const originalBg = targetRow.style.backgroundColor;
-                targetRow.style.backgroundColor = '#dbeafe';
-                setTimeout(() => {
-                    targetRow.style.backgroundColor = originalBg;
-                }, 1000);
+                            populateMetaTagFilter();
+                            applyFilters();
+                        } else {
+                            alert("Session expired or credentials missing. Please log in again.");
+                            location.reload();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Fetch error:", err);
+                        alert("Error loading data. Please try again.");
+                    });
             }
 
-            // Update active state
-            document.querySelectorAll('.alphabet-nav-letter').forEach(l => {
-                l.classList.remove('active');
-            });
-            const clickedLetter = document.querySelector(`.alphabet-nav-letter[data-letter="${letter}"]`);
-            if (clickedLetter) {
-                clickedLetter.classList.add('active');
-            }
-        }
 
-        function populateQuizFilter() {
-            const dropdown = document.getElementById('quizNameFilter');
-            const uniqueQuizzes = new Set();
+            function populateMetaTagFilter() {
+                const tagSet = new Set();
 
-            quizData.forEach(q => {
-                if (q.quiz) uniqueQuizzes.add(q.quiz);
-            });
-
-            const sortedQuizzes = Array.from(uniqueQuizzes).sort();
-
-            dropdown.innerHTML = '<option value="">All Quizzes</option>';
-
-            sortedQuizzes.forEach(quizName => {
-                const option = document.createElement('option');
-                option.value = quizName;
-                option.textContent = quizName;
-                dropdown.appendChild(option);
-            });
-        }
-
-        function populateQuestionQuizFilter() {
-            const dropdown = document.getElementById('questionQuizFilter');
-            const uniqueQuizzes = new Set();
-
-            questionStats.forEach(q => {
-                if (q.quiz) uniqueQuizzes.add(q.quiz);
-            });
-
-            const sortedQuizzes = Array.from(uniqueQuizzes).sort();
-
-            dropdown.innerHTML = '<option value="">Select Quiz</option>';
-
-            sortedQuizzes.forEach(quizName => {
-                const option = document.createElement('option');
-                option.value = quizName;
-                option.textContent = quizName;
-                dropdown.appendChild(option);
-            });
-        }
-
-        function applyFilters() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const list = document.getElementById('data-list');
-            list.innerHTML = '';
-
-            if (currentView === 'cmi') {
-                const tag = document.getElementById('tagFilter').value;
-                const metaTag = document.getElementById('metaTagFilter').value;
-                const vid = document.getElementById('videoToggle').checked;
-
-                // REMOVED: Frontend filter by supervisor name.
-                // The backend now handles region filtering (and thus supervisor scoping) via 'viewRegion' and 'cmiData'.
-                // If we filter here, we hide reports from other regions that validly belong in cmiData.
-
-                // const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
-
-                const filtered = cmiData.filter(item => {
-                    // if (effectiveSupervisor !== 'MASTER' && !String(item.supervisor).includes(effectiveSupervisor)) {
-                    //     return false;
-                    // }
-
-                    if (vid && !(item.video || "").toString().startsWith("http")) return false;
-                    if (tag && !(item.cmi || "").includes(tag)) return false;
-
-                    if (metaTag) {
-                        const itemTags = (item.tags || "").split(',').map(t => t.trim());
-                        if (!itemTags.includes(metaTag)) return false;
-                    }
-
-                    return JSON.stringify(item).toLowerCase().includes(term);
-                }).sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
-
-                filtered.forEach(item => {
-                    let rClass = '';
-                    if ((item.cmi || "").includes('Red')) rClass = 'row-red';
-                    else if ((item.cmi || "").includes('Penalty')) rClass = 'row-pk';
-                    else if ((item.cmi || "").includes('Goal')) rClass = 'row-goal';
-
-                    const vidBtn = (item.video || "").startsWith("http")
-                        ? `<a href="${item.video}" target="_blank" class="video-link">Watch</a>`
-                        : `<span class="video-none">No Video</span>`;
-
-                    // Parse tags
-                    let tagsHtml = '<div class="col-tags">';
+                cmiData.forEach(item => {
                     if (item.tags) {
                         const tags = item.tags.split(',').map(t => t.trim()).filter(t => t);
-                        if (tags.length > 0) {
-                            tags.forEach(t => {
-                                const isHighlighted = metaTag && t === metaTag;
-                                tagsHtml += `<span class="meta-tag ${isHighlighted ? 'highlight' : ''}">${t}</span>`;
-                            });
-                        } else {
-                            tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
-                        }
-                    } else {
-                        tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
+                        tags.forEach(tag => tagSet.add(tag));
                     }
-                    tagsHtml += '</div>';
+                });
 
-                    // Extract region from supervisor name
-                    const supervisorName = item.supervisor || "";
-                    const regionMatch = supervisorName.match(/\(([^)]+)\)/);
-                    const region = regionMatch ? regionMatch[1] : "";
-                    const refereeName = item.refName || "Unknown";
+                const sortedTags = Array.from(tagSet).sort();
 
-                    const div = document.createElement('div');
-                    div.className = `list-row cmi-row ${rClass}`;
-                    div.onclick = (e) => {
-                        if (e.target.tagName !== 'A') {
-                            div.classList.toggle('expanded');
+                const dropdown = document.getElementById('metaTagFilter');
+                dropdown.innerHTML = '<option value="">All Tags</option>';
+
+                sortedTags.forEach(tag => {
+                    const option = document.createElement('option');
+                    option.value = tag;
+                    option.textContent = tag;
+                    dropdown.appendChild(option);
+                });
+
+
+
+
+                function toggleView() {
+                    currentView = document.getElementById('viewSelect').value;
+                    const cmiFilters = document.getElementById('cmi-filters');
+                    const quizFilters = document.getElementById('quiz-filters');
+                    const questionFilters = document.getElementById('question-filters');
+                    const seasonNav = document.getElementById('season-nav');
+                    const header = document.getElementById('list-header');
+                    const statsCard = document.getElementById('stats-card');
+                    const quizDetailStats = document.getElementById('quiz-detail-stats');
+                    const alphabetNav = document.getElementById('alphabet-nav');
+
+                    if (currentView === 'quiz') {
+                        cmiFilters.style.display = 'none';
+                        quizFilters.style.display = 'flex';
+                        questionFilters.style.display = 'none';
+                        seasonNav.style.display = 'none';
+                        statsCard.classList.add('show');
+                        quizDetailStats.classList.remove('show');
+                        alphabetNav.classList.add('show');
+                        header.className = 'list-header quiz-header';
+                        header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';
+                        populateQuizFilter();
+                    } else if (currentView === 'questions') {
+                        cmiFilters.style.display = 'none';
+                        quizFilters.style.display = 'none';
+                        questionFilters.style.display = 'flex';
+                        seasonNav.style.display = 'none';
+                        statsCard.classList.remove('show');
+                        quizDetailStats.classList.add('show');
+                        alphabetNav.classList.remove('show');
+                        header.className = 'list-header question-header';
+                        header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
+
+                        populateQuestionQuizFilter();
+                    } else {
+                        cmiFilters.style.display = 'flex';
+                        quizFilters.style.display = 'none';
+                        questionFilters.style.display = 'none';
+                        seasonNav.style.display = 'flex';
+                        statsCard.classList.remove('show');
+                        quizDetailStats.classList.remove('show');
+                        alphabetNav.classList.remove('show');
+                        header.className = 'list-header cmi-header';
+                        header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div>Tags</div><div>Moderator Notes</div><div style="text-align:center;">Video</div>';
+                    }
+                    applyFilters();
+                }
+
+                function buildAlphabetNav(filteredData) {
+                    const alphabetNav = document.getElementById('alphabet-nav');
+                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+                    // Get first letters that exist in the data
+                    const existingLetters = new Set();
+                    filteredData.forEach(student => {
+                        const firstLetter = student.name.charAt(0).toUpperCase();
+                        if (alphabet.includes(firstLetter)) {
+                            existingLetters.add(firstLetter);
                         }
-                    };
+                    });
 
-                    div.innerHTML = `
+                    // Build alphabet navigation
+                    alphabetNav.innerHTML = '';
+                    alphabet.forEach(letter => {
+                        const letterDiv = document.createElement('div');
+                        letterDiv.className = 'alphabet-nav-letter';
+                        letterDiv.textContent = letter;
+                        letterDiv.dataset.letter = letter;
+
+                        if (existingLetters.has(letter)) {
+                            letterDiv.onclick = () => scrollToLetter(letter);
+                        } else {
+                            letterDiv.classList.add('disabled');
+                        }
+
+                        alphabetNav.appendChild(letterDiv);
+                    });
+                }
+
+                function scrollToLetter(letter) {
+                    const targetRow = document.querySelector(`.quiz-row[data-letter="${letter}"]`);
+
+                    if (targetRow) {
+                        // Scroll to this row with offset for fixed header
+                        const offset = 100;
+                        const elementPosition = targetRow.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+
+                        // Highlight briefly
+                        targetRow.style.transition = 'background-color 0.3s';
+                        const originalBg = targetRow.style.backgroundColor;
+                        targetRow.style.backgroundColor = '#dbeafe';
+                        setTimeout(() => {
+                            targetRow.style.backgroundColor = originalBg;
+                        }, 1000);
+                    }
+
+                    // Update active state
+                    document.querySelectorAll('.alphabet-nav-letter').forEach(l => {
+                        l.classList.remove('active');
+                    });
+                    const clickedLetter = document.querySelector(`.alphabet-nav-letter[data-letter="${letter}"]`);
+                    if (clickedLetter) {
+                        clickedLetter.classList.add('active');
+                    }
+                }
+
+                function populateQuizFilter() {
+                    const dropdown = document.getElementById('quizNameFilter');
+                    const uniqueQuizzes = new Set();
+
+                    quizData.forEach(q => {
+                        if (q.quiz) uniqueQuizzes.add(q.quiz);
+                    });
+
+                    const sortedQuizzes = Array.from(uniqueQuizzes).sort();
+
+                    dropdown.innerHTML = '<option value="">All Quizzes</option>';
+
+                    sortedQuizzes.forEach(quizName => {
+                        const option = document.createElement('option');
+                        option.value = quizName;
+                        option.textContent = quizName;
+                        dropdown.appendChild(option);
+                    });
+                }
+
+                function populateQuestionQuizFilter() {
+                    const dropdown = document.getElementById('questionQuizFilter');
+                    const uniqueQuizzes = new Set();
+
+                    questionStats.forEach(q => {
+                        if (q.quiz) uniqueQuizzes.add(q.quiz);
+                    });
+
+                    const sortedQuizzes = Array.from(uniqueQuizzes).sort();
+
+                    dropdown.innerHTML = '<option value="">Select Quiz</option>';
+
+                    sortedQuizzes.forEach(quizName => {
+                        const option = document.createElement('option');
+                        option.value = quizName;
+                        option.textContent = quizName;
+                        dropdown.appendChild(option);
+                    });
+                }
+
+                function applyFilters() {
+                    const term = document.getElementById('searchInput').value.toLowerCase();
+                    const list = document.getElementById('data-list');
+                    list.innerHTML = '';
+
+                    if (currentView === 'cmi') {
+                        const tag = document.getElementById('tagFilter').value;
+                        const metaTag = document.getElementById('metaTagFilter').value;
+                        const vid = document.getElementById('videoToggle').checked;
+
+                        // REMOVED: Frontend filter by supervisor name.
+                        // The backend now handles region filtering (and thus supervisor scoping) via 'viewRegion' and 'cmiData'.
+                        // If we filter here, we hide reports from other regions that validly belong in cmiData.
+
+                        const filtered = cmiData.filter(item => {
+                            if (vid && !(item.video || "").toString().startsWith("http")) return false;
+                            if (tag && !(item.cmi || "").includes(tag)) return false;
+
+                            if (metaTag) {
+                                const itemTags = (item.tags || "").split(',').map(t => t.trim());
+                                if (!itemTags.includes(metaTag)) return false;
+                            }
+
+                            return JSON.stringify(item).toLowerCase().includes(term);
+                        }).sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
+
+                        filtered.forEach(item => {
+                            let rClass = '';
+                            if ((item.cmi || "").includes('Red')) rClass = 'row-red';
+                            else if ((item.cmi || "").includes('Penalty')) rClass = 'row-pk';
+                            else if ((item.cmi || "").includes('Goal')) rClass = 'row-goal';
+
+                            const vidBtn = (item.video || "").startsWith("http")
+                                ? `<a href="${item.video}" target="_blank" class="video-link">Watch</a>`
+                                : `<span class="video-none">No Video</span>`;
+
+                            // Parse tags
+                            let tagsHtml = '<div class="col-tags">';
+                            if (item.tags) {
+                                const tags = item.tags.split(',').map(t => t.trim()).filter(t => t);
+                                if (tags.length > 0) {
+                                    tags.forEach(t => {
+                                        const isHighlighted = metaTag && t === metaTag;
+                                        tagsHtml += `<span class="meta-tag ${isHighlighted ? 'highlight' : ''}">${t}</span>`;
+                                    });
+                                } else {
+                                    tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
+                                }
+                            } else {
+                                tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
+                            }
+                            tagsHtml += '</div>';
+
+                            // Extract region from supervisor name
+                            const supervisorName = item.supervisor || "";
+                            const regionMatch = supervisorName.match(/\(([^)]+)\)/);
+                            const region = regionMatch ? regionMatch[1] : "";
+                            const refereeName = item.refName || "Unknown";
+
+                            const div = document.createElement('div');
+                            div.className = `list-row cmi-row ${rClass}`;
+                            div.onclick = (e) => {
+                                if (e.target.tagName !== 'A') {
+                                    div.classList.toggle('expanded');
+                                }
+                            };
+
+                            div.innerHTML = `
                         <div class="col-date">${item.gameDate}</div>
                         <div class="col-match">
                             <div>${item.home} vs ${item.away}</div>
@@ -2029,159 +1962,159 @@
                             </div>
                         </div>
                     `;
-                    list.appendChild(div);
-                });
-            } else if (currentView === 'quiz') {
-                if (!quizData || quizData.length === 0) {
-                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p></div>';
-                    document.getElementById('stats-grid').innerHTML = '';
-                    return;
-                }
+                            list.appendChild(div);
+                        });
+                    } else if (currentView === 'quiz') {
+                        if (!quizData || quizData.length === 0) {
+                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p></div>';
+                            document.getElementById('stats-grid').innerHTML = '';
+                            return;
+                        }
 
-                const selectedQuiz = document.getElementById('quizNameFilter').value;
+                        const selectedQuiz = document.getElementById('quizNameFilter').value;
 
-                const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
-                const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
+                        const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                        const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
 
-                const studentQuizzes = {};
+                        const studentQuizzes = {};
 
-                quizData.forEach(q => {
-                    const email = q.email;
+                        quizData.forEach(q => {
+                            const email = q.email;
 
-                    if (!studentQuizzes[email]) {
-                        studentQuizzes[email] = {
-                            name: q.name,
-                            email: q.email,
-                            group: q.group || "Unknown",
-                            quizzes: {},
-                            scrimmage1: q.scrimmage1 || false,
-                            scrimmage2: q.scrimmage2 || false,
-                            playoffEligible: q.playoffEligible || false
-                        };
-                    }
-
-                    const quizName = q.quiz;
-                    const percent = parseFloat(q.percent) || 0;
-
-                    // Track ALL attempts for each quiz
-                    if (!studentQuizzes[email].quizzes[quizName]) {
-                        studentQuizzes[email].quizzes[quizName] = {
-                            attempts: []
-                        };
-                    }
-
-                    studentQuizzes[email].quizzes[quizName].attempts.push({
-                        score: q.score,
-                        percent: q.percent,
-                        date: q.date
-                    });
-                });
-
-                // Calculate best attempt for each quiz
-                Object.values(studentQuizzes).forEach(student => {
-                    Object.keys(student.quizzes).forEach(quizName => {
-                        const attempts = student.quizzes[quizName].attempts;
-
-                        // Find best attempt
-                        let bestAttempt = attempts[0];
-                        attempts.forEach(attempt => {
-                            const currentPercent = parseFloat(attempt.percent) || 0;
-                            const bestPercent = parseFloat(bestAttempt.percent) || 0;
-                            if (currentPercent > bestPercent) {
-                                bestAttempt = attempt;
+                            if (!studentQuizzes[email]) {
+                                studentQuizzes[email] = {
+                                    name: q.name,
+                                    email: q.email,
+                                    group: q.group || "Unknown",
+                                    quizzes: {},
+                                    scrimmage1: q.scrimmage1 || false,
+                                    scrimmage2: q.scrimmage2 || false,
+                                    playoffEligible: q.playoffEligible || false
+                                };
                             }
+
+                            const quizName = q.quiz;
+                            const percent = parseFloat(q.percent) || 0;
+
+                            // Track ALL attempts for each quiz
+                            if (!studentQuizzes[email].quizzes[quizName]) {
+                                studentQuizzes[email].quizzes[quizName] = {
+                                    attempts: []
+                                };
+                            }
+
+                            studentQuizzes[email].quizzes[quizName].attempts.push({
+                                score: q.score,
+                                percent: q.percent,
+                                date: q.date
+                            });
                         });
 
-                        student.quizzes[quizName].best = bestAttempt;
-                        student.quizzes[quizName].attemptCount = attempts.length;
-                    });
-                });
+                        // Calculate best attempt for each quiz
+                        Object.values(studentQuizzes).forEach(student => {
+                            Object.keys(student.quizzes).forEach(quizName => {
+                                const attempts = student.quizzes[quizName].attempts;
 
-                // Get all unique quiz names from the data (skip empty names)
-                const allQuizNames = new Set();
-                Object.values(studentQuizzes).forEach(student => {
-                    Object.keys(student.quizzes).forEach(quizName => {
-                        // Only add non-empty quiz names
-                        if (quizName && quizName.trim()) {
-                            allQuizNames.add(quizName);
-                        }
-                    });
-                });
-                const sortedAllQuizNames = Array.from(allQuizNames).sort();
-
-                let filtered = Object.values(studentQuizzes).filter(student => {
-                    if (!JSON.stringify(student).toLowerCase().includes(term)) return false;
-
-                    if (selectedQuiz && !student.quizzes[selectedQuiz]) return false;
-
-                    if (supervisorRegion && !matchesRegion(student.group, supervisorRegion)) {
-                        return false;
-                    }
-
-                    return true;
-                }).sort((a, b) => a.name.localeCompare(b.name));
-
-                updateQuizStats(filtered, selectedQuiz);
-
-                // Build alphabet navigation
-                buildAlphabetNav(filtered);
-
-                if (filtered.length === 0) {
-                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
-                    return;
-                }
-
-                filtered.forEach(student => {
-                    const div = document.createElement('div');
-                    div.className = 'list-row quiz-row';
-                    div.dataset.letter = student.name.charAt(0).toUpperCase();
-
-                    // Add click handler for mobile expand/collapse
-                    div.onclick = function (e) {
-                        // Only toggle on mobile (screen width < 768px)
-                        if (window.innerWidth < 768) {
-                            div.classList.toggle('expanded');
-                        }
-                    };
-
-                    // Build quiz scores HTML
-                    let quizScoresHtml = '<div class="quiz-scores-container">';
-
-                    const quizzesToShow = selectedQuiz ? [selectedQuiz] : sortedAllQuizNames;
-
-                    quizzesToShow.forEach(quizName => {
-                        // Skip empty quiz names
-                        if (!quizName || !quizName.trim()) return;
-
-                        const quizData = student.quizzes[quizName];
-
-                        if (quizData && quizData.best) {
-                            // Student has taken this quiz
-                            const quiz = quizData.best;
-                            const attemptCount = quizData.attemptCount;
-
-                            var quizPercent = 0;
-                            if (quiz.percent && quiz.percent !== '') {
-                                quizPercent = parseFloat(quiz.percent);
-                            }
-
-                            // If percentage is missing or wrong, calculate from fractional score
-                            if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
-                                var parts = quiz.score.split('/');
-                                if (parts.length === 2) {
-                                    var earned = parseFloat(parts[0]);
-                                    var total = parseFloat(parts[1]);
-                                    if (total > 0) {
-                                        quizPercent = Math.round((earned / total) * 100);
+                                // Find best attempt
+                                let bestAttempt = attempts[0];
+                                attempts.forEach(attempt => {
+                                    const currentPercent = parseFloat(attempt.percent) || 0;
+                                    const bestPercent = parseFloat(bestAttempt.percent) || 0;
+                                    if (currentPercent > bestPercent) {
+                                        bestAttempt = attempt;
                                     }
+                                });
+
+                                student.quizzes[quizName].best = bestAttempt;
+                                student.quizzes[quizName].attemptCount = attempts.length;
+                            });
+                        });
+
+                        // Get all unique quiz names from the data (skip empty names)
+                        const allQuizNames = new Set();
+                        Object.values(studentQuizzes).forEach(student => {
+                            Object.keys(student.quizzes).forEach(quizName => {
+                                // Only add non-empty quiz names
+                                if (quizName && quizName.trim()) {
+                                    allQuizNames.add(quizName);
                                 }
+                            });
+                        });
+                        const sortedAllQuizNames = Array.from(allQuizNames).sort();
+
+                        let filtered = Object.values(studentQuizzes).filter(student => {
+                            if (!JSON.stringify(student).toLowerCase().includes(term)) return false;
+
+                            if (selectedQuiz && !student.quizzes[selectedQuiz]) return false;
+
+                            if (supervisorRegion && !matchesRegion(student.group, supervisorRegion)) {
+                                return false;
                             }
 
-                            var borderClass = 'none';
-                            if (quizPercent >= 80) borderClass = 'high';
-                            else if (quizPercent > 0) borderClass = 'low';
+                            return true;
+                        }).sort((a, b) => a.name.localeCompare(b.name));
 
-                            quizScoresHtml += `
+                        updateQuizStats(filtered, selectedQuiz);
+
+                        // Build alphabet navigation
+                        buildAlphabetNav(filtered);
+
+                        if (filtered.length === 0) {
+                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
+                            return;
+                        }
+
+                        filtered.forEach(student => {
+                            const div = document.createElement('div');
+                            div.className = 'list-row quiz-row';
+                            div.dataset.letter = student.name.charAt(0).toUpperCase();
+
+                            // Add click handler for mobile expand/collapse
+                            div.onclick = function (e) {
+                                // Only toggle on mobile (screen width < 768px)
+                                if (window.innerWidth < 768) {
+                                    div.classList.toggle('expanded');
+                                }
+                            };
+
+                            // Build quiz scores HTML
+                            let quizScoresHtml = '<div class="quiz-scores-container">';
+
+                            const quizzesToShow = selectedQuiz ? [selectedQuiz] : sortedAllQuizNames;
+
+                            quizzesToShow.forEach(quizName => {
+                                // Skip empty quiz names
+                                if (!quizName || !quizName.trim()) return;
+
+                                const quizData = student.quizzes[quizName];
+
+                                if (quizData && quizData.best) {
+                                    // Student has taken this quiz
+                                    const quiz = quizData.best;
+                                    const attemptCount = quizData.attemptCount;
+
+                                    var quizPercent = 0;
+                                    if (quiz.percent && quiz.percent !== '') {
+                                        quizPercent = parseFloat(quiz.percent);
+                                    }
+
+                                    // If percentage is missing or wrong, calculate from fractional score
+                                    if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
+                                        var parts = quiz.score.split('/');
+                                        if (parts.length === 2) {
+                                            var earned = parseFloat(parts[0]);
+                                            var total = parseFloat(parts[1]);
+                                            if (total > 0) {
+                                                quizPercent = Math.round((earned / total) * 100);
+                                            }
+                                        }
+                                    }
+
+                                    var borderClass = 'none';
+                                    if (quizPercent >= 80) borderClass = 'high';
+                                    else if (quizPercent > 0) borderClass = 'low';
+
+                                    quizScoresHtml += `
                                 <div class="quiz-score-card ${borderClass}">
                                     <div class="quiz-name-label">${quizName}</div>
                                     <div class="quiz-score-value">${quiz.score || 'N/A'}</div>
@@ -2189,26 +2122,26 @@
                                     <div class="attempt-count">${attemptCount} attempt${attemptCount > 1 ? 's' : ''}</div>
                                 </div>
                             `;
-                        } else {
-                            // Student has NOT taken this quiz
-                            quizScoresHtml += `
+                                } else {
+                                    // Student has NOT taken this quiz
+                                    quizScoresHtml += `
                                 <div class="quiz-score-card none">
                                     <div class="quiz-name-label">${quizName}</div>
                                     <div class="quiz-score-value not-taken">Not taken</div>
                                 </div>
                             `;
-                        }
-                    });
+                                }
+                            });
 
-                    quizScoresHtml += '</div>';
+                            quizScoresHtml += '</div>';
 
-                    // Scrimmage checkboxes
-                    const scrim1Icon = student.scrimmage1 ? '✓' : '○';
-                    const scrim2Icon = student.scrimmage2 ? '✓' : '○';
-                    const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
-                    const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
+                            // Scrimmage checkboxes
+                            const scrim1Icon = student.scrimmage1 ? '✓' : '○';
+                            const scrim2Icon = student.scrimmage2 ? '✓' : '○';
+                            const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
+                            const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
 
-                    div.innerHTML = `
+                            div.innerHTML = `
                         <div class="col-referee">
                             <div class="col-referee-name">${student.name}</div>
                             <div class="col-referee-region">${student.group}</div>
@@ -2231,124 +2164,124 @@
                         <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
                         ${quizScoresHtml}
                     `;
-                    list.appendChild(div);
-                });
-            } else if (currentView === 'questions') {
-                if (!questionStats || questionStats.length === 0) {
-                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Question Data Found</h3><p>Question-level data will appear here once students take quizzes.</p></div>';
-                    document.getElementById('quiz-detail-stats').classList.remove('show');
-                    return;
-                }
-
-                const selectedQuiz = document.getElementById('questionQuizFilter').value;
-                const problemsOnly = document.getElementById('problemsOnlyToggle').checked;
-
-                const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
-                const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
-
-                let filtered = questionStats.filter(q => {
-                    if (!JSON.stringify(q).toLowerCase().includes(term)) return false;
-
-                    if (!selectedQuiz) return false;
-                    if (q.quiz !== selectedQuiz) return false;
-
-                    if (problemsOnly && q.successRate >= 70) return false;
-
-                    if (supervisorRegion && !Object.keys(q.studentGroups).some(group => matchesRegion(group, supervisorRegion))) {
-                        return false;
-                    }
-
-                    return true;
-                }).sort((a, b) => a.questionNumber - b.questionNumber);
-
-                if (!selectedQuiz) {
-                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>Please select a quiz from the dropdown above to view question analysis.</p></div>';
-                    document.getElementById('quiz-detail-stats').classList.remove('show');
-                    return;
-                }
-
-                // Calculate unique referees and total attempts for selected quiz
-                if (selectedQuiz) {
-                    const uniqueReferees = new Set();
-                    let totalAttempts = 0;
-
-                    quizData.forEach(q => {
-                        if (q.quiz === selectedQuiz) {
-                            uniqueReferees.add(q.email);
-                            totalAttempts++;
+                            list.appendChild(div);
+                        });
+                    } else if (currentView === 'questions') {
+                        if (!questionStats || questionStats.length === 0) {
+                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Question Data Found</h3><p>Question-level data will appear here once students take quizzes.</p></div>';
+                            document.getElementById('quiz-detail-stats').classList.remove('show');
+                            return;
                         }
-                    });
 
-                    document.getElementById('quiz-stats-title').textContent = `${selectedQuiz} Statistics`;
-                    document.getElementById('unique-referees').textContent = uniqueReferees.size;
-                    document.getElementById('total-attempts').textContent = totalAttempts;
-                    document.getElementById('quiz-detail-stats').classList.add('show');
-                } else {
-                    document.getElementById('quiz-detail-stats').classList.remove('show');
-                }
+                        const selectedQuiz = document.getElementById('questionQuizFilter').value;
+                        const problemsOnly = document.getElementById('problemsOnlyToggle').checked;
 
-                if (filtered.length === 0) {
-                    list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No questions match your filters.</p></div>';
-                    return;
-                }
+                        const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                        const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
 
+                        let filtered = questionStats.filter(q => {
+                            if (!JSON.stringify(q).toLowerCase().includes(term)) return false;
 
-                // Find the lowest success rate for highlighting
-                let lowestRate = 100;
-                filtered.forEach(q => {
-                    if (q.successRate < lowestRate) {
-                        lowestRate = q.successRate;
-                    }
-                });
+                            if (!selectedQuiz) return false;
+                            if (q.quiz !== selectedQuiz) return false;
 
-                filtered.forEach(q => {
-                    const isLowestPerformer = q.successRate === lowestRate;
+                            if (problemsOnly && q.successRate >= 70) return false;
 
-                    const div = document.createElement('div');
-                    div.className = `list-row question-row ${isLowestPerformer ? 'lowest-performer' : ''}`;
+                            if (supervisorRegion && !Object.keys(q.studentGroups).some(group => matchesRegion(group, supervisorRegion))) {
+                                return false;
+                            }
 
-                    // Build answer breakdown
-                    let answerBreakdownHtml = '<div class="answer-breakdown">';
-                    answerBreakdownHtml += '<div style="font-weight:600; margin-bottom:10px; color:#374151;">Answer Breakdown:</div>';
+                            return true;
+                        }).sort((a, b) => a.questionNumber - b.questionNumber);
 
-                    // Calculate total responses
-                    const totalResponses = q.totalAttempts;
+                        if (!selectedQuiz) {
+                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>Please select a quiz from the dropdown above to view question analysis.</p></div>';
+                            document.getElementById('quiz-detail-stats').classList.remove('show');
+                            return;
+                        }
 
-                    // Create array of all answers with their counts
-                    const allAnswers = [];
+                        // Calculate unique referees and total attempts for selected quiz
+                        if (selectedQuiz) {
+                            const uniqueReferees = new Set();
+                            let totalAttempts = 0;
 
-                    // Add correct answer
-                    const correctCount = q.correctAttempts;
-                    const correctPercent = Math.round((correctCount / totalResponses) * 100);
-                    allAnswers.push({
-                        text: q.correctAnswer,
-                        count: correctCount,
-                        percent: correctPercent,
-                        isCorrect: true
-                    });
-
-                    // Add wrong answers
-                    if (q.wrongAnswers) {
-                        for (const [answer, count] of Object.entries(q.wrongAnswers)) {
-                            const percent = Math.round((count / totalResponses) * 100);
-                            allAnswers.push({
-                                text: answer,
-                                count: count,
-                                percent: percent,
-                                isCorrect: false
+                            quizData.forEach(q => {
+                                if (q.quiz === selectedQuiz) {
+                                    uniqueReferees.add(q.email);
+                                    totalAttempts++;
+                                }
                             });
+
+                            document.getElementById('quiz-stats-title').textContent = `${selectedQuiz} Statistics`;
+                            document.getElementById('unique-referees').textContent = uniqueReferees.size;
+                            document.getElementById('total-attempts').textContent = totalAttempts;
+                            document.getElementById('quiz-detail-stats').classList.add('show');
+                        } else {
+                            document.getElementById('quiz-detail-stats').classList.remove('show');
                         }
-                    }
 
-                    // Sort by count (most selected first)
-                    allAnswers.sort((a, b) => b.count - a.count);
+                        if (filtered.length === 0) {
+                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No questions match your filters.</p></div>';
+                            return;
+                        }
 
-                    // Render answer items
-                    allAnswers.forEach(ans => {
-                        const correctClass = ans.isCorrect ? 'correct' : 'incorrect';
-                        const fillClass = ans.isCorrect ? 'correct' : 'incorrect';
 
-                        answerBreakdownHtml += `
+                        // Find the lowest success rate for highlighting
+                        let lowestRate = 100;
+                        filtered.forEach(q => {
+                            if (q.successRate < lowestRate) {
+                                lowestRate = q.successRate;
+                            }
+                        });
+
+                        filtered.forEach(q => {
+                            const isLowestPerformer = q.successRate === lowestRate;
+
+                            const div = document.createElement('div');
+                            div.className = `list-row question-row ${isLowestPerformer ? 'lowest-performer' : ''}`;
+
+                            // Build answer breakdown
+                            let answerBreakdownHtml = '<div class="answer-breakdown">';
+                            answerBreakdownHtml += '<div style="font-weight:600; margin-bottom:10px; color:#374151;">Answer Breakdown:</div>';
+
+                            // Calculate total responses
+                            const totalResponses = q.totalAttempts;
+
+                            // Create array of all answers with their counts
+                            const allAnswers = [];
+
+                            // Add correct answer
+                            const correctCount = q.correctAttempts;
+                            const correctPercent = Math.round((correctCount / totalResponses) * 100);
+                            allAnswers.push({
+                                text: q.correctAnswer,
+                                count: correctCount,
+                                percent: correctPercent,
+                                isCorrect: true
+                            });
+
+                            // Add wrong answers
+                            if (q.wrongAnswers) {
+                                for (const [answer, count] of Object.entries(q.wrongAnswers)) {
+                                    const percent = Math.round((count / totalResponses) * 100);
+                                    allAnswers.push({
+                                        text: answer,
+                                        count: count,
+                                        percent: percent,
+                                        isCorrect: false
+                                    });
+                                }
+                            }
+
+                            // Sort by count (most selected first)
+                            allAnswers.sort((a, b) => b.count - a.count);
+
+                            // Render answer items
+                            allAnswers.forEach(ans => {
+                                const correctClass = ans.isCorrect ? 'correct' : 'incorrect';
+                                const fillClass = ans.isCorrect ? 'correct' : 'incorrect';
+
+                                answerBreakdownHtml += `
                             <div class="answer-item ${correctClass}">
                                 <div class="answer-text">
                                     ${ans.text}
@@ -2363,49 +2296,49 @@
                                 </div>
                             </div>
                         `;
-                    });
+                            });
 
-                    answerBreakdownHtml += '</div>';
+                            answerBreakdownHtml += '</div>';
 
-                    // Build wrong answers summary (only most common incorrect)
-                    let wrongAnswersHtml = '';
-                    if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
-                        wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
-                    }
+                            // Build wrong answers summary (only most common incorrect)
+                            let wrongAnswersHtml = '';
+                            if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
+                                wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
+                            }
 
-                    // ⭐ NEW: Build video link (simple, no border, under question title)
-                    let videoLinkHtml = '';
-                    if (q.videoUrl && q.videoUrl.trim() !== '') {
-                        videoLinkHtml = `
+                            // ⭐ NEW: Build video link (simple, no border, under question title)
+                            let videoLinkHtml = '';
+                            if (q.videoUrl && q.videoUrl.trim() !== '') {
+                                videoLinkHtml = `
                             <div class="question-video-link">
                                 <a href="${q.videoUrl}" target="_blank">Video for question ↗</a>
                             </div>
                         `;
-                    }
+                            }
 
-                    // Build question display with optional header
-                    let questionDisplayHtml = '<div class="question-text">';
+                            // Build question display with optional header
+                            let questionDisplayHtml = '<div class="question-text">';
 
-                    if (q.questionHeader && q.questionHeader.trim() !== '') {
-                        // Has separate header - show both (body hidden by CSS in row view)
-                        questionDisplayHtml += `
+                            if (q.questionHeader && q.questionHeader.trim() !== '') {
+                                // Has separate header - show both (body hidden by CSS in row view)
+                                questionDisplayHtml += `
                             <div class="question-header-text">${q.questionHeader}</div>
                             <div class="question-body-text">${q.questionText}</div>
                         `;
-                    } else {
-                        // No separate header - create a fallback header and hide full text in row
-                        const fallbackHeader = q.questionText.length > 60 ? q.questionText.substring(0, 60) + '...' : q.questionText;
-                        questionDisplayHtml += `
+                            } else {
+                                // No separate header - create a fallback header and hide full text in row
+                                const fallbackHeader = q.questionText.length > 60 ? q.questionText.substring(0, 60) + '...' : q.questionText;
+                                questionDisplayHtml += `
                             <div class="question-header-text">${fallbackHeader}</div>
                             <div class="question-body-text">${q.questionText}</div>
                         `;
-                    }
+                            }
 
-                    questionDisplayHtml += videoLinkHtml;
-                    questionDisplayHtml += '</div>';
+                            questionDisplayHtml += videoLinkHtml;
+                            questionDisplayHtml += '</div>';
 
-                    // Use the new questionDisplayHtml
-                    div.innerHTML = `
+                            // Use the new questionDisplayHtml
+                            div.innerHTML = `
                         ${questionDisplayHtml}
                         <div style="text-align:center;">
                             <div class="success-rate">${q.successRate}%</div>
@@ -2417,104 +2350,106 @@
                         ${answerBreakdownHtml}
                     `;
 
-                    div.onclick = function (e) {
-                        if (e.target.tagName === 'A') return;
-                        div.classList.toggle('expanded');
-                    };
+                            div.onclick = function (e) {
+                                if (e.target.tagName === 'A') return;
+                                div.classList.toggle('expanded');
+                            };
 
-                    list.appendChild(div);
-                });
-            }
-        }
-
-        function extractRegionFromSupervisor(supervisorName) {
-            if (!supervisorName || supervisorName === 'MASTER') return null;
-
-            const match = supervisorName.match(/\(([^)]+)\)/);
-            return match ? match[1] : null;
-        }
-
-        function matchesRegion(studentGroup, supervisorRegion) {
-            if (!studentGroup || !supervisorRegion) return false;
-
-            const normalizedGroup = studentGroup.toLowerCase().trim();
-            const normalizedRegion = supervisorRegion.toLowerCase().trim();
-
-            if (normalizedGroup === normalizedRegion) return true;
-
-            if (normalizedGroup.includes(normalizedRegion) || normalizedRegion.includes(normalizedGroup)) {
-                return true;
-            }
-
-            return false;
-        }
-
-        function updateQuizStats(filteredData, selectedQuiz) {
-            const statsGrid = document.getElementById('stats-grid');
-
-            if (filteredData.length === 0) {
-                statsGrid.innerHTML = '';
-                return;
-            }
-
-            const quizCounts = {};
-            const quizAttempts = {};
-
-            filteredData.forEach(student => {
-                Object.keys(student.quizzes).forEach(quizName => {
-                    // Skip empty or whitespace-only quiz names
-                    if (!quizName || !quizName.trim()) return;
-
-                    if (!selectedQuiz || selectedQuiz === quizName) {
-                        quizCounts[quizName] = (quizCounts[quizName] || 0) + 1;
-
-                        // Track total attempts for this quiz
-                        const attemptCount = student.quizzes[quizName].attemptCount || 1;
-                        quizAttempts[quizName] = (quizAttempts[quizName] || 0) + attemptCount;
+                            list.appendChild(div);
+                        });
                     }
-                });
-            });
+                }
 
-            const sortedQuizNames = Object.keys(quizCounts).sort();
 
-            let statsHtml = '';
+                function extractRegionFromSupervisor(supervisorName) {
+                    if (!supervisorName || supervisorName === 'MASTER') return null;
 
-            // Always show total students
-            statsHtml += `
+                    const match = supervisorName.match(/\(([^)]+)\)/);
+                    return match ? match[1] : null;
+                }
+
+                function matchesRegion(studentGroup, supervisorRegion) {
+                    if (!studentGroup || !supervisorRegion) return false;
+
+                    const normalizedGroup = studentGroup.toLowerCase().trim();
+                    const normalizedRegion = supervisorRegion.toLowerCase().trim();
+
+                    if (normalizedGroup === normalizedRegion) return true;
+
+                    if (normalizedGroup.includes(normalizedRegion) || normalizedRegion.includes(normalizedGroup)) {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                function updateQuizStats(filteredData, selectedQuiz) {
+                    const statsGrid = document.getElementById('stats-grid');
+
+                    if (filteredData.length === 0) {
+                        statsGrid.innerHTML = '';
+                        return;
+                    }
+
+                    const quizCounts = {};
+                    const quizAttempts = {};
+
+                    filteredData.forEach(student => {
+                        Object.keys(student.quizzes).forEach(quizName => {
+                            // Skip empty or whitespace-only quiz names
+                            if (!quizName || !quizName.trim()) return;
+
+                            if (!selectedQuiz || selectedQuiz === quizName) {
+                                quizCounts[quizName] = (quizCounts[quizName] || 0) + 1;
+
+                                // Track total attempts for this quiz
+                                const attemptCount = student.quizzes[quizName].attemptCount || 1;
+                                quizAttempts[quizName] = (quizAttempts[quizName] || 0) + attemptCount;
+                            }
+                        });
+                    });
+
+                    const sortedQuizNames = Object.keys(quizCounts).sort();
+
+                    let statsHtml = '';
+
+                    // Always show total students
+                    statsHtml += `
                 <div class="stat-item">
                     <div class="stat-value">${filteredData.length}</div>
                     <div class="stat-label">Rostered Referees</div>
                 </div>
             `;
 
-            // Show quiz-specific stats
-            if (selectedQuiz) {
-                // Single quiz selected - show unique referees for that quiz
-                const totalAttempts = quizAttempts[selectedQuiz] || 0;
-                statsHtml += `
+                    // Show quiz-specific stats
+                    if (selectedQuiz) {
+                        // Single quiz selected - show unique referees for that quiz
+                        const totalAttempts = quizAttempts[selectedQuiz] || 0;
+                        statsHtml += `
                     <div class="stat-item">
                         <div class="stat-value">${quizCounts[selectedQuiz] || 0}</div>
                         <div class="stat-label">${selectedQuiz}</div>
                         <div class="stat-subtext">${totalAttempts} total attempt${totalAttempts !== 1 ? 's' : ''}</div>
                     </div>
                 `;
-            } else {
-                // All quizzes - show count for each quiz with attempts
-                sortedQuizNames.forEach(quizName => {
-                    const totalAttempts = quizAttempts[quizName] || 0;
-                    statsHtml += `
+                    } else {
+                        // All quizzes - show count for each quiz with attempts
+                        sortedQuizNames.forEach(quizName => {
+                            const totalAttempts = quizAttempts[quizName] || 0;
+                            statsHtml += `
                         <div class="stat-item">
                             <div class="stat-value">${quizCounts[quizName]}</div>
                             <div class="stat-label">${quizName}</div>
                             <div class="stat-subtext">${totalAttempts} total attempt${totalAttempts !== 1 ? 's' : ''}</div>
                         </div>
                     `;
-                });
-            }
+                        });
+                    }
 
-            statsGrid.innerHTML = statsHtml;
-        }
-    </script>
+                    statsGrid.innerHTML = statsHtml;
+                }
+            }
+        </script>
 </body>
 
 </html>
