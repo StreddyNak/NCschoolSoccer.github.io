@@ -1361,6 +1361,12 @@
         </div>
 
         <div class="filter-bar">
+            <!-- Region Filter (Populated dynamically) -->
+            <select id="regionSelect" onchange="switchRegion()"
+                style="padding:8px 12px; border:2px solid #3498db; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px; margin-right: 10px; display:none;">
+                <option value="">My Region</option>
+            </select>
+
             <select id="viewSelect" onchange="toggleView()"
                 style="padding:8px 12px; border:2px solid #2ecc71; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px;">
                 <option value="cmi">Show CMI Reports</option>
@@ -1482,9 +1488,13 @@
                 .catch(err => handleLoginError(err));
         }
 
+        let googleToken = ""; // Store token for subsequent requests
+
         function handleCredentialResponse(response) {
             const statusDiv = document.getElementById('login-status');
             const errorDiv = document.getElementById('login-error');
+
+            googleToken = response.credential; // Store it
 
             console.log("Encoded JWT ID token: " + response.credential);
 
@@ -1502,6 +1512,8 @@
                 .catch(err => handleLoginError(err));
         }
 
+        let currentRegion = "";
+
         function processLoginResponse(resp) {
             const loginBtn = document.getElementById('loginBtn');
             const statusDiv = document.getElementById('login-status');
@@ -1516,11 +1528,15 @@
                 }, 500);
 
                 actualSupervisor = resp.supervisor;
+                currentRegion = resp.currentViewRegion || "";
 
                 document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
                 cmiData = resp.data || [];
                 quizData = resp.quizzes || [];
                 questionStats = resp.questionStats || [];
+
+                // Populate Region Dropdown
+                populateRegionDropdown(resp.allRegions, resp.userRegion, resp.currentViewRegion);
 
                 if (resp.supervisor === 'MASTER' || resp.supervisor.toUpperCase().includes('MASTER')) {
                     document.getElementById('master-controls').classList.remove('hidden');
@@ -1539,6 +1555,54 @@
                 errorDiv.style.display = 'block';
                 errorDiv.innerText = resp.message || "Authentication failed.";
             }
+        }
+
+        function populateRegionDropdown(allRegions, userRegion, currentView) {
+            const select = document.getElementById('regionSelect');
+            if (!allRegions || allRegions.length === 0) {
+                select.style.display = 'none';
+                return;
+            }
+
+            select.style.display = 'inline-block';
+            select.innerHTML = '';
+
+            // 1. My Region Option
+            const myRegionOpt = document.createElement('option');
+            myRegionOpt.value = userRegion === 'MASTER' ? 'ALL' : userRegion;
+            myRegionOpt.textContent = `My Region (${userRegion})`;
+            select.appendChild(myRegionOpt);
+
+            // 2. Show All Option
+            const allOpt = document.createElement('option');
+            allOpt.value = 'ALL';
+            allOpt.textContent = 'Show All Regions';
+            select.appendChild(allOpt);
+
+            // 3. Other Regions
+            allRegions.forEach(region => {
+                if (region !== userRegion && region !== 'MASTER') {
+                    const opt = document.createElement('option');
+                    opt.value = region;
+                    opt.textContent = region;
+                    select.appendChild(opt);
+                }
+            });
+
+            // Set selected value
+            select.value = currentView;
+        }
+
+        function switchRegion() {
+            const selectedRegion = document.getElementById('regionSelect').value;
+            // Refresh data with new region
+            const activeSeasonBtn = document.querySelector('.season-btn.active');
+            const season = activeSeasonBtn ? activeSeasonBtn.innerText : 'Current';
+
+            // Show loading state
+            document.getElementById('data-list').innerHTML = '<div style="text-align:center; padding:20px;">🔄 Loading region data...</div>';
+
+            fetchData(season, selectedRegion);
         }
 
         function handleLoginError(err) {
@@ -1563,19 +1627,47 @@
                 btn.classList.remove('active');
                 if (btn.innerText.includes(seasonName)) btn.classList.add('active');
             });
-            fetchData(seasonName);
+
+            // Keep current region filter
+            const selectedRegion = document.getElementById('regionSelect').value;
+            fetchData(seasonName, selectedRegion);
         }
 
-        function fetchData(season) {
+        function fetchData(season, viewRegion) {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            if (!email || !password) {
+            let url = "";
+
+            if (password) {
+                // Password Login
+                url = `${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=${season}`;
+            } else if (googleToken) {
+                // Google Login (Re-use toke)
+                url = `${SCRIPT_URL}?action=googleLogin&token=${encodeURIComponent(googleToken)}&season=${season}`;
+            } else {
                 console.error("No credentials available");
+                alert("Session expired. Please log in again.");
+                location.reload();
                 return;
             }
 
-            fetch(`${SCRIPT_URL}?action=passwordLogin&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&season=${season}`)
+            if (viewRegion) {
+                url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
+            }
+
+            fetch(url)
+
+            if (viewRegion) {
+                url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
+            }
+
+            // If password is empty (e.g. Google Login), we might fail here unless we stored the token.
+            // For this quick task, let's assume session relies on re-sending credentials. 
+            // If Google Login, this fetchData needs the token.
+            // I'll check if I can store the token.
+
+            fetch(url)
                 .then(res => res.json())
                 .then(resp => {
                     if (resp.status === 'success') {
@@ -1584,10 +1676,15 @@
                         quizData = resp.quizzes || [];
                         questionStats = resp.questionStats || [];
 
+                        // Update dropdown selection just in case
+                        if (resp.currentViewRegion) {
+                            document.getElementById('regionSelect').value = resp.currentViewRegion;
+                        }
+
                         populateMetaTagFilter();
                         applyFilters();
                     } else {
-                        alert("Session expired. Please log in again.");
+                        alert("Session expired or credentials missing. Please log in again.");
                         location.reload();
                     }
                 })
