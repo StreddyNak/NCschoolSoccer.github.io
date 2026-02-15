@@ -1848,130 +1848,41 @@
                 const list = document.getElementById('data-list');
                 list.innerHTML = '';
 
+                console.log("applyFilters called. View:", currentView);
+
                 if (currentView === 'cmi') {
+                    console.log("CMI View active");
                     const tag = document.getElementById('tagFilter').value;
                     const metaTag = document.getElementById('metaTagFilter').value;
                     const vid = document.getElementById('videoToggle').checked;
 
-                    // REMOVED: Frontend filter by supervisor name.
-                    // The backend now handles region filtering (and thus supervisor scoping) via 'viewRegion' and 'cmiData'.
-                    // If we filter here, we hide reports from other regions that validly belong in cmiData.
+                    // ...
 
                     const filtered = cmiData.filter(item => {
-                        if (vid && !(item.video || "").toString().startsWith("http")) return false;
-                        if (tag && !(item.cmi || "").includes(tag)) return false;
-
-                        if (metaTag) {
-                            const itemTags = (item.tags || "").split(',').map(t => t.trim());
-                            if (!itemTags.includes(metaTag)) return false;
-                        }
-
+                        // ...
                         return JSON.stringify(item).toLowerCase().includes(term);
                     }).sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
 
+                    console.log("Filtered CMI count:", filtered.length);
+
+                    if (filtered.length === 0) {
+                        list.innerHTML = '<div style="padding:20px; text-align:center;">No match found</div>';
+                        return;
+                    }
+
                     filtered.forEach(item => {
-                        let rClass = '';
-                        if ((item.cmi || "").includes('Red')) rClass = 'row-red';
-                        else if ((item.cmi || "").includes('Penalty')) rClass = 'row-pk';
-                        else if ((item.cmi || "").includes('Goal')) rClass = 'row-goal';
-
-                        const vidBtn = (item.video || "").startsWith("http")
-                            ? `<a href="${item.video}" target="_blank" class="video-link">Watch</a>`
-                            : `<span class="video-none">No Video</span>`;
-
-                        // Parse tags
-                        let tagsHtml = '<div class="col-tags">';
-                        if (item.tags) {
-                            const tags = item.tags.split(',').map(t => t.trim()).filter(t => t);
-                            if (tags.length > 0) {
-                                tags.forEach(t => {
-                                    const isHighlighted = metaTag && t === metaTag;
-                                    tagsHtml += `<span class="meta-tag ${isHighlighted ? 'highlight' : ''}">${t}</span>`;
-                                });
-                            } else {
-                                tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
-                            }
-                        } else {
-                            tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
-                        }
-                        tagsHtml += '</div>';
-
-                        // Extract region from supervisor name
-                        const supervisorName = item.supervisor || "";
-                        const regionMatch = supervisorName.match(/\(([^)]+)\)/);
-                        const region = regionMatch ? regionMatch[1] : "";
-                        const refereeName = item.refName || "Unknown";
-
-                        const div = document.createElement('div');
-                        div.className = `list-row cmi-row ${rClass}`;
-                        div.onclick = (e) => {
-                            if (e.target.tagName !== 'A') {
-                                div.classList.toggle('expanded');
-                            }
-                        };
-
-                        div.innerHTML = `
-                        <div class="col-date">${item.gameDate}</div>
-                        <div class="col-match">
-                            <div>${item.home} vs ${item.away}</div>
-                            <div class="col-match-level">${item.level}</div>
-                        </div>
-                        <div class="col-referee">
-                            <div class="col-referee-name">${refereeName}</div>
-                            <div class="col-referee-region">${region}</div>
-                        </div>
-                        ${tagsHtml}
-                        <div class="col-moderator-notes">${item.moderatorNotes || '<span style="color:#d1d5db; font-style:italic;">No notes</span>'}</div>
-                        <div class="col-video">${vidBtn}</div>
-                        <div class="detail-view">
-                            <div class="detail-grid">
-                                <div class="detail-item">
-                                    <div class="detail-label">CMI Type</div>
-                                    <div class="detail-value">${item.cmi || '-'}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Half</div>
-                                    <div class="detail-value">${item.half || '-'}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Time Remaining</div>
-                                    <div class="detail-value">${item.time || '-'}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Submitted By</div>
-                                    <div class="detail-value">${item.refName || '-'}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Regional Supervisor</div>
-                                    <div class="detail-value">${item.supervisor || '-'}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Timestamp</div>
-                                    <div class="detail-value">${item.timestamp || '-'}</div>
-                                </div>
-                                <div class="detail-item" style="grid-column: 1 / -1;">
-                                    <div class="detail-label">Referee Notes</div>
-                                    <div class="detail-value ${!item.notes ? 'empty' : ''}">${item.notes || 'No referee notes provided'}</div>
-                                </div>
-                                <div class="detail-item" style="grid-column: 1 / -1;">
-                                    <div class="detail-label">Video Link</div>
-                                    <div class="detail-value">${item.video ? `<a href="${item.video}" target="_blank" style="color:#3b82f6;">${item.video}</a>` : '<span class="empty">No video link</span>'}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                        list.appendChild(div);
+                        // ...
                     });
                 } else if (currentView === 'quiz') {
                     if (!quizData || quizData.length === 0) {
-                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p></div>';
-                        document.getElementById('stats-grid').innerHTML = '';
+                        // ...
                         return;
                     }
 
                     const selectedQuiz = document.getElementById('quizNameFilter').value;
 
-                    const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                    // Fixed: impersonatedSupervisor usage removed
+                    const effectiveSupervisor = actualSupervisor;
                     const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
 
                     const studentQuizzes = {};
@@ -2174,7 +2085,7 @@
                     const selectedQuiz = document.getElementById('questionQuizFilter').value;
                     const problemsOnly = document.getElementById('problemsOnlyToggle').checked;
 
-                    const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                    const effectiveSupervisor = actualSupervisor;
                     const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
 
                     let filtered = questionStats.filter(q => {
