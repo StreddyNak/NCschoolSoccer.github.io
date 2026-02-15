@@ -262,6 +262,114 @@
             document.getElementById('mascotMsg').textContent = `Go ${data.mascot}!`;
         }
 
+        function showReviewForm() {
+            document.getElementById('review-form').style.display = 'block';
+            window.location.hash = 'review-form';
+        }
+
+        function hideReviewForm() {
+            document.getElementById('review-form').style.display = 'none';
+        }
+
+        function toggleLevelRatings() {
+            const level = document.getElementById('gameLevel').value;
+            document.getElementById('jv-ratings').style.display = level === 'JV' ? 'block' : 'none';
+            document.getElementById('varsity-ratings').style.display = level === 'Varsity' ? 'block' : 'none';
+        }
+
+        const ratings = {};
+
+        function rate(star, value) {
+            const group = star.closest('.rating-group');
+            const metric = group.dataset.metric;
+
+            // Set internal value
+            ratings[metric] = value;
+
+            // Update UI
+            const stars = group.querySelectorAll('.star');
+            stars.forEach((s, index) => {
+                if (index < value) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+        }
+
+        function submitReview() {
+            const date = document.getElementById('gameDate').value;
+            const opponent = document.getElementById('opponent').value;
+            const level = document.getElementById('gameLevel').value;
+
+            if (!date || !opponent || !level) {
+                alert("Please fill in all game details.");
+                return;
+            }
+
+            // Gather ratings based on level
+            const payload = {
+                type: 'review_submission', // Tag for backend
+                coachEmail: document.getElementById('coachEmail').value.trim(), // Need to persist this
+                date: date,
+                opponent: opponent,
+                level: level,
+                ratings: {}
+            };
+
+            // Collect relevant ratings
+            if (level === 'JV') {
+                if (!ratings['jv_home_ref_movement'] || !ratings['jv_home_ref_comms']) {
+                    alert("Please rate all JV categories.");
+                    return;
+                }
+                payload.ratings = {
+                    movement: ratings['jv_home_ref_movement'],
+                    communication: ratings['jv_home_ref_comms']
+                };
+            } else if (level === 'Varsity') {
+                if (!ratings['varsity_ref_movement'] || !ratings['varsity_ref_control'] ||
+                    !ratings['varsity_home_ar_pos'] || !ratings['varsity_away_ar_pos']) {
+                    alert("Please rate all Varsity categories.");
+                    return;
+                }
+                payload.ratings = {
+                    movement: ratings['varsity_ref_movement'],
+                    control: ratings['varsity_ref_control'],
+                    home_ar: ratings['varsity_home_ar_pos'],
+                    away_ar: ratings['varsity_away_ar_pos']
+                };
+            }
+
+            // Submit
+            const loadingDiv = document.getElementById('loading');
+            loadingDiv.style.display = 'block';
+            loadingDiv.textContent = "Submitting Review...";
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    if (data.status === 'success') {
+                        alert("Review Submitted Successfully!");
+                        hideReviewForm();
+                        // Reset form
+                        document.getElementById('gameDate').value = '';
+                        document.getElementById('opponent').value = '';
+                        document.getElementById('gameLevel').value = '';
+                        toggleLevelRatings();
+                        // Clear stars
+                        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+                    } else {
+                        alert("Submission failed: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    loadingDiv.style.display = 'none';
+                    alert("Error submitting: " + err.toString());
+                });
+        }
+
         function showError(msg) {
             const el = document.getElementById('error-msg');
             el.textContent = msg;

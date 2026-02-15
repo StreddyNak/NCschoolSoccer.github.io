@@ -15,6 +15,55 @@ function doGet(e) {
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    
+    if (data.type === 'review_submission') {
+      return handleReviewSubmission(data);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Unknown action" })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleReviewSubmission(data) {
+  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+  var sheet = ss.getSheetByName("Reviews");
+  
+  if (!sheet) {
+    sheet = ss.insertSheet("Reviews");
+    sheet.appendRow(["Timestamp", "Coach Email", "Date", "Opponent", "Level", "Metric 1", "Metric 2", "Metric 3", "Metric 4"]);
+  }
+  
+  // Format ratings for row
+  var r = data.ratings || {};
+  // JV: Movement, Communication
+  // Varsity: Movement, Control, Home AR, Away AR
+  
+  var m1 = r.movement || "";
+  var m2 = r.communication || r.control || "";
+  var m3 = r.home_ar || "";
+  var m4 = r.away_ar || "";
+  
+  sheet.appendRow([
+    new Date(),
+    data.coachEmail,
+    data.date,
+    data.opponent,
+    data.level,
+    m1,
+    m2,
+    m3,
+    m4
+  ]);
+  
+  return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+}
+
 function handleCoachLogin(email) {
   try {
     if (!email) {
