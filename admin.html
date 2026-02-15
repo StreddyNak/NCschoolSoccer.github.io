@@ -1532,6 +1532,11 @@
 
                 document.getElementById('welcome-msg').textContent = `Logged in as: ${resp.supervisor}`;
                 cmiData = resp.data || [];
+
+                // DEBUG: Verify data count
+                console.log(`Debug: Received ${cmiData.length} records for region ${resp.currentViewRegion}`);
+                // alert(`Debug: Loaded ${cmiData.length} reports for region: ${resp.currentViewRegion}`); 
+
                 quizData = resp.quizzes || [];
                 questionStats = resp.questionStats || [];
 
