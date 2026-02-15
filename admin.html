@@ -1689,230 +1689,228 @@
                     option.textContent = tag;
                     dropdown.appendChild(option);
                 });
+            }
 
+            function toggleView() {
+                currentView = document.getElementById('viewSelect').value;
+                const cmiFilters = document.getElementById('cmi-filters');
+                const quizFilters = document.getElementById('quiz-filters');
+                const questionFilters = document.getElementById('question-filters');
+                const seasonNav = document.getElementById('season-nav');
+                const header = document.getElementById('list-header');
+                const statsCard = document.getElementById('stats-card');
+                const quizDetailStats = document.getElementById('quiz-detail-stats');
+                const alphabetNav = document.getElementById('alphabet-nav');
 
+                if (currentView === 'quiz') {
+                    cmiFilters.style.display = 'none';
+                    quizFilters.style.display = 'flex';
+                    questionFilters.style.display = 'none';
+                    seasonNav.style.display = 'none';
+                    statsCard.classList.add('show');
+                    quizDetailStats.classList.remove('show');
+                    alphabetNav.classList.add('show');
+                    header.className = 'list-header quiz-header';
+                    header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';
+                    populateQuizFilter();
+                } else if (currentView === 'questions') {
+                    cmiFilters.style.display = 'none';
+                    quizFilters.style.display = 'none';
+                    questionFilters.style.display = 'flex';
+                    seasonNav.style.display = 'none';
+                    statsCard.classList.remove('show');
+                    quizDetailStats.classList.add('show');
+                    alphabetNav.classList.remove('show');
+                    header.className = 'list-header question-header';
+                    header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
 
+                    populateQuestionQuizFilter();
+                } else {
+                    cmiFilters.style.display = 'flex';
+                    quizFilters.style.display = 'none';
+                    questionFilters.style.display = 'none';
+                    seasonNav.style.display = 'flex';
+                    statsCard.classList.remove('show');
+                    quizDetailStats.classList.remove('show');
+                    alphabetNav.classList.remove('show');
+                    header.className = 'list-header cmi-header';
+                    header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div>Tags</div><div>Moderator Notes</div><div style="text-align:center;">Video</div>';
+                }
+                applyFilters();
+            }
 
-                function toggleView() {
-                    currentView = document.getElementById('viewSelect').value;
-                    const cmiFilters = document.getElementById('cmi-filters');
-                    const quizFilters = document.getElementById('quiz-filters');
-                    const questionFilters = document.getElementById('question-filters');
-                    const seasonNav = document.getElementById('season-nav');
-                    const header = document.getElementById('list-header');
-                    const statsCard = document.getElementById('stats-card');
-                    const quizDetailStats = document.getElementById('quiz-detail-stats');
-                    const alphabetNav = document.getElementById('alphabet-nav');
+            function buildAlphabetNav(filteredData) {
+                const alphabetNav = document.getElementById('alphabet-nav');
+                const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-                    if (currentView === 'quiz') {
-                        cmiFilters.style.display = 'none';
-                        quizFilters.style.display = 'flex';
-                        questionFilters.style.display = 'none';
-                        seasonNav.style.display = 'none';
-                        statsCard.classList.add('show');
-                        quizDetailStats.classList.remove('show');
-                        alphabetNav.classList.add('show');
-                        header.className = 'list-header quiz-header';
-                        header.innerHTML = '<div>Referee Name</div><div>Email</div><div style="text-align:center; font-size:0.7rem;">S1</div><div style="text-align:center; font-size:0.7rem;">S2</div><div>Quiz Scores</div>';
-                        populateQuizFilter();
-                    } else if (currentView === 'questions') {
-                        cmiFilters.style.display = 'none';
-                        quizFilters.style.display = 'none';
-                        questionFilters.style.display = 'flex';
-                        seasonNav.style.display = 'none';
-                        statsCard.classList.remove('show');
-                        quizDetailStats.classList.add('show');
-                        alphabetNav.classList.remove('show');
-                        header.className = 'list-header question-header';
-                        header.innerHTML = '<div>Question</div><div style="text-align:center;">Success Rate</div><div>Answer Details</div>';
+                // Get first letters that exist in the data
+                const existingLetters = new Set();
+                filteredData.forEach(student => {
+                    const firstLetter = student.name.charAt(0).toUpperCase();
+                    if (alphabet.includes(firstLetter)) {
+                        existingLetters.add(firstLetter);
+                    }
+                });
 
-                        populateQuestionQuizFilter();
+                // Build alphabet navigation
+                alphabetNav.innerHTML = '';
+                alphabet.forEach(letter => {
+                    const letterDiv = document.createElement('div');
+                    letterDiv.className = 'alphabet-nav-letter';
+                    letterDiv.textContent = letter;
+                    letterDiv.dataset.letter = letter;
+
+                    if (existingLetters.has(letter)) {
+                        letterDiv.onclick = () => scrollToLetter(letter);
                     } else {
-                        cmiFilters.style.display = 'flex';
-                        quizFilters.style.display = 'none';
-                        questionFilters.style.display = 'none';
-                        seasonNav.style.display = 'flex';
-                        statsCard.classList.remove('show');
-                        quizDetailStats.classList.remove('show');
-                        alphabetNav.classList.remove('show');
-                        header.className = 'list-header cmi-header';
-                        header.innerHTML = '<div>Date</div><div>Match</div><div>Referee</div><div>Tags</div><div>Moderator Notes</div><div style="text-align:center;">Video</div>';
+                        letterDiv.classList.add('disabled');
                     }
-                    applyFilters();
+
+                    alphabetNav.appendChild(letterDiv);
+                });
+            }
+
+            function scrollToLetter(letter) {
+                const targetRow = document.querySelector(`.quiz-row[data-letter="${letter}"]`);
+
+                if (targetRow) {
+                    // Scroll to this row with offset for fixed header
+                    const offset = 100;
+                    const elementPosition = targetRow.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    // Highlight briefly
+                    targetRow.style.transition = 'background-color 0.3s';
+                    const originalBg = targetRow.style.backgroundColor;
+                    targetRow.style.backgroundColor = '#dbeafe';
+                    setTimeout(() => {
+                        targetRow.style.backgroundColor = originalBg;
+                    }, 1000);
                 }
 
-                function buildAlphabetNav(filteredData) {
-                    const alphabetNav = document.getElementById('alphabet-nav');
-                    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                // Update active state
+                document.querySelectorAll('.alphabet-nav-letter').forEach(l => {
+                    l.classList.remove('active');
+                });
+                const clickedLetter = document.querySelector(`.alphabet-nav-letter[data-letter="${letter}"]`);
+                if (clickedLetter) {
+                    clickedLetter.classList.add('active');
+                }
+            }
 
-                    // Get first letters that exist in the data
-                    const existingLetters = new Set();
-                    filteredData.forEach(student => {
-                        const firstLetter = student.name.charAt(0).toUpperCase();
-                        if (alphabet.includes(firstLetter)) {
-                            existingLetters.add(firstLetter);
+            function populateQuizFilter() {
+                const dropdown = document.getElementById('quizNameFilter');
+                const uniqueQuizzes = new Set();
+
+                quizData.forEach(q => {
+                    if (q.quiz) uniqueQuizzes.add(q.quiz);
+                });
+
+                const sortedQuizzes = Array.from(uniqueQuizzes).sort();
+
+                dropdown.innerHTML = '<option value="">All Quizzes</option>';
+
+                sortedQuizzes.forEach(quizName => {
+                    const option = document.createElement('option');
+                    option.value = quizName;
+                    option.textContent = quizName;
+                    dropdown.appendChild(option);
+                });
+            }
+
+            function populateQuestionQuizFilter() {
+                const dropdown = document.getElementById('questionQuizFilter');
+                const uniqueQuizzes = new Set();
+
+                questionStats.forEach(q => {
+                    if (q.quiz) uniqueQuizzes.add(q.quiz);
+                });
+
+                const sortedQuizzes = Array.from(uniqueQuizzes).sort();
+
+                dropdown.innerHTML = '<option value="">Select Quiz</option>';
+
+                sortedQuizzes.forEach(quizName => {
+                    const option = document.createElement('option');
+                    option.value = quizName;
+                    option.textContent = quizName;
+                    dropdown.appendChild(option);
+                });
+            }
+
+            function applyFilters() {
+                const term = document.getElementById('searchInput').value.toLowerCase();
+                const list = document.getElementById('data-list');
+                list.innerHTML = '';
+
+                if (currentView === 'cmi') {
+                    const tag = document.getElementById('tagFilter').value;
+                    const metaTag = document.getElementById('metaTagFilter').value;
+                    const vid = document.getElementById('videoToggle').checked;
+
+                    // REMOVED: Frontend filter by supervisor name.
+                    // The backend now handles region filtering (and thus supervisor scoping) via 'viewRegion' and 'cmiData'.
+                    // If we filter here, we hide reports from other regions that validly belong in cmiData.
+
+                    const filtered = cmiData.filter(item => {
+                        if (vid && !(item.video || "").toString().startsWith("http")) return false;
+                        if (tag && !(item.cmi || "").includes(tag)) return false;
+
+                        if (metaTag) {
+                            const itemTags = (item.tags || "").split(',').map(t => t.trim());
+                            if (!itemTags.includes(metaTag)) return false;
                         }
-                    });
 
-                    // Build alphabet navigation
-                    alphabetNav.innerHTML = '';
-                    alphabet.forEach(letter => {
-                        const letterDiv = document.createElement('div');
-                        letterDiv.className = 'alphabet-nav-letter';
-                        letterDiv.textContent = letter;
-                        letterDiv.dataset.letter = letter;
+                        return JSON.stringify(item).toLowerCase().includes(term);
+                    }).sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
 
-                        if (existingLetters.has(letter)) {
-                            letterDiv.onclick = () => scrollToLetter(letter);
-                        } else {
-                            letterDiv.classList.add('disabled');
-                        }
+                    filtered.forEach(item => {
+                        let rClass = '';
+                        if ((item.cmi || "").includes('Red')) rClass = 'row-red';
+                        else if ((item.cmi || "").includes('Penalty')) rClass = 'row-pk';
+                        else if ((item.cmi || "").includes('Goal')) rClass = 'row-goal';
 
-                        alphabetNav.appendChild(letterDiv);
-                    });
-                }
+                        const vidBtn = (item.video || "").startsWith("http")
+                            ? `<a href="${item.video}" target="_blank" class="video-link">Watch</a>`
+                            : `<span class="video-none">No Video</span>`;
 
-                function scrollToLetter(letter) {
-                    const targetRow = document.querySelector(`.quiz-row[data-letter="${letter}"]`);
-
-                    if (targetRow) {
-                        // Scroll to this row with offset for fixed header
-                        const offset = 100;
-                        const elementPosition = targetRow.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-
-                        // Highlight briefly
-                        targetRow.style.transition = 'background-color 0.3s';
-                        const originalBg = targetRow.style.backgroundColor;
-                        targetRow.style.backgroundColor = '#dbeafe';
-                        setTimeout(() => {
-                            targetRow.style.backgroundColor = originalBg;
-                        }, 1000);
-                    }
-
-                    // Update active state
-                    document.querySelectorAll('.alphabet-nav-letter').forEach(l => {
-                        l.classList.remove('active');
-                    });
-                    const clickedLetter = document.querySelector(`.alphabet-nav-letter[data-letter="${letter}"]`);
-                    if (clickedLetter) {
-                        clickedLetter.classList.add('active');
-                    }
-                }
-
-                function populateQuizFilter() {
-                    const dropdown = document.getElementById('quizNameFilter');
-                    const uniqueQuizzes = new Set();
-
-                    quizData.forEach(q => {
-                        if (q.quiz) uniqueQuizzes.add(q.quiz);
-                    });
-
-                    const sortedQuizzes = Array.from(uniqueQuizzes).sort();
-
-                    dropdown.innerHTML = '<option value="">All Quizzes</option>';
-
-                    sortedQuizzes.forEach(quizName => {
-                        const option = document.createElement('option');
-                        option.value = quizName;
-                        option.textContent = quizName;
-                        dropdown.appendChild(option);
-                    });
-                }
-
-                function populateQuestionQuizFilter() {
-                    const dropdown = document.getElementById('questionQuizFilter');
-                    const uniqueQuizzes = new Set();
-
-                    questionStats.forEach(q => {
-                        if (q.quiz) uniqueQuizzes.add(q.quiz);
-                    });
-
-                    const sortedQuizzes = Array.from(uniqueQuizzes).sort();
-
-                    dropdown.innerHTML = '<option value="">Select Quiz</option>';
-
-                    sortedQuizzes.forEach(quizName => {
-                        const option = document.createElement('option');
-                        option.value = quizName;
-                        option.textContent = quizName;
-                        dropdown.appendChild(option);
-                    });
-                }
-
-                function applyFilters() {
-                    const term = document.getElementById('searchInput').value.toLowerCase();
-                    const list = document.getElementById('data-list');
-                    list.innerHTML = '';
-
-                    if (currentView === 'cmi') {
-                        const tag = document.getElementById('tagFilter').value;
-                        const metaTag = document.getElementById('metaTagFilter').value;
-                        const vid = document.getElementById('videoToggle').checked;
-
-                        // REMOVED: Frontend filter by supervisor name.
-                        // The backend now handles region filtering (and thus supervisor scoping) via 'viewRegion' and 'cmiData'.
-                        // If we filter here, we hide reports from other regions that validly belong in cmiData.
-
-                        const filtered = cmiData.filter(item => {
-                            if (vid && !(item.video || "").toString().startsWith("http")) return false;
-                            if (tag && !(item.cmi || "").includes(tag)) return false;
-
-                            if (metaTag) {
-                                const itemTags = (item.tags || "").split(',').map(t => t.trim());
-                                if (!itemTags.includes(metaTag)) return false;
-                            }
-
-                            return JSON.stringify(item).toLowerCase().includes(term);
-                        }).sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
-
-                        filtered.forEach(item => {
-                            let rClass = '';
-                            if ((item.cmi || "").includes('Red')) rClass = 'row-red';
-                            else if ((item.cmi || "").includes('Penalty')) rClass = 'row-pk';
-                            else if ((item.cmi || "").includes('Goal')) rClass = 'row-goal';
-
-                            const vidBtn = (item.video || "").startsWith("http")
-                                ? `<a href="${item.video}" target="_blank" class="video-link">Watch</a>`
-                                : `<span class="video-none">No Video</span>`;
-
-                            // Parse tags
-                            let tagsHtml = '<div class="col-tags">';
-                            if (item.tags) {
-                                const tags = item.tags.split(',').map(t => t.trim()).filter(t => t);
-                                if (tags.length > 0) {
-                                    tags.forEach(t => {
-                                        const isHighlighted = metaTag && t === metaTag;
-                                        tagsHtml += `<span class="meta-tag ${isHighlighted ? 'highlight' : ''}">${t}</span>`;
-                                    });
-                                } else {
-                                    tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
-                                }
+                        // Parse tags
+                        let tagsHtml = '<div class="col-tags">';
+                        if (item.tags) {
+                            const tags = item.tags.split(',').map(t => t.trim()).filter(t => t);
+                            if (tags.length > 0) {
+                                tags.forEach(t => {
+                                    const isHighlighted = metaTag && t === metaTag;
+                                    tagsHtml += `<span class="meta-tag ${isHighlighted ? 'highlight' : ''}">${t}</span>`;
+                                });
                             } else {
                                 tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
                             }
-                            tagsHtml += '</div>';
+                        } else {
+                            tagsHtml += '<span class="meta-tag" style="background:#f9fafb; color:#d1d5db;">No tags</span>';
+                        }
+                        tagsHtml += '</div>';
 
-                            // Extract region from supervisor name
-                            const supervisorName = item.supervisor || "";
-                            const regionMatch = supervisorName.match(/\(([^)]+)\)/);
-                            const region = regionMatch ? regionMatch[1] : "";
-                            const refereeName = item.refName || "Unknown";
+                        // Extract region from supervisor name
+                        const supervisorName = item.supervisor || "";
+                        const regionMatch = supervisorName.match(/\(([^)]+)\)/);
+                        const region = regionMatch ? regionMatch[1] : "";
+                        const refereeName = item.refName || "Unknown";
 
-                            const div = document.createElement('div');
-                            div.className = `list-row cmi-row ${rClass}`;
-                            div.onclick = (e) => {
-                                if (e.target.tagName !== 'A') {
-                                    div.classList.toggle('expanded');
-                                }
-                            };
+                        const div = document.createElement('div');
+                        div.className = `list-row cmi-row ${rClass}`;
+                        div.onclick = (e) => {
+                            if (e.target.tagName !== 'A') {
+                                div.classList.toggle('expanded');
+                            }
+                        };
 
-                            div.innerHTML = `
+                        div.innerHTML = `
                         <div class="col-date">${item.gameDate}</div>
                         <div class="col-match">
                             <div>${item.home} vs ${item.away}</div>
@@ -1962,159 +1960,159 @@
                             </div>
                         </div>
                     `;
-                            list.appendChild(div);
-                        });
-                    } else if (currentView === 'quiz') {
-                        if (!quizData || quizData.length === 0) {
-                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p></div>';
-                            document.getElementById('stats-grid').innerHTML = '';
-                            return;
-                        }
+                        list.appendChild(div);
+                    });
+                } else if (currentView === 'quiz') {
+                    if (!quizData || quizData.length === 0) {
+                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Quiz Results Found</h3><p>Quiz results will appear here once students complete quizzes.</p></div>';
+                        document.getElementById('stats-grid').innerHTML = '';
+                        return;
+                    }
 
-                        const selectedQuiz = document.getElementById('quizNameFilter').value;
+                    const selectedQuiz = document.getElementById('quizNameFilter').value;
 
-                        const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
-                        const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
+                    const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                    const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
 
-                        const studentQuizzes = {};
+                    const studentQuizzes = {};
 
-                        quizData.forEach(q => {
-                            const email = q.email;
+                    quizData.forEach(q => {
+                        const email = q.email;
 
-                            if (!studentQuizzes[email]) {
-                                studentQuizzes[email] = {
-                                    name: q.name,
-                                    email: q.email,
-                                    group: q.group || "Unknown",
-                                    quizzes: {},
-                                    scrimmage1: q.scrimmage1 || false,
-                                    scrimmage2: q.scrimmage2 || false,
-                                    playoffEligible: q.playoffEligible || false
-                                };
-                            }
-
-                            const quizName = q.quiz;
-                            const percent = parseFloat(q.percent) || 0;
-
-                            // Track ALL attempts for each quiz
-                            if (!studentQuizzes[email].quizzes[quizName]) {
-                                studentQuizzes[email].quizzes[quizName] = {
-                                    attempts: []
-                                };
-                            }
-
-                            studentQuizzes[email].quizzes[quizName].attempts.push({
-                                score: q.score,
-                                percent: q.percent,
-                                date: q.date
-                            });
-                        });
-
-                        // Calculate best attempt for each quiz
-                        Object.values(studentQuizzes).forEach(student => {
-                            Object.keys(student.quizzes).forEach(quizName => {
-                                const attempts = student.quizzes[quizName].attempts;
-
-                                // Find best attempt
-                                let bestAttempt = attempts[0];
-                                attempts.forEach(attempt => {
-                                    const currentPercent = parseFloat(attempt.percent) || 0;
-                                    const bestPercent = parseFloat(bestAttempt.percent) || 0;
-                                    if (currentPercent > bestPercent) {
-                                        bestAttempt = attempt;
-                                    }
-                                });
-
-                                student.quizzes[quizName].best = bestAttempt;
-                                student.quizzes[quizName].attemptCount = attempts.length;
-                            });
-                        });
-
-                        // Get all unique quiz names from the data (skip empty names)
-                        const allQuizNames = new Set();
-                        Object.values(studentQuizzes).forEach(student => {
-                            Object.keys(student.quizzes).forEach(quizName => {
-                                // Only add non-empty quiz names
-                                if (quizName && quizName.trim()) {
-                                    allQuizNames.add(quizName);
-                                }
-                            });
-                        });
-                        const sortedAllQuizNames = Array.from(allQuizNames).sort();
-
-                        let filtered = Object.values(studentQuizzes).filter(student => {
-                            if (!JSON.stringify(student).toLowerCase().includes(term)) return false;
-
-                            if (selectedQuiz && !student.quizzes[selectedQuiz]) return false;
-
-                            if (supervisorRegion && !matchesRegion(student.group, supervisorRegion)) {
-                                return false;
-                            }
-
-                            return true;
-                        }).sort((a, b) => a.name.localeCompare(b.name));
-
-                        updateQuizStats(filtered, selectedQuiz);
-
-                        // Build alphabet navigation
-                        buildAlphabetNav(filtered);
-
-                        if (filtered.length === 0) {
-                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
-                            return;
-                        }
-
-                        filtered.forEach(student => {
-                            const div = document.createElement('div');
-                            div.className = 'list-row quiz-row';
-                            div.dataset.letter = student.name.charAt(0).toUpperCase();
-
-                            // Add click handler for mobile expand/collapse
-                            div.onclick = function (e) {
-                                // Only toggle on mobile (screen width < 768px)
-                                if (window.innerWidth < 768) {
-                                    div.classList.toggle('expanded');
-                                }
+                        if (!studentQuizzes[email]) {
+                            studentQuizzes[email] = {
+                                name: q.name,
+                                email: q.email,
+                                group: q.group || "Unknown",
+                                quizzes: {},
+                                scrimmage1: q.scrimmage1 || false,
+                                scrimmage2: q.scrimmage2 || false,
+                                playoffEligible: q.playoffEligible || false
                             };
+                        }
 
-                            // Build quiz scores HTML
-                            let quizScoresHtml = '<div class="quiz-scores-container">';
+                        const quizName = q.quiz;
+                        const percent = parseFloat(q.percent) || 0;
 
-                            const quizzesToShow = selectedQuiz ? [selectedQuiz] : sortedAllQuizNames;
+                        // Track ALL attempts for each quiz
+                        if (!studentQuizzes[email].quizzes[quizName]) {
+                            studentQuizzes[email].quizzes[quizName] = {
+                                attempts: []
+                            };
+                        }
 
-                            quizzesToShow.forEach(quizName => {
-                                // Skip empty quiz names
-                                if (!quizName || !quizName.trim()) return;
+                        studentQuizzes[email].quizzes[quizName].attempts.push({
+                            score: q.score,
+                            percent: q.percent,
+                            date: q.date
+                        });
+                    });
 
-                                const quizData = student.quizzes[quizName];
+                    // Calculate best attempt for each quiz
+                    Object.values(studentQuizzes).forEach(student => {
+                        Object.keys(student.quizzes).forEach(quizName => {
+                            const attempts = student.quizzes[quizName].attempts;
 
-                                if (quizData && quizData.best) {
-                                    // Student has taken this quiz
-                                    const quiz = quizData.best;
-                                    const attemptCount = quizData.attemptCount;
+                            // Find best attempt
+                            let bestAttempt = attempts[0];
+                            attempts.forEach(attempt => {
+                                const currentPercent = parseFloat(attempt.percent) || 0;
+                                const bestPercent = parseFloat(bestAttempt.percent) || 0;
+                                if (currentPercent > bestPercent) {
+                                    bestAttempt = attempt;
+                                }
+                            });
 
-                                    var quizPercent = 0;
-                                    if (quiz.percent && quiz.percent !== '') {
-                                        quizPercent = parseFloat(quiz.percent);
-                                    }
+                            student.quizzes[quizName].best = bestAttempt;
+                            student.quizzes[quizName].attemptCount = attempts.length;
+                        });
+                    });
 
-                                    // If percentage is missing or wrong, calculate from fractional score
-                                    if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
-                                        var parts = quiz.score.split('/');
-                                        if (parts.length === 2) {
-                                            var earned = parseFloat(parts[0]);
-                                            var total = parseFloat(parts[1]);
-                                            if (total > 0) {
-                                                quizPercent = Math.round((earned / total) * 100);
-                                            }
+                    // Get all unique quiz names from the data (skip empty names)
+                    const allQuizNames = new Set();
+                    Object.values(studentQuizzes).forEach(student => {
+                        Object.keys(student.quizzes).forEach(quizName => {
+                            // Only add non-empty quiz names
+                            if (quizName && quizName.trim()) {
+                                allQuizNames.add(quizName);
+                            }
+                        });
+                    });
+                    const sortedAllQuizNames = Array.from(allQuizNames).sort();
+
+                    let filtered = Object.values(studentQuizzes).filter(student => {
+                        if (!JSON.stringify(student).toLowerCase().includes(term)) return false;
+
+                        if (selectedQuiz && !student.quizzes[selectedQuiz]) return false;
+
+                        if (supervisorRegion && !matchesRegion(student.group, supervisorRegion)) {
+                            return false;
+                        }
+
+                        return true;
+                    }).sort((a, b) => a.name.localeCompare(b.name));
+
+                    updateQuizStats(filtered, selectedQuiz);
+
+                    // Build alphabet navigation
+                    buildAlphabetNav(filtered);
+
+                    if (filtered.length === 0) {
+                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No results match your filters.</p></div>';
+                        return;
+                    }
+
+                    filtered.forEach(student => {
+                        const div = document.createElement('div');
+                        div.className = 'list-row quiz-row';
+                        div.dataset.letter = student.name.charAt(0).toUpperCase();
+
+                        // Add click handler for mobile expand/collapse
+                        div.onclick = function (e) {
+                            // Only toggle on mobile (screen width < 768px)
+                            if (window.innerWidth < 768) {
+                                div.classList.toggle('expanded');
+                            }
+                        };
+
+                        // Build quiz scores HTML
+                        let quizScoresHtml = '<div class="quiz-scores-container">';
+
+                        const quizzesToShow = selectedQuiz ? [selectedQuiz] : sortedAllQuizNames;
+
+                        quizzesToShow.forEach(quizName => {
+                            // Skip empty quiz names
+                            if (!quizName || !quizName.trim()) return;
+
+                            const quizData = student.quizzes[quizName];
+
+                            if (quizData && quizData.best) {
+                                // Student has taken this quiz
+                                const quiz = quizData.best;
+                                const attemptCount = quizData.attemptCount;
+
+                                var quizPercent = 0;
+                                if (quiz.percent && quiz.percent !== '') {
+                                    quizPercent = parseFloat(quiz.percent);
+                                }
+
+                                // If percentage is missing or wrong, calculate from fractional score
+                                if ((quizPercent === 0 || quizPercent === 1) && quiz.score && quiz.score.includes('/')) {
+                                    var parts = quiz.score.split('/');
+                                    if (parts.length === 2) {
+                                        var earned = parseFloat(parts[0]);
+                                        var total = parseFloat(parts[1]);
+                                        if (total > 0) {
+                                            quizPercent = Math.round((earned / total) * 100);
                                         }
                                     }
+                                }
 
-                                    var borderClass = 'none';
-                                    if (quizPercent >= 80) borderClass = 'high';
-                                    else if (quizPercent > 0) borderClass = 'low';
+                                var borderClass = 'none';
+                                if (quizPercent >= 80) borderClass = 'high';
+                                else if (quizPercent > 0) borderClass = 'low';
 
-                                    quizScoresHtml += `
+                                quizScoresHtml += `
                                 <div class="quiz-score-card ${borderClass}">
                                     <div class="quiz-name-label">${quizName}</div>
                                     <div class="quiz-score-value">${quiz.score || 'N/A'}</div>
@@ -2122,26 +2120,26 @@
                                     <div class="attempt-count">${attemptCount} attempt${attemptCount > 1 ? 's' : ''}</div>
                                 </div>
                             `;
-                                } else {
-                                    // Student has NOT taken this quiz
-                                    quizScoresHtml += `
+                            } else {
+                                // Student has NOT taken this quiz
+                                quizScoresHtml += `
                                 <div class="quiz-score-card none">
                                     <div class="quiz-name-label">${quizName}</div>
                                     <div class="quiz-score-value not-taken">Not taken</div>
                                 </div>
                             `;
-                                }
-                            });
+                            }
+                        });
 
-                            quizScoresHtml += '</div>';
+                        quizScoresHtml += '</div>';
 
-                            // Scrimmage checkboxes
-                            const scrim1Icon = student.scrimmage1 ? '✓' : '○';
-                            const scrim2Icon = student.scrimmage2 ? '✓' : '○';
-                            const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
-                            const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
+                        // Scrimmage checkboxes
+                        const scrim1Icon = student.scrimmage1 ? '✓' : '○';
+                        const scrim2Icon = student.scrimmage2 ? '✓' : '○';
+                        const scrim1Class = student.scrimmage1 ? 'attended' : 'not-attended';
+                        const scrim2Class = student.scrimmage2 ? 'attended' : 'not-attended';
 
-                            div.innerHTML = `
+                        div.innerHTML = `
                         <div class="col-referee">
                             <div class="col-referee-name">${student.name}</div>
                             <div class="col-referee-region">${student.group}</div>
@@ -2164,124 +2162,124 @@
                         <div class="scrim-check ${scrim2Class}">${scrim2Icon}</div>
                         ${quizScoresHtml}
                     `;
-                            list.appendChild(div);
-                        });
-                    } else if (currentView === 'questions') {
-                        if (!questionStats || questionStats.length === 0) {
-                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Question Data Found</h3><p>Question-level data will appear here once students take quizzes.</p></div>';
-                            document.getElementById('quiz-detail-stats').classList.remove('show');
-                            return;
+                        list.appendChild(div);
+                    });
+                } else if (currentView === 'questions') {
+                    if (!questionStats || questionStats.length === 0) {
+                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><h3>No Question Data Found</h3><p>Question-level data will appear here once students take quizzes.</p></div>';
+                        document.getElementById('quiz-detail-stats').classList.remove('show');
+                        return;
+                    }
+
+                    const selectedQuiz = document.getElementById('questionQuizFilter').value;
+                    const problemsOnly = document.getElementById('problemsOnlyToggle').checked;
+
+                    const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                    const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
+
+                    let filtered = questionStats.filter(q => {
+                        if (!JSON.stringify(q).toLowerCase().includes(term)) return false;
+
+                        if (!selectedQuiz) return false;
+                        if (q.quiz !== selectedQuiz) return false;
+
+                        if (problemsOnly && q.successRate >= 70) return false;
+
+                        if (supervisorRegion && !Object.keys(q.studentGroups).some(group => matchesRegion(group, supervisorRegion))) {
+                            return false;
                         }
 
-                        const selectedQuiz = document.getElementById('questionQuizFilter').value;
-                        const problemsOnly = document.getElementById('problemsOnlyToggle').checked;
+                        return true;
+                    }).sort((a, b) => a.questionNumber - b.questionNumber);
 
-                        const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
-                        const supervisorRegion = extractRegionFromSupervisor(effectiveSupervisor);
+                    if (!selectedQuiz) {
+                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>Please select a quiz from the dropdown above to view question analysis.</p></div>';
+                        document.getElementById('quiz-detail-stats').classList.remove('show');
+                        return;
+                    }
 
-                        let filtered = questionStats.filter(q => {
-                            if (!JSON.stringify(q).toLowerCase().includes(term)) return false;
+                    // Calculate unique referees and total attempts for selected quiz
+                    if (selectedQuiz) {
+                        const uniqueReferees = new Set();
+                        let totalAttempts = 0;
 
-                            if (!selectedQuiz) return false;
-                            if (q.quiz !== selectedQuiz) return false;
-
-                            if (problemsOnly && q.successRate >= 70) return false;
-
-                            if (supervisorRegion && !Object.keys(q.studentGroups).some(group => matchesRegion(group, supervisorRegion))) {
-                                return false;
-                            }
-
-                            return true;
-                        }).sort((a, b) => a.questionNumber - b.questionNumber);
-
-                        if (!selectedQuiz) {
-                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>Please select a quiz from the dropdown above to view question analysis.</p></div>';
-                            document.getElementById('quiz-detail-stats').classList.remove('show');
-                            return;
-                        }
-
-                        // Calculate unique referees and total attempts for selected quiz
-                        if (selectedQuiz) {
-                            const uniqueReferees = new Set();
-                            let totalAttempts = 0;
-
-                            quizData.forEach(q => {
-                                if (q.quiz === selectedQuiz) {
-                                    uniqueReferees.add(q.email);
-                                    totalAttempts++;
-                                }
-                            });
-
-                            document.getElementById('quiz-stats-title').textContent = `${selectedQuiz} Statistics`;
-                            document.getElementById('unique-referees').textContent = uniqueReferees.size;
-                            document.getElementById('total-attempts').textContent = totalAttempts;
-                            document.getElementById('quiz-detail-stats').classList.add('show');
-                        } else {
-                            document.getElementById('quiz-detail-stats').classList.remove('show');
-                        }
-
-                        if (filtered.length === 0) {
-                            list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No questions match your filters.</p></div>';
-                            return;
-                        }
-
-
-                        // Find the lowest success rate for highlighting
-                        let lowestRate = 100;
-                        filtered.forEach(q => {
-                            if (q.successRate < lowestRate) {
-                                lowestRate = q.successRate;
+                        quizData.forEach(q => {
+                            if (q.quiz === selectedQuiz) {
+                                uniqueReferees.add(q.email);
+                                totalAttempts++;
                             }
                         });
 
-                        filtered.forEach(q => {
-                            const isLowestPerformer = q.successRate === lowestRate;
+                        document.getElementById('quiz-stats-title').textContent = `${selectedQuiz} Statistics`;
+                        document.getElementById('unique-referees').textContent = uniqueReferees.size;
+                        document.getElementById('total-attempts').textContent = totalAttempts;
+                        document.getElementById('quiz-detail-stats').classList.add('show');
+                    } else {
+                        document.getElementById('quiz-detail-stats').classList.remove('show');
+                    }
 
-                            const div = document.createElement('div');
-                            div.className = `list-row question-row ${isLowestPerformer ? 'lowest-performer' : ''}`;
+                    if (filtered.length === 0) {
+                        list.innerHTML = '<div style="padding:40px; text-align:center; color:#666;"><p>No questions match your filters.</p></div>';
+                        return;
+                    }
 
-                            // Build answer breakdown
-                            let answerBreakdownHtml = '<div class="answer-breakdown">';
-                            answerBreakdownHtml += '<div style="font-weight:600; margin-bottom:10px; color:#374151;">Answer Breakdown:</div>';
 
-                            // Calculate total responses
-                            const totalResponses = q.totalAttempts;
+                    // Find the lowest success rate for highlighting
+                    let lowestRate = 100;
+                    filtered.forEach(q => {
+                        if (q.successRate < lowestRate) {
+                            lowestRate = q.successRate;
+                        }
+                    });
 
-                            // Create array of all answers with their counts
-                            const allAnswers = [];
+                    filtered.forEach(q => {
+                        const isLowestPerformer = q.successRate === lowestRate;
 
-                            // Add correct answer
-                            const correctCount = q.correctAttempts;
-                            const correctPercent = Math.round((correctCount / totalResponses) * 100);
-                            allAnswers.push({
-                                text: q.correctAnswer,
-                                count: correctCount,
-                                percent: correctPercent,
-                                isCorrect: true
-                            });
+                        const div = document.createElement('div');
+                        div.className = `list-row question-row ${isLowestPerformer ? 'lowest-performer' : ''}`;
 
-                            // Add wrong answers
-                            if (q.wrongAnswers) {
-                                for (const [answer, count] of Object.entries(q.wrongAnswers)) {
-                                    const percent = Math.round((count / totalResponses) * 100);
-                                    allAnswers.push({
-                                        text: answer,
-                                        count: count,
-                                        percent: percent,
-                                        isCorrect: false
-                                    });
-                                }
+                        // Build answer breakdown
+                        let answerBreakdownHtml = '<div class="answer-breakdown">';
+                        answerBreakdownHtml += '<div style="font-weight:600; margin-bottom:10px; color:#374151;">Answer Breakdown:</div>';
+
+                        // Calculate total responses
+                        const totalResponses = q.totalAttempts;
+
+                        // Create array of all answers with their counts
+                        const allAnswers = [];
+
+                        // Add correct answer
+                        const correctCount = q.correctAttempts;
+                        const correctPercent = Math.round((correctCount / totalResponses) * 100);
+                        allAnswers.push({
+                            text: q.correctAnswer,
+                            count: correctCount,
+                            percent: correctPercent,
+                            isCorrect: true
+                        });
+
+                        // Add wrong answers
+                        if (q.wrongAnswers) {
+                            for (const [answer, count] of Object.entries(q.wrongAnswers)) {
+                                const percent = Math.round((count / totalResponses) * 100);
+                                allAnswers.push({
+                                    text: answer,
+                                    count: count,
+                                    percent: percent,
+                                    isCorrect: false
+                                });
                             }
+                        }
 
-                            // Sort by count (most selected first)
-                            allAnswers.sort((a, b) => b.count - a.count);
+                        // Sort by count (most selected first)
+                        allAnswers.sort((a, b) => b.count - a.count);
 
-                            // Render answer items
-                            allAnswers.forEach(ans => {
-                                const correctClass = ans.isCorrect ? 'correct' : 'incorrect';
-                                const fillClass = ans.isCorrect ? 'correct' : 'incorrect';
+                        // Render answer items
+                        allAnswers.forEach(ans => {
+                            const correctClass = ans.isCorrect ? 'correct' : 'incorrect';
+                            const fillClass = ans.isCorrect ? 'correct' : 'incorrect';
 
-                                answerBreakdownHtml += `
+                            answerBreakdownHtml += `
                             <div class="answer-item ${correctClass}">
                                 <div class="answer-text">
                                     ${ans.text}
@@ -2296,49 +2294,49 @@
                                 </div>
                             </div>
                         `;
-                            });
+                        });
 
-                            answerBreakdownHtml += '</div>';
+                        answerBreakdownHtml += '</div>';
 
-                            // Build wrong answers summary (only most common incorrect)
-                            let wrongAnswersHtml = '';
-                            if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
-                                wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
-                            }
+                        // Build wrong answers summary (only most common incorrect)
+                        let wrongAnswersHtml = '';
+                        if (q.mostCommonWrongAnswer && q.mostCommonWrongCount > 0) {
+                            wrongAnswersHtml = `<div class="wrong-answers">Most common incorrect: "${q.mostCommonWrongAnswer}" (${q.mostCommonWrongCount} times)</div>`;
+                        }
 
-                            // ⭐ NEW: Build video link (simple, no border, under question title)
-                            let videoLinkHtml = '';
-                            if (q.videoUrl && q.videoUrl.trim() !== '') {
-                                videoLinkHtml = `
+                        // ⭐ NEW: Build video link (simple, no border, under question title)
+                        let videoLinkHtml = '';
+                        if (q.videoUrl && q.videoUrl.trim() !== '') {
+                            videoLinkHtml = `
                             <div class="question-video-link">
                                 <a href="${q.videoUrl}" target="_blank">Video for question ↗</a>
                             </div>
                         `;
-                            }
+                        }
 
-                            // Build question display with optional header
-                            let questionDisplayHtml = '<div class="question-text">';
+                        // Build question display with optional header
+                        let questionDisplayHtml = '<div class="question-text">';
 
-                            if (q.questionHeader && q.questionHeader.trim() !== '') {
-                                // Has separate header - show both (body hidden by CSS in row view)
-                                questionDisplayHtml += `
+                        if (q.questionHeader && q.questionHeader.trim() !== '') {
+                            // Has separate header - show both (body hidden by CSS in row view)
+                            questionDisplayHtml += `
                             <div class="question-header-text">${q.questionHeader}</div>
                             <div class="question-body-text">${q.questionText}</div>
                         `;
-                            } else {
-                                // No separate header - create a fallback header and hide full text in row
-                                const fallbackHeader = q.questionText.length > 60 ? q.questionText.substring(0, 60) + '...' : q.questionText;
-                                questionDisplayHtml += `
+                        } else {
+                            // No separate header - create a fallback header and hide full text in row
+                            const fallbackHeader = q.questionText.length > 60 ? q.questionText.substring(0, 60) + '...' : q.questionText;
+                            questionDisplayHtml += `
                             <div class="question-header-text">${fallbackHeader}</div>
                             <div class="question-body-text">${q.questionText}</div>
                         `;
-                            }
+                        }
 
-                            questionDisplayHtml += videoLinkHtml;
-                            questionDisplayHtml += '</div>';
+                        questionDisplayHtml += videoLinkHtml;
+                        questionDisplayHtml += '</div>';
 
-                            // Use the new questionDisplayHtml
-                            div.innerHTML = `
+                        // Use the new questionDisplayHtml
+                        div.innerHTML = `
                         ${questionDisplayHtml}
                         <div style="text-align:center;">
                             <div class="success-rate">${q.successRate}%</div>
@@ -2350,105 +2348,105 @@
                         ${answerBreakdownHtml}
                     `;
 
-                            div.onclick = function (e) {
-                                if (e.target.tagName === 'A') return;
-                                div.classList.toggle('expanded');
-                            };
+                        div.onclick = function (e) {
+                            if (e.target.tagName === 'A') return;
+                            div.classList.toggle('expanded');
+                        };
 
-                            list.appendChild(div);
-                        });
-                    }
-                }
-
-
-                function extractRegionFromSupervisor(supervisorName) {
-                    if (!supervisorName || supervisorName === 'MASTER') return null;
-
-                    const match = supervisorName.match(/\(([^)]+)\)/);
-                    return match ? match[1] : null;
-                }
-
-                function matchesRegion(studentGroup, supervisorRegion) {
-                    if (!studentGroup || !supervisorRegion) return false;
-
-                    const normalizedGroup = studentGroup.toLowerCase().trim();
-                    const normalizedRegion = supervisorRegion.toLowerCase().trim();
-
-                    if (normalizedGroup === normalizedRegion) return true;
-
-                    if (normalizedGroup.includes(normalizedRegion) || normalizedRegion.includes(normalizedGroup)) {
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                function updateQuizStats(filteredData, selectedQuiz) {
-                    const statsGrid = document.getElementById('stats-grid');
-
-                    if (filteredData.length === 0) {
-                        statsGrid.innerHTML = '';
-                        return;
-                    }
-
-                    const quizCounts = {};
-                    const quizAttempts = {};
-
-                    filteredData.forEach(student => {
-                        Object.keys(student.quizzes).forEach(quizName => {
-                            // Skip empty or whitespace-only quiz names
-                            if (!quizName || !quizName.trim()) return;
-
-                            if (!selectedQuiz || selectedQuiz === quizName) {
-                                quizCounts[quizName] = (quizCounts[quizName] || 0) + 1;
-
-                                // Track total attempts for this quiz
-                                const attemptCount = student.quizzes[quizName].attemptCount || 1;
-                                quizAttempts[quizName] = (quizAttempts[quizName] || 0) + attemptCount;
-                            }
-                        });
+                        list.appendChild(div);
                     });
+                }
+            }
 
-                    const sortedQuizNames = Object.keys(quizCounts).sort();
 
-                    let statsHtml = '';
+            function extractRegionFromSupervisor(supervisorName) {
+                if (!supervisorName || supervisorName === 'MASTER') return null;
 
-                    // Always show total students
-                    statsHtml += `
+                const match = supervisorName.match(/\(([^)]+)\)/);
+                return match ? match[1] : null;
+            }
+
+            function matchesRegion(studentGroup, supervisorRegion) {
+                if (!studentGroup || !supervisorRegion) return false;
+
+                const normalizedGroup = studentGroup.toLowerCase().trim();
+                const normalizedRegion = supervisorRegion.toLowerCase().trim();
+
+                if (normalizedGroup === normalizedRegion) return true;
+
+                if (normalizedGroup.includes(normalizedRegion) || normalizedRegion.includes(normalizedGroup)) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            function updateQuizStats(filteredData, selectedQuiz) {
+                const statsGrid = document.getElementById('stats-grid');
+
+                if (filteredData.length === 0) {
+                    statsGrid.innerHTML = '';
+                    return;
+                }
+
+                const quizCounts = {};
+                const quizAttempts = {};
+
+                filteredData.forEach(student => {
+                    Object.keys(student.quizzes).forEach(quizName => {
+                        // Skip empty or whitespace-only quiz names
+                        if (!quizName || !quizName.trim()) return;
+
+                        if (!selectedQuiz || selectedQuiz === quizName) {
+                            quizCounts[quizName] = (quizCounts[quizName] || 0) + 1;
+
+                            // Track total attempts for this quiz
+                            const attemptCount = student.quizzes[quizName].attemptCount || 1;
+                            quizAttempts[quizName] = (quizAttempts[quizName] || 0) + attemptCount;
+                        }
+                    });
+                });
+
+                const sortedQuizNames = Object.keys(quizCounts).sort();
+
+                let statsHtml = '';
+
+                // Always show total students
+                statsHtml += `
                 <div class="stat-item">
                     <div class="stat-value">${filteredData.length}</div>
                     <div class="stat-label">Rostered Referees</div>
                 </div>
             `;
 
-                    // Show quiz-specific stats
-                    if (selectedQuiz) {
-                        // Single quiz selected - show unique referees for that quiz
-                        const totalAttempts = quizAttempts[selectedQuiz] || 0;
-                        statsHtml += `
+                // Show quiz-specific stats
+                if (selectedQuiz) {
+                    // Single quiz selected - show unique referees for that quiz
+                    const totalAttempts = quizAttempts[selectedQuiz] || 0;
+                    statsHtml += `
                     <div class="stat-item">
                         <div class="stat-value">${quizCounts[selectedQuiz] || 0}</div>
                         <div class="stat-label">${selectedQuiz}</div>
                         <div class="stat-subtext">${totalAttempts} total attempt${totalAttempts !== 1 ? 's' : ''}</div>
                     </div>
                 `;
-                    } else {
-                        // All quizzes - show count for each quiz with attempts
-                        sortedQuizNames.forEach(quizName => {
-                            const totalAttempts = quizAttempts[quizName] || 0;
-                            statsHtml += `
+                } else {
+                    // All quizzes - show count for each quiz with attempts
+                    sortedQuizNames.forEach(quizName => {
+                        const totalAttempts = quizAttempts[quizName] || 0;
+                        statsHtml += `
                         <div class="stat-item">
                             <div class="stat-value">${quizCounts[quizName]}</div>
                             <div class="stat-label">${quizName}</div>
                             <div class="stat-subtext">${totalAttempts} total attempt${totalAttempts !== 1 ? 's' : ''}</div>
                         </div>
                     `;
-                        });
-                    }
-
-                    statsGrid.innerHTML = statsHtml;
+                    });
                 }
+
+                statsGrid.innerHTML = statsHtml;
             }
+
         </script>
 </body>
 
