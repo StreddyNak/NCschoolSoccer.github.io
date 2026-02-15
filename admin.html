@@ -1389,11 +1389,12 @@
         </div>
 
         <div class="season-nav" id="season-nav">
-            <button class="season-btn active" onclick="switchSeason('Current')">Current Season</button>
-            <button class="season-btn" onclick="switchSeason('Boys 2025')">Boys 2025</button>
-            <button class="season-btn" onclick="switchSeason('Girls 2025')">Girls 2025</button>
-            <button class="season-btn" onclick="switchSeason('Boys 2024')">Boys 2024</button>
-            <button class="season-btn" onclick="switchSeason('Girls 2024')">Girls 2024</button>
+            <button class="season-btn active" data-season="Current" onclick="switchSeason('Current')">Current
+                Season</button>
+            <button class="season-btn" data-season="Boys 2025" onclick="switchSeason('Boys 2025')">Boys 2025</button>
+            <button class="season-btn" data-season="Girls 2025" onclick="switchSeason('Girls 2025')">Girls 2025</button>
+            <button class="season-btn" data-season="Boys 2024" onclick="switchSeason('Boys 2024')">Boys 2024</button>
+            <button class="season-btn" data-season="Girls 2024" onclick="switchSeason('Girls 2024')">Girls 2024</button>
         </div>
 
         <div class="stats-card" id="stats-card">
@@ -1579,7 +1580,7 @@
             const selectedRegion = document.getElementById('regionSelect').value;
             // Refresh data with new region
             const activeSeasonBtn = document.querySelector('.season-btn.active');
-            const season = activeSeasonBtn ? activeSeasonBtn.innerText : 'Current';
+            const season = activeSeasonBtn ? activeSeasonBtn.dataset.season : 'Current';
 
             // Show loading state
             document.getElementById('data-list').innerHTML = '<div style="text-align:center; padding:20px;">🔄 Loading region data...</div>';
@@ -1638,12 +1639,17 @@
                 url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
             }
 
+            console.log("Fetching data...", url);
+            document.getElementById('data-list').innerHTML = '<div style="text-align:center; padding:20px;">🔄 Loading...</div>';
+
             fetch(url)
                 .then(res => res.json())
                 .then(resp => {
+                    console.log("Fetch response:", resp);
                     if (resp.status === 'success') {
                         actualSupervisor = resp.supervisor;
                         cmiData = resp.data || [];
+                        console.log(`Fetched ${cmiData.length} records.`);
                         quizData = resp.quizzes || [];
                         questionStats = resp.questionStats || [];
 
