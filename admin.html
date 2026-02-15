@@ -1360,7 +1360,7 @@
                     <option value="">All Types</option>
                     <option value="Red">Red Cards</option>
                     <option value="Penalty">PKs</option>
-                    <option value="Goal">No Goal</option>
+                    <option value="Goal">Disallowed Goals</option>
                 </select>
                 <select id="metaTagFilter" onchange="applyFilters()"
                     style="padding:8px 12px; border:1px solid #ddd; border-radius:6px; min-width:160px; font-size: 13px;">
@@ -1863,7 +1863,9 @@
                 // ...
 
                 const filtered = cmiData.filter(item => {
-                    // ...
+                    if (tag && !(item.cmi || "").includes(tag)) return false;
+                    if (metaTag && !(item.tags || "").includes(metaTag)) return false;
+                    if (vid && !(item.video || "").startsWith("http")) return false;
                     return JSON.stringify(item).toLowerCase().includes(term);
                 }).sort((a, b) => new Date(b.gameDate) - new Date(a.gameDate));
 
