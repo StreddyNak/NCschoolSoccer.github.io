@@ -284,8 +284,15 @@ function getQuizQuestions(userEmail) {
         var endDate = row[15]; // Column P - End Date
         var instructionalVideo = String(row[16] || '').trim(); // Column Q - Instructional Video URL
         
+        var rawTargetGroups = assignToGroup; // Use the correct column
+
+        var isPublic = (!assignToGroup || assignToGroup === "");
+        var quizAllowedGroups = rawTargetGroups.split(",").map(function(item) { return item.trim(); });
+        var isAllowed = userGroups.some(function(uGroup) { return quizAllowedGroups.includes(uGroup); });
+
         // ⭐ NEW: Track status, dates, and video for each quiz (use first occurrence)
-        if (qName && !response.quizStatus[qName]) {
+        // ONLY if user is allowed to see it
+        if (qName && !response.quizStatus[qName] && (isPublic || isAllowed || isMaster)) {
           response.quizStatus[qName] = {
             status: quizStatus,
             startDate: formatDate(startDate),
@@ -293,12 +300,6 @@ function getQuizQuestions(userEmail) {
             instructionalVideo: instructionalVideo
           };
         }
-        
-        var rawTargetGroups = assignToGroup; // Use the correct column
-
-        var isPublic = (!assignToGroup || assignToGroup === "");
-        var quizAllowedGroups = rawTargetGroups.split(",").map(function(item) { return item.trim(); });
-        var isAllowed = userGroups.some(function(uGroup) { return quizAllowedGroups.includes(uGroup); });
 
         if (qName && (isPublic || isAllowed || isMaster) && quizStatus === 'active') {
   if (!response.quizzes[qName]) response.quizzes[qName] = [];
