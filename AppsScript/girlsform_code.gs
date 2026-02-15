@@ -355,7 +355,9 @@ function getSupervisorMap() {
                     var region = String(data[i][regionIdx]).trim();
                     
                     if (supName && region && region !== "MASTER") {
-                        map[supName] = region;
+                        // CLEAN NAME: Remove (Region) suffix so it matches getCMIReports logic
+                        var cleanSupName = supName.split('(')[0].trim();
+                        map[cleanSupName] = region;
                         regions.add(region);
                     }
                 }
