@@ -2,6 +2,19 @@
 // ID of the "NC HS Coaches" spreadsheet
 const COACH_SHEET_ID = "1JN68hzT5KXn4j7pSXuIH8ST_acdtVWIpNRvMeDo7Ygc";
 
+function doGet(e) {
+  var params = e.parameter;
+  var action = params.action;
+
+  if (action === 'coachLogin') {
+    return handleCoachLogin(params.email);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "ready", message: "Coach Portal Backend Online"
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
 function handleCoachLogin(email) {
   try {
     if (!email) {
