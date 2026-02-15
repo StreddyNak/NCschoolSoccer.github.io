@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coach Portal - NC HS Soccer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* Partnership Header */
+        .partnership-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+            background: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .partnership-text {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* Card Style */
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            margin: 40px auto;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            /* Hidden by default */
+            background: white;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 30px;
+        }
+
+        .welcome-text {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .school-text {
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .mascot-text {
+            font-size: 2rem;
+            color: #27ae60;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
+
+        .logout-btn {
+            background: #95a5a6;
+            margin-top: 20px;
+            width: auto;
+        }
+
+        .logout-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Partnership Header with Logos -->
+    <div class="partnership-header">
+        <div class="logo-container">
+            <img src="assets/NickNak_logo.svg" alt="Organization 1" class="logo-img"
+                onerror="this.style.display='none'">
+        </div>
+        <div class="partnership-text">
+            A Partnership Initiative
+        </div>
+        <div class="logo-container">
+            <a href="https://www.trianglerefs.org/"><img src="assets/TSOA_logo.svg" alt="Organization 2"
+                    class="logo-img" onerror="this.style.display='none'"></a>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Login View -->
+        <div id="login-view" class="login-card">
+            <h1>Coach Portal</h1>
+            <p style="color:#666; margin-bottom:20px;">Please enter your email to access your dashboard.</p>
+
+            <input type="email" id="coachEmail" placeholder="Enter your email address" onkeypress="handleEnter(event)">
+            <button onclick="login()">Login</button>
+            <div id="error-msg" class="error-msg"></div>
+            <div id="loading" style="display:none; margin-top:15px; color:#666;">Verifying...</div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="dashboard">
+            <div class="welcome-text" id="welcomeMsg">Hello, Coach!</div>
+            <div class="school-text" id="schoolMsg">School Affiliation</div>
+            <div class="mascot-text" id="mascotMsg">Go Team!</div>
+
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <div class="footer">
+            <p><a href="index.html" style="color:#3498db; text-decoration:none;">&larr; Back to Home</a></p>
+            <p>© 2026 All Rights Reserved</p>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzi1gJkccUwLsjwPcepY_g9JY6nkLwcOxAn2dAEIw3YNQdWLuBl2lQYf6sOIM2WsRi3Cg/exec";
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') login();
+        }
+
+        function login() {
+            const email = document.getElementById('coachEmail').value.trim();
+            const errorDiv = document.getElementById('error-msg');
+            const loadingDiv = document.getElementById('loading');
+
+            if (!email) {
+                showError("Please enter an email address.");
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+
+            // Call Backend
+            fetch(`${SCRIPT_URL}?action=coachLogin&email=${encodeURIComponent(email)}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    if (data.status === 'success') {
+                        showDashboard(data);
+                    } else {
+                        showError(data.message || "Login failed. Please check your email.");
+                    }
+                })
+                .catch(err => {
+                    loadingDiv.style.display = 'none';
+                    showError("Start-up error: " + err.toString());
+                    console.error(err);
+                });
+        }
+
+        function showDashboard(data) {
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('dashboard-view').style.display = 'block';
+
+            document.getElementById('welcomeMsg').textContent = `Hello, Coach ${data.lastName}!`;
+            document.getElementById('schoolMsg').textContent = `School Affiliation: ${data.school}`;
+            document.getElementById('mascotMsg').textContent = `Go ${data.mascot}!`;
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function logout() {
+            location.reload();
+        }
+    </script>
+</body>
+
+</html>
