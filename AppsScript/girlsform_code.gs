@@ -18,14 +18,15 @@ function doGet(e) {
   var params = e.parameter;
   var action = params.action;
   var season = params.season || 'Current';
+  var viewRegion = params.viewRegion || null; // NEW: Optional region filter
 
   if (action === 'googleLogin') {
-    return handleAdminLogin(params.token, season);
+    return handleAdminLogin(params.token, season, viewRegion);
   }
   
   // Password-based login
   if (action === 'passwordLogin') {
-    return handlePasswordLogin(params.email, params.password, season);
+    return handlePasswordLogin(params.email, params.password, season, viewRegion);
   }
 
   return ContentService.createTextOutput(JSON.stringify({
@@ -112,7 +113,7 @@ function doPost(e) {
 }
 
 // ===== PASSWORD LOGIN HANDLER =====
-function handlePasswordLogin(email, password, seasonKey) {
+function handlePasswordLogin(email, password, seasonKey, requestedViewRegion) {
   try {
     if (!email || !password) {
       return ContentService.createTextOutput(JSON.stringify({ 
@@ -155,7 +156,7 @@ function handlePasswordLogin(email, password, seasonKey) {
     }
 
     var assignedSupervisor = null;
-    var supervisorRegion = null;
+    var userRegion = null;
     
     // Find the admin by email and verify password
     for (var i = 1; i < data.length; i++) {
@@ -178,11 +179,11 @@ function handlePasswordLogin(email, password, seasonKey) {
         // Use the supervisor name as-is (it already includes region)
         assignedSupervisor = supName;
         
-        // Extract just the region for filtering quiz results
+        // Extract just the region for default filtering
         if (supName === "MASTER" || region === "MASTER") {
-          supervisorRegion = "MASTER";
+          userRegion = "MASTER";
         } else {
-          supervisorRegion = region;
+          userRegion = region;
         }
         
         break;
@@ -196,25 +197,39 @@ function handlePasswordLogin(email, password, seasonKey) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    Logger.log("Login successful for: " + email);
-    Logger.log("Assigned Supervisor: " + assignedSupervisor);
-    Logger.log("Supervisor Region: " + supervisorRegion);
+    // ⭐ DETERMINE VIEW REGION
+    // If requestedViewRegion is provided, use it. Otherwise default to user's assigned region.
+    var currentViewRegion = requestedViewRegion;
+    if (!currentViewRegion) {
+        currentViewRegion = (userRegion === 'MASTER') ? 'ALL' : userRegion;
+    }
+    
+    // ⭐ GET REGION MAP & LIST
+    var mapData = getSupervisorMap();
+    var allRegions = mapData.regions;
 
-    var reports = getCMIReports(assignedSupervisor, seasonKey);
+    Logger.log("Login successful for: " + email);
+    Logger.log("Assigned Supervisor: " + assignedSupervisor + " (" + userRegion + ")");
+    Logger.log("View Region: " + currentViewRegion);
+
+    var reports = getCMIReports(currentViewRegion, seasonKey, mapData.map);
     Logger.log("CMI reports found: " + reports.length);
     
-    var quizzes = getQuizResults(supervisorRegion);
+    var quizzes = getQuizResults(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
     Logger.log("Quiz results found: " + quizzes.length);
     
-    var questionStats = getQuestionStats(supervisorRegion);
+    var questionStats = getQuestionStats(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
     Logger.log("Question stats found: " + questionStats.length);
     
-    // ⭐ NEW: Add video URLs to question stats (one per unique question)
+    // Add video URLs to question stats
     questionStats = enrichQuestionStatsWithVideos(questionStats);
 
     return ContentService.createTextOutput(JSON.stringify({
       status: 'success', 
       supervisor: assignedSupervisor,
+      userRegion: userRegion,       // The user's actual region
+      currentViewRegion: currentViewRegion, // The region they are viewing
+      allRegions: allRegions,       // List of all available regions
       season: seasonKey, 
       data: reports, 
       quizzes: quizzes,
@@ -231,7 +246,7 @@ function handlePasswordLogin(email, password, seasonKey) {
 }
 
 // ===== ADMIN LOGIN HANDLER (GOOGLE OAUTH - BACKUP) =====
-function handleAdminLogin(token, seasonKey) {
+function handleAdminLogin(token, seasonKey, requestedViewRegion) {
   try {
     // Decode JWT token to get email
     var parts = token.split('.');
@@ -251,26 +266,22 @@ function handleAdminLogin(token, seasonKey) {
     if (emailIdx === -1) throw new Error("Admins tab missing 'Email' column");
 
     var assignedSupervisor = null;
-    var supervisorRegion = null;
-    var supervisorNameOnly = null;
+    var userRegion = null;
     
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][emailIdx]).toLowerCase().trim() === email) {
         var supName = (supervisorIdx > -1) ? String(data[i][supervisorIdx]).trim() : "MASTER";
         var region = (regionIdx > -1) ? String(data[i][regionIdx]).trim() : "";
         
-        supervisorNameOnly = supName;
-        
         if (supName === "MASTER" || region === "MASTER") {
           assignedSupervisor = "MASTER";
-          supervisorRegion = "MASTER";
-          supervisorNameOnly = "MASTER";
+          userRegion = "MASTER";
         } else if (region) {
           assignedSupervisor = supName; // MATCHING PASSWORD LOGIN: Use name as-is
-          supervisorRegion = region;
+          userRegion = region;
         } else {
           assignedSupervisor = supName;
-          supervisorRegion = "";
+          userRegion = "";
         }
         break;
       }
@@ -283,16 +294,32 @@ function handleAdminLogin(token, seasonKey) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
 
-    var reports = getCMIReports(supervisorNameOnly, seasonKey);
-    var quizzes = getQuizResults(supervisorRegion);
-    var questionStats = getQuestionStats(supervisorRegion);
+    // ⭐ DETERMINE VIEW REGION
+    var currentViewRegion = requestedViewRegion;
+    if (!currentViewRegion) {
+        currentViewRegion = (userRegion === 'MASTER') ? 'ALL' : userRegion;
+    }
+
+    // ⭐ GET REGION MAP & LIST
+    var mapData = getSupervisorMap();
+    var allRegions = mapData.regions;
+
+    Logger.log("OAuth Login successful for: " + email);
+    Logger.log("View Region: " + currentViewRegion);
+
+    var reports = getCMIReports(currentViewRegion, seasonKey, mapData.map);
+    var quizzes = getQuizResults(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
+    var questionStats = getQuestionStats(currentViewRegion === 'ALL' ? 'MASTER' : currentViewRegion);
     
-    // ⭐ NEW: Add video URLs to question stats (one per unique question)
+    // Add video URLs to question stats
     questionStats = enrichQuestionStatsWithVideos(questionStats);
 
     return ContentService.createTextOutput(JSON.stringify({
       status: 'success', 
       supervisor: assignedSupervisor, 
+      userRegion: userRegion,
+      currentViewRegion: currentViewRegion,
+      allRegions: allRegions,
       season: seasonKey, 
       data: reports, 
       quizzes: quizzes,
@@ -305,6 +332,41 @@ function handleAdminLogin(token, seasonKey) {
       message: e.message + '\n\nStack: ' + e.stack 
     })).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// ===== HELPER: BUILD SUPERVISOR -> REGION MAP =====
+function getSupervisorMap() {
+    var map = {};
+    var regions = new Set();
+    
+    try {
+        var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Admins");
+        if (sheet) {
+            var data = sheet.getDataRange().getValues();
+            var headers = data[0].map(h => String(h).toLowerCase().trim());
+            var supervisorIdx = headers.findIndex(h => h.includes('assigned') || h.includes('supervisor'));
+            var regionIdx = headers.indexOf('region');
+            
+            if (supervisorIdx > -1 && regionIdx > -1) {
+                for (var i = 1; i < data.length; i++) {
+                    var supName = String(data[i][supervisorIdx]).trim();
+                    var region = String(data[i][regionIdx]).trim();
+                    
+                    if (supName && region && region !== "MASTER") {
+                        map[supName] = region;
+                        regions.add(region);
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        Logger.log("Error building supervisor map: " + e.toString());
+    }
+    
+    return {
+        map: map,
+        regions: Array.from(regions).sort()
+    };
 }
 
 // ===== GET ELIGIBILITY DATA FROM QUIZ SPREADSHEET =====
@@ -588,7 +650,6 @@ function getAllRosterStudents(supervisorRegion) {
 }
 
 // ===== GET QUESTION STATISTICS (FILTERED BY SUPERVISOR REGION) =====
-// ===== GET QUESTION STATISTICS (FILTERED BY SUPERVISOR REGION) =====
 // ⭐ REWRITTEN (HYBRID) to show:
 // 1. All Active questions (even if unanswered)
 // 2. All Historical/Answered questions (even if inactive or mismatching)
@@ -827,7 +888,12 @@ function enrichQuestionStatsWithVideos(questionStats) {
 }
 
 // ===== GET CMI REPORTS =====
-function getCMIReports(role, seasonKey) {
+function getCMIReports(targetRegion, seasonKey, supervisorMap) {
+  // If no map provided, build it temporarily (though it should be passed in)
+  if (!supervisorMap) {
+    supervisorMap = getSupervisorMap().map;
+  }
+
   var source = DATA_SOURCES[seasonKey];
   if (!source) {
     Logger.log("No data source found for season: " + seasonKey);
@@ -879,20 +945,35 @@ function getCMIReports(role, seasonKey) {
     map.supervisor = 2;
   }
 
-  Logger.log("Filtering CMI reports for role: " + role);
+  Logger.log("Filtering CMI reports for Region: " + targetRegion);
   Logger.log("Total rows to process: " + (data.length - 1));
 
   var cleanReports = [];
   for (var i = 1; i < data.length; i++) {
     var r = data[i];
+    
+    // Get supervisor name from report, remove any (Region) suffix if it exists
     var rowSup = (map.supervisor > -1 && r[map.supervisor]) ? String(r[map.supervisor]).trim() : "";
-
+    var cleanName = rowSup.split('(')[0].trim();
+    
     var shouldInclude = false;
     
-    if (role === 'MASTER') {
+    // "ALL" means view everything
+    if (targetRegion === 'ALL' || targetRegion === 'MASTER') {
       shouldInclude = true;
-    } else if (rowSup === role) {
-      shouldInclude = true;
+    } else {
+      // Look up region for this supervisor
+      var region = supervisorMap[cleanName] || "Unknown";
+      
+      // Check if Regions match
+      if (region === targetRegion) {
+        shouldInclude = true;
+      }
+      
+      // Fallback: Check if name itself matches (legacy behavior)
+      if (cleanName === targetRegion) {
+        shouldInclude = true;
+      }
     }
 
     if (shouldInclude) {
