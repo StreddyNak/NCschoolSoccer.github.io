@@ -1361,12 +1361,6 @@
         </div>
 
         <div class="filter-bar">
-            <!-- Region Filter (Populated dynamically) -->
-            <select id="regionSelect" onchange="switchRegion()"
-                style="padding:8px 12px; border:2px solid #3498db; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px; margin-right: 10px; display:none;">
-                <option value="">My Region</option>
-            </select>
-
             <select id="viewSelect" onchange="toggleView()"
                 style="padding:8px 12px; border:2px solid #2ecc71; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 13px;">
                 <option value="cmi">Show CMI Reports</option>
@@ -1661,17 +1655,6 @@
             if (viewRegion) {
                 url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
             }
-
-            fetch(url)
-
-            if (viewRegion) {
-                url += `&viewRegion=${encodeURIComponent(viewRegion)}`;
-            }
-
-            // If password is empty (e.g. Google Login), we might fail here unless we stored the token.
-            // For this quick task, let's assume session relies on re-sending credentials. 
-            // If Google Login, this fetchData needs the token.
-            // I'll check if I can store the token.
 
             fetch(url)
                 .then(res => res.json())
