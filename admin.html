@@ -1911,12 +1911,16 @@
                 const metaTag = document.getElementById('metaTagFilter').value;
                 const vid = document.getElementById('videoToggle').checked;
 
-                const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
+                // REMOVED: Frontend filter by supervisor name.
+                // The backend now handles region filtering (and thus supervisor scoping) via 'viewRegion' and 'cmiData'.
+                // If we filter here, we hide reports from other regions that validly belong in cmiData.
+
+                // const effectiveSupervisor = impersonatedSupervisor || actualSupervisor;
 
                 const filtered = cmiData.filter(item => {
-                    if (effectiveSupervisor !== 'MASTER' && !String(item.supervisor).includes(effectiveSupervisor)) {
-                        return false;
-                    }
+                    // if (effectiveSupervisor !== 'MASTER' && !String(item.supervisor).includes(effectiveSupervisor)) {
+                    //     return false;
+                    // }
 
                     if (vid && !(item.video || "").toString().startsWith("http")) return false;
                     if (tag && !(item.cmi || "").includes(tag)) return false;
