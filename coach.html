@@ -205,6 +205,35 @@
             </p>
         </div>
 
+        <!-- Request Access View -->
+        <div id="register-view" class="login-card" style="display:none;">
+            <h1>Request Access</h1>
+            <p style="color:#666; margin-bottom:20px;">Submit your details for approval.</p>
+
+            <div class="form-group">
+                <input type="text" id="regFirstName" class="form-control" placeholder="First Name"
+                    style="margin-bottom:10px;">
+                <input type="text" id="regLastName" class="form-control" placeholder="Last Name"
+                    style="margin-bottom:10px;">
+                <input type="email" id="regEmail" class="form-control" placeholder="Email Address"
+                    style="margin-bottom:10px;">
+                <input type="text" id="regSchool" class="form-control" placeholder="School Name"
+                    style="margin-bottom:10px;">
+                <input type="text" id="regMascot" class="form-control" placeholder="Mascot (e.g. Tigers)"
+                    style="margin-bottom:10px;">
+            </div>
+
+            <button onclick="register()">Request Access</button>
+
+            <p style="margin-top:15px; font-size:0.9rem;">
+                Already have an account? <a href="#" onclick="showLogin(); return false;" style="color:#3498db;">Login
+                    Here</a>
+            </p>
+
+            <div id="reg-error-msg" class="error-msg"></div>
+            <div id="reg-loading" style="display:none; margin-top:15px; color:#666;">Submitting Request...</div>
+        </div>
+
         <!-- Dashboard View -->
         <div id="dashboard-view" class="dashboard">
             <div class="welcome-text" id="welcomeMsg">Hello, Coach!</div>

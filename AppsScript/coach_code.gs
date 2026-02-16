@@ -84,7 +84,7 @@ function handleRegistration(data) {
   
   if (!pendingSheet) {
     pendingSheet = ss.insertSheet("Pending Requests");
-    pendingSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Timestamp"]);
+    pendingSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", "Timestamp"]);
   }
   
   var email = (data.email || "").toLowerCase().trim();
@@ -109,12 +109,14 @@ function handleRegistration(data) {
   }
 
   // Add to Pending
+  // Columns: First, Last, Email, School, Mascot, Supervisor, Date
   pendingSheet.appendRow([
     data.firstName,
     data.lastName,
     email,
     data.school,
     data.mascot,
+    data.supervisor || "Unknown",
     new Date()
   ]);
 
@@ -128,7 +130,8 @@ function handleRegistration(data) {
              "Name: " + data.firstName + " " + data.lastName + "\n" +
              "Email: " + email + "\n" +
              "School: " + data.school + "\n" +
-             "Mascot: " + data.mascot + "\n\n" +
+             "Mascot: " + data.mascot + "\n" +
+             "Supervisor: " + (data.supervisor || "None") + "\n\n" +
              "Approve: " + approveLink + "\n" +
              "Deny: " + denyLink;
              
@@ -163,9 +166,10 @@ function handleApproval(email) {
   }
   
   // Move to Coaches
-  // Pending: First, Last, Email, School, Mascot, Time
-  // Coaches: First, Last, Email, School, Mascot
-  coachSheet.appendRow([rowData[0], rowData[1], rowData[2], rowData[3], rowData[4]]);
+  // Pending: First, Last, Email, School, Mascot, Supervisor, Time
+  // Coaches: First, Last, Email, School, Mascot, Supervisor
+  var supervisor = rowData[5] || ""; // Get supervisor from column F
+  coachSheet.appendRow([rowData[0], rowData[1], rowData[2], rowData[3], rowData[4], supervisor]);
   
   // Remove from Pending
   pendingSheet.deleteRow(rowIndex);
