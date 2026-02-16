@@ -370,6 +370,75 @@
                 });
         }
 
+        function showRegister() {
+            document.getElementById('login-view').style.display = 'none';
+            document.getElementById('register-view').style.display = 'block';
+            document.getElementById('reg-error-msg').style.display = 'none';
+        }
+
+        function showLogin() {
+            document.getElementById('register-view').style.display = 'none';
+            document.getElementById('login-view').style.display = 'block';
+            document.getElementById('error-msg').style.display = 'none';
+        }
+
+        function register() {
+            const firstName = document.getElementById('regFirstName').value.trim();
+            const lastName = document.getElementById('regLastName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const school = document.getElementById('regSchool').value.trim();
+            const mascot = document.getElementById('regMascot').value.trim();
+
+            const errorDiv = document.getElementById('reg-error-msg');
+            const loadingDiv = document.getElementById('reg-loading');
+
+            if (!firstName || !lastName || !email || !school || !mascot) {
+                errorDiv.textContent = "Please fill in all fields.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+
+            const payload = {
+                type: 'register',
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                school: school,
+                mascot: mascot
+            };
+
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    if (data.status === 'success') {
+                        // Auto-login on success
+                        showDashboard({
+                            firstName: firstName,
+                            lastName: lastName,
+                            school: school,
+                            mascot: mascot
+                        });
+                        // Also populate the login email field for next time
+                        document.getElementById('coachEmail').value = email;
+                    } else {
+                        errorDiv.textContent = data.message || "Registration failed.";
+                        errorDiv.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    loadingDiv.style.display = 'none';
+                    errorDiv.textContent = "Error: " + err.toString();
+                    errorDiv.style.display = 'block';
+                });
+        }
+
         function showError(msg) {
             const el = document.getElementById('error-msg');
             el.textContent = msg;

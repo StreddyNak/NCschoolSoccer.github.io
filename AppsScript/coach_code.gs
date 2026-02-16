@@ -1,6 +1,6 @@
-// ===== COACH LOGIN HANDLER =====
 // ID of the "NC HS Coaches" spreadsheet
 const COACH_SHEET_ID = "1JN68hzT5KXn4j7pSXuIH8ST_acdtVWIpNRvMeDo7Ygc";
+const ADMIN_EMAIL = "nstrednak@gmail.com"; // Admin email for notifications
 
 function doGet(e) {
   var params = e.parameter;
@@ -9,18 +9,31 @@ function doGet(e) {
   if (action === 'coachLogin') {
     return handleCoachLogin(params.email);
   }
+  
+  if (action === 'approve') {
+    return handleApproval(params.email);
+  }
+  
+  if (action === 'deny') {
+    return handleDenial(params.email);
+  }
 
   return ContentService.createTextOutput(JSON.stringify({
     status: "ready", message: "Coach Portal Backend Online"
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
+// ... doPost and handleReviewSubmission remain same ...
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     
     if (data.type === 'review_submission') {
       return handleReviewSubmission(data);
+    }
+
+    if (data.type === 'register') {
+      return handleRegistration(data);
     }
     
     return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Unknown action" })).setMimeType(ContentService.MimeType.JSON);
@@ -30,7 +43,9 @@ function doPost(e) {
   }
 }
 
+// ... handleReviewSubmission ...
 function handleReviewSubmission(data) {
+  // ... (keep existing implementation)
   var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
   var sheet = ss.getSheetByName("Reviews");
   
@@ -39,11 +54,7 @@ function handleReviewSubmission(data) {
     sheet.appendRow(["Timestamp", "Coach Email", "Date", "Opponent", "Level", "Metric 1", "Metric 2", "Metric 3", "Metric 4"]);
   }
   
-  // Format ratings for row
   var r = data.ratings || {};
-  // JV: Movement, Communication
-  // Varsity: Movement, Control, Home AR, Away AR
-  
   var m1 = r.movement || "";
   var m2 = r.communication || r.control || "";
   var m3 = r.home_ar || "";
@@ -61,7 +72,139 @@ function handleReviewSubmission(data) {
     m4
   ]);
   
+  // Also email admin about the new review? Optional.
   return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+}
+
+
+function handleRegistration(data) {
+  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+  var pendingSheet = ss.getSheetByName("Pending Requests");
+  var coachSheet = ss.getSheetByName("Coaches");
+  
+  if (!pendingSheet) {
+    pendingSheet = ss.insertSheet("Pending Requests");
+    pendingSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Timestamp"]);
+  }
+  
+  var email = (data.email || "").toLowerCase().trim();
+  if (!email) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Email is required" })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Check if already active
+  var coaches = coachSheet ? coachSheet.getDataRange().getValues() : [];
+  for (var i = 1; i < coaches.length; i++) {
+    if (String(coaches[i][2] || "").toLowerCase().trim() === email) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Email already registered. Please login." })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // Check if already pending
+  var pending = pendingSheet.getDataRange().getValues();
+  for (var i = 1; i < pending.length; i++) {
+    if (String(pending[i][2] || "").toLowerCase().trim() === email) {
+      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Request already pending approval." })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  // Add to Pending
+  pendingSheet.appendRow([
+    data.firstName,
+    data.lastName,
+    email,
+    data.school,
+    data.mascot,
+    new Date()
+  ]);
+
+  // Email Admin
+  var scriptUrl = ScriptApp.getService().getUrl();
+  var approveLink = scriptUrl + "?action=approve&email=" + encodeURIComponent(email);
+  var denyLink = scriptUrl + "?action=deny&email=" + encodeURIComponent(email);
+  
+  var subject = "New Coach Access Request: " + data.firstName + " " + data.lastName;
+  var body = "New request from:\n\n" +
+             "Name: " + data.firstName + " " + data.lastName + "\n" +
+             "Email: " + email + "\n" +
+             "School: " + data.school + "\n" +
+             "Mascot: " + data.mascot + "\n\n" +
+             "Approve: " + approveLink + "\n" +
+             "Deny: " + denyLink;
+             
+  MailApp.sendEmail(ADMIN_EMAIL, subject, body);
+
+  return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleApproval(email) {
+  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+  var pendingSheet = ss.getSheetByName("Pending Requests");
+  var coachSheet = ss.getSheetByName("Coaches");
+  
+  if (!pendingSheet || !coachSheet) return HtmlService.createHtmlOutput("<h1>Error: Sheets not found.</h1>");
+  
+  var data = pendingSheet.getDataRange().getValues();
+  var rowIndex = -1;
+  var rowData = [];
+  
+  email = email.toLowerCase().trim();
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][2] || "").toLowerCase().trim() === email) {
+      rowIndex = i + 1; // 1-based index
+      rowData = data[i];
+      break;
+    }
+  }
+  
+  if (rowIndex === -1) {
+    return HtmlService.createHtmlOutput("<h1>Request not found or already processed.</h1>");
+  }
+  
+  // Move to Coaches
+  // Pending: First, Last, Email, School, Mascot, Time
+  // Coaches: First, Last, Email, School, Mascot
+  coachSheet.appendRow([rowData[0], rowData[1], rowData[2], rowData[3], rowData[4]]);
+  
+  // Remove from Pending
+  pendingSheet.deleteRow(rowIndex);
+  
+  // Email Coach
+  MailApp.sendEmail(email, "Coach Portal Access Approved", "Congratulations! Your access to the NC HS Coach Portal has been approved.\n\nYou can now login at: https://ncschoolsoccer.github.io/coach.html");
+  
+  return HtmlService.createHtmlOutput("<h1 style='color:green'>Coach Approved and Notified!</h1><p>" + email + "</p>");
+}
+
+function handleDenial(email) {
+  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+  var pendingSheet = ss.getSheetByName("Pending Requests");
+  
+  if (!pendingSheet) return HtmlService.createHtmlOutput("<h1>Error: Sheets not found.</h1>");
+  
+  var data = pendingSheet.getDataRange().getValues();
+  var rowIndex = -1;
+  
+  email = email.toLowerCase().trim();
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][2] || "").toLowerCase().trim() === email) {
+      rowIndex = i + 1;
+      break;
+    }
+  }
+  
+  if (rowIndex === -1) {
+    return HtmlService.createHtmlOutput("<h1>Request not found or already processed.</h1>");
+  }
+  
+  // Remove from Pending
+  pendingSheet.deleteRow(rowIndex);
+  
+  // Email Coach
+  MailApp.sendEmail(email, "Coach Portal Access Denied", "Your request to access the NC HS Coach Portal has been denied.");
+  
+  return HtmlService.createHtmlOutput("<h1 style='color:red'>Coach Request Denied.</h1><p>" + email + "</p>");
 }
 
 function handleCoachLogin(email) {
