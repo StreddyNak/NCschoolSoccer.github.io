@@ -160,6 +160,47 @@
             display: none;
         }
 
+        /* Form Groups and Inputs */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
         /* Footer */
         .footer {
             text-align: center;
@@ -168,6 +209,21 @@
             font-size: 0.85rem;
             border-top: 1px solid #e5e7eb;
             margin-top: 40px;
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .helper-text a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .helper-text a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -194,8 +250,14 @@
             <h1>Coach Portal</h1>
             <p style="color:#666; margin-bottom:20px;">Please enter your email to access your dashboard.</p>
 
-            <input type="email" id="coachEmail" placeholder="Enter your email address" onkeypress="handleEnter(event)">
+            <div class="form-group">
+                <label class="form-label" for="coachEmail">Email Address</label>
+                <input type="email" id="coachEmail" class="form-control" placeholder="Enter your email address"
+                    onkeypress="handleEnter(event)">
+            </div>
+
             <button onclick="login()">Login</button>
+
             <div id="error-msg" class="error-msg"></div>
             <div id="loading" style="display:none; margin-top:15px; color:#666;">Verifying...</div>
 
@@ -206,26 +268,54 @@
         </div>
 
         <!-- Request Access View -->
-        <div id="register-view" class="login-card" style="display:none;">
+        <div id="register-view" class="login-card" style="display:none; max-width:600px;">
             <h1>Request Access</h1>
             <p style="color:#666; margin-bottom:20px;">Submit your details for approval.</p>
 
-            <div class="form-group">
-                <input type="text" id="regFirstName" class="form-control" placeholder="First Name"
-                    style="margin-bottom:10px;">
-                <input type="text" id="regLastName" class="form-control" placeholder="Last Name"
-                    style="margin-bottom:10px;">
-                <input type="email" id="regEmail" class="form-control" placeholder="Email Address"
-                    style="margin-bottom:10px;">
-                <input type="text" id="regSchool" class="form-control" placeholder="School Name"
-                    style="margin-bottom:10px;">
-                <input type="text" id="regMascot" class="form-control" placeholder="Mascot (e.g. Tigers)"
-                    style="margin-bottom:10px;">
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label" for="regFirstName">First Name</label>
+                    <input type="text" id="regFirstName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regLastName">Last Name</label>
+                    <input type="text" id="regLastName" class="form-control">
+                </div>
             </div>
 
-            <button onclick="register()">Request Access</button>
+            <div class="form-group">
+                <label class="form-label" for="regEmail">Email Address</label>
+                <input type="email" id="regEmail" class="form-control">
+            </div>
 
-            <p style="margin-top:15px; font-size:0.9rem;">
+            <div class="form-group">
+                <label class="form-label" for="regSchool">School Affiliation</label>
+                <input type="text" id="regSchool" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="regSupervisor">Regional Supervisor</label>
+                <select id="regSupervisor" class="form-control">
+                    <option value="">Select your area's Regional Supervisor...</option>
+                    <option value="Ben Wooten - Foothills">Ben Wooten - Foothills</option>
+                    <option value="Cliff Clement - Eastern">Cliff Clement - Eastern</option>
+                    <option value="Darren Dawson - Eastern Plains">Darren Dawson - Eastern Plains</option>
+                    <option value="Eric Usher - Western NC">Eric Usher - Western NC</option>
+                    <option value="Ernie Fisher - Southeastern">Ernie Fisher - Southeastern</option>
+                    <option value="Mark Buda - Metrolina">Mark Buda - Metrolina</option>
+                    <option value="Mark Kadlecik - Triangle">Mark Kadlecik - Triangle</option>
+                    <option value="Roger Morgan - Albemarle">Roger Morgan - Albemarle</option>
+                    <option value="Roger Morton - Piedmont">Roger Morton - Piedmont</option>
+                </select>
+                <div class="helper-text">
+                    Don't know who your regional supervisor is? <a href="https://www.nchsaa.org/regional-supervisors/"
+                        target="_blank">Click here</a>
+                </div>
+            </div>
+
+            <button onclick="register()" style="margin-top:10px;">Request Access</button>
+
+            <p style="margin-top:20px; font-size:0.9rem;">
                 Already have an account? <a href="#" onclick="showLogin(); return false;" style="color:#3498db;">Login
                     Here</a>
             </p>
@@ -421,13 +511,13 @@
             const lastName = document.getElementById('regLastName').value.trim();
             const email = document.getElementById('regEmail').value.trim();
             const school = document.getElementById('regSchool').value.trim();
-            const mascot = document.getElementById('regMascot').value.trim();
+            const supervisor = document.getElementById('regSupervisor').value;
 
             const errorDiv = document.getElementById('reg-error-msg');
             const loadingDiv = document.getElementById('reg-loading');
 
-            if (!firstName || !lastName || !email || !school || !mascot) {
-                errorDiv.textContent = "Please fill in all fields.";
+            if (!firstName || !lastName || !email || !school || !supervisor) {
+                errorDiv.textContent = "Please fill in all fields including Supervisor.";
                 errorDiv.style.display = 'block';
                 return;
             }
@@ -441,7 +531,7 @@
                 lastName: lastName,
                 email: email,
                 school: school,
-                mascot: mascot
+                supervisor: supervisor
             };
 
             fetch(SCRIPT_URL, {
@@ -452,15 +542,15 @@
                 .then(data => {
                     loadingDiv.style.display = 'none';
                     if (data.status === 'success') {
-                        // Auto-login on success
-                        showDashboard({
-                            firstName: firstName,
-                            lastName: lastName,
-                            school: school,
-                            mascot: mascot
-                        });
-                        // Also populate the login email field for next time
-                        document.getElementById('coachEmail').value = email;
+                        // Show success message instead of auto-login
+                        alert("Request submitted! You will receive an email once approved.");
+                        showLogin();
+                        // Reset inputs
+                        document.getElementById('regFirstName').value = '';
+                        document.getElementById('regLastName').value = '';
+                        document.getElementById('regEmail').value = '';
+                        document.getElementById('regSchool').value = '';
+                        document.getElementById('regSupervisor').value = '';
                     } else {
                         errorDiv.textContent = data.message || "Registration failed.";
                         errorDiv.style.display = 'block';
