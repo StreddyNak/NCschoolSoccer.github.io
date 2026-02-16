@@ -847,6 +847,13 @@
             let homeUniform = "N/A";
             let awayUniform = "N/A";
 
+
+
+            const errorDiv = document.getElementById('reg-error-msg');
+            const loadingDiv = document.getElementById('reg-loading');
+
+            errorDiv.style.display = 'none';
+
             if (knowUniforms === "Yes") {
                 const h1 = document.getElementById('regHomeShirt').value.trim();
                 const h2 = document.getElementById('regHomeShorts').value.trim();
@@ -892,7 +899,6 @@
                 return;
             }
 
-            errorDiv.style.display = 'none';
             loadingDiv.style.display = 'block';
 
             const payload = {
