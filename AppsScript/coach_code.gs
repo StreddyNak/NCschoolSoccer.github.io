@@ -4,7 +4,7 @@ const ADMIN_EMAIL = "ncschoolsoccer@gmail.com"; // Admin email for notifications
 
 // RUN THIS FUNCTION ONCE IN THE EDITOR TO AUTHORIZE EMAIL PERMISSIONS
 function authorizeEmail() {
-  MailApp.sendEmail(Session.getActiveUser().getEmail(), "Script Authorization", "Your script can now send emails.");
+  MailApp.sendEmail(Session.getActiveUser().getEmail(), "Script Authorization", "Your script can now send emails.", {name: 'NC HS Soccer Portal'});
 }
 
 function doGet(e) {
@@ -20,7 +20,7 @@ function doGet(e) {
   }
   
   if (action === 'deny') {
-    return handleDenial(params.email);
+    return handleDenial(params.email, params.reason);
   }
 
   return ContentService.createTextOutput(JSON.stringify({
@@ -89,7 +89,7 @@ function handleRegistration(data) {
   
   if (!pendingSheet) {
     pendingSheet = ss.insertSheet("Pending Requests");
-    pendingSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", "Timestamp"]);
+    pendingSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", "Film", "Platform", "Home Uniform", "Away Uniform", "Timestamp"]);
   }
   
   var email = (data.email || "").toLowerCase().trim();
@@ -114,14 +114,18 @@ function handleRegistration(data) {
   }
 
   // Add to Pending
-  // Columns: First, Last, Email, School, Mascot, Supervisor, Date
+  // Columns: First, Last, Email, School, Mascot, Supervisor, Film, Platform, Home Uniform, Away Uniform, Date
   pendingSheet.appendRow([
     data.firstName,
     data.lastName,
     email,
     data.school,
-    data.mascot,
+    "", // Mascot is manually entered later
     data.supervisor || "Unknown",
+    data.film || "No",
+    data.platform || "",
+    data.homeUniform || "N/A",
+    data.awayUniform || "N/A",
     new Date()
   ]);
 
@@ -135,12 +139,15 @@ function handleRegistration(data) {
              "Name: " + data.firstName + " " + data.lastName + "\n" +
              "Email: " + email + "\n" +
              "School: " + data.school + "\n" +
-             "Mascot: " + data.mascot + "\n" +
-             "Supervisor: " + (data.supervisor || "None") + "\n\n" +
+             "Supervisor: " + (data.supervisor || "None") + "\n" +
+             "Filming: " + (data.film || "No") + "\n" +
+             "Platform: " + (data.platform || "N/A") + "\n" +
+             "Home Uniform: " + (data.homeUniform || "N/A") + "\n" +
+             "Away Uniform: " + (data.awayUniform || "N/A") + "\n\n" +
              "Approve: " + approveLink + "\n" +
              "Deny: " + denyLink;
              
-  MailApp.sendEmail(ADMIN_EMAIL, subject, body);
+  MailApp.sendEmail(ADMIN_EMAIL, subject, body, {name: 'NC HS Soccer Portal'});
 
   return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -171,34 +178,70 @@ function handleApproval(email) {
   }
   
   // Move to Coaches
-  // Pending: First, Last, Email, School, Mascot, Supervisor, Time
-  // Coaches: First, Last, Email, School, Mascot, Supervisor
-  var supervisor = rowData[5] || ""; // Get supervisor from column F
-  coachSheet.appendRow([rowData[0], rowData[1], rowData[2], rowData[3], rowData[4], supervisor]);
+  // Pending: First(0), Last(1), Email(2), School(3), Mascot(4), Supervisor(5), Film(6), Platform(7), Home Uniform(8), Away Uniform(9), Timestamp(10)
+  var supervisor = rowData[5] || ""; 
+  var film = rowData[6] || "";
+  var platform = rowData[7] || "";
+  var homeUni = rowData[8] || "";
+  var awayUni = rowData[9] || "";
+  
+  // Coaches Sheet: First, Last, Email, School, Mascot, Supervisor, Film, Platform, Home Uni, Away Uni
+  coachSheet.appendRow([rowData[0], rowData[1], rowData[2], rowData[3], rowData[4], supervisor, film, platform, homeUni, awayUni]);
   
   // Remove from Pending
   pendingSheet.deleteRow(rowIndex);
   
   // Email Coach
-  MailApp.sendEmail(email, "Coach Portal Access Approved", "Congratulations! Your access to the NC HS Coach Portal has been approved.\n\nYou can now login at: https://ncschoolsoccer.github.io/coach.html");
+  MailApp.sendEmail(email, "Coach Portal Access Approved", "Congratulations! Your access to the NC HS Coach Portal has been approved.\n\nYou can now login at: https://ncschoolsoccer.com/coach.html", {name: 'NC HS Soccer Portal'});
   
   return HtmlService.createHtmlOutput("<h1 style='color:green'>Coach Approved and Notified!</h1><p>" + email + "</p>");
 }
 
-function handleDenial(email) {
+function handleDenial(email, reason) {
+  // 1. If no reason is provided, show the input form first
+  if (!reason) {
+    var scriptUrl = ScriptApp.getService().getUrl();
+    var html = `
+      <div style="font-family: sans-serif; max-width: 500px; margin: 40px auto; text-align: center; border: 1px solid #ccc; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <h2 style="color: #c0392b; margin-top: 0;">Deny Access</h2>
+        <p style="color: #666;">You are denying access for:<br><strong>${email}</strong></p>
+        <form action="${scriptUrl}" method="get">
+          <input type="hidden" name="action" value="deny">
+          <input type="hidden" name="email" value="${email}">
+          <div style="margin-bottom: 20px; text-align: left;">
+            <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Reason for Denial:</label>
+            <textarea name="reason" rows="4" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ddd; font-family: inherit;" required placeholder="e.g. Incomplete information, Not a recognized school..."></textarea>
+          </div>
+          <button type="submit" style="background: #c0392b; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%;">Confirm Denial</button>
+        </form>
+      </div>
+    `;
+    return HtmlService.createHtmlOutput(html).setTitle("Deny Access Reason");
+  }
+
+  // 2. Process the denial with the provided reason
   var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
   var pendingSheet = ss.getSheetByName("Pending Requests");
+  var deniedSheet = ss.getSheetByName("Denied Requests");
+  
+  if (!deniedSheet) {
+    deniedSheet = ss.insertSheet("Denied Requests");
+    // Header row: First, Last, Email, School, Mascot, Supervisor, Requested Date, Denied Date, Denial Reason
+    deniedSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", "Requested At", "Denied At", "Reason"]);
+  }
   
   if (!pendingSheet) return HtmlService.createHtmlOutput("<h1>Error: Sheets not found.</h1>");
   
   var data = pendingSheet.getDataRange().getValues();
   var rowIndex = -1;
+  var rowData = [];
   
   email = email.toLowerCase().trim();
   
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][2] || "").toLowerCase().trim() === email) {
       rowIndex = i + 1;
+      rowData = data[i]; // Capture the data before deletion
       break;
     }
   }
@@ -206,14 +249,30 @@ function handleDenial(email) {
   if (rowIndex === -1) {
     return HtmlService.createHtmlOutput("<h1>Request not found or already processed.</h1>");
   }
+
+  // Archive to "Denied Requests"
+  // pending: First Name(0), Last Name(1), Email(2), School(3), Mascot(4), Supervisor(5), Timestamp(6)
+  deniedSheet.appendRow([
+    rowData[0], 
+    rowData[1], 
+    rowData[2], 
+    rowData[3], 
+    rowData[4], 
+    rowData[5], 
+    rowData[6], 
+    new Date(), 
+    reason
+  ]);
   
   // Remove from Pending
   pendingSheet.deleteRow(rowIndex);
   
-  // Email Coach
-  MailApp.sendEmail(email, "Coach Portal Access Denied", "Your request to access the NC HS Coach Portal has been denied.");
+  // Email Coach with Reason
+  var subject = "Coach Portal Access Denied";
+  var body = "Your request to access the NC HS Coach Portal has been denied.\n\nReason: " + reason;
+  MailApp.sendEmail(email, subject, body, {name: 'NC HS Soccer Portal'});
   
-  return HtmlService.createHtmlOutput("<h1 style='color:red'>Coach Request Denied.</h1><p>" + email + "</p>");
+  return HtmlService.createHtmlOutput("<h1 style='color:red'>Coach Request Denied.</h1><p>Email sent to: " + email + "</p><p>Reason: " + reason + "</p>");
 }
 
 function handleCoachLogin(email) {
