@@ -1,6 +1,11 @@
 // ID of the "NC HS Coaches" spreadsheet
 const COACH_SHEET_ID = "1JN68hzT5KXn4j7pSXuIH8ST_acdtVWIpNRvMeDo7Ygc";
-const ADMIN_EMAIL = "nstrednak@gmail.com"; // Admin email for notifications
+const ADMIN_EMAIL = "ncschoolsoccer@gmail.com"; // Admin email for notifications
+
+// RUN THIS FUNCTION ONCE IN THE EDITOR TO AUTHORIZE EMAIL PERMISSIONS
+function authorizeEmail() {
+  MailApp.sendEmail(Session.getActiveUser().getEmail(), "Script Authorization", "Your script can now send emails.");
+}
 
 function doGet(e) {
   var params = e.parameter;
