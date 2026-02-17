@@ -8,24 +8,7 @@ function authorizeEmail() {
 }
 
 function doGet(e) {
-  var params = e.parameter;
-  var action = params.action;
-
-  if (action === 'coachLogin') {
-    return handleCoachLogin(params.email);
-  }
-  
-  if (action === 'approve') {
-    return handleApproval(params.email);
-  }
-  
-  if (action === 'deny') {
-    return handleDenial(params.email, params.reason);
-  }
-
-  return ContentService.createTextOutput(JSON.stringify({
-    status: "ready", message: "Coach Portal Backend Online"
-  })).setMimeType(ContentService.MimeType.JSON);
+  return handleGet(e);
 }
 
 // ... doPost and handleReviewSubmission remain same ...
@@ -48,15 +31,39 @@ function doPost(e) {
   }
 }
 
+function handleGet(e) {
+  var params = e.parameter;
+  var action = params.action;
+
+  if (action === 'coachLogin') {
+    return handleCoachLogin(params.email);
+  }
+  
+  if (action === 'approve') {
+    return handleApproval(params.email);
+  }
+  
+  if (action === 'deny') {
+    return handleDenial(params.email, params.reason);
+  }
+
+  if (action === 'getPastReviews') {
+    return getPastReviews(params.email);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "ready", message: "Coach Portal Backend Online"
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
 // ... handleReviewSubmission ...
 function handleReviewSubmission(data) {
-  // ... (keep existing implementation)
   var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
   var sheet = ss.getSheetByName("Reviews");
   
   if (!sheet) {
     sheet = ss.insertSheet("Reviews");
-    sheet.appendRow(["Timestamp", "Coach Email", "Date", "Opponent", "Level", "Metric 1", "Metric 2", "Metric 3", "Metric 4"]);
+    sheet.appendRow(["Timestamp", "Coach Email", "Date", "Opponent", "Level", "Movement", "Communication/Control", "Home AR", "Away AR", "Reviewed"]);
   }
   
   var r = data.ratings || {};
@@ -74,11 +81,48 @@ function handleReviewSubmission(data) {
     m1,
     m2,
     m3,
-    m4
+    m4,
+    false // Reviewed Checkbox (initially false)
   ]);
   
-  // Also email admin about the new review? Optional.
+  // Email Admin
+  var subject = "New Performance Review Submitted";
+  var body = "A new performance review has been submitted by " + data.coachEmail + ".\n\n" +
+             "Date: " + data.date + "\n" +
+             "Opponent: " + data.opponent + "\n" +
+             "Level: " + data.level + "\n\n" +
+             "Please check the 'Reviews' sheet to mark it as reviewed.";
+             
+  MailApp.sendEmail(ADMIN_EMAIL, subject, body, {name: 'NC HS Soccer Portal'});
+  
   return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getPastReviews(email) {
+  if (!email) return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Email required" })).setMimeType(ContentService.MimeType.JSON);
+  
+  email = email.toLowerCase().trim();
+  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+  var sheet = ss.getSheetByName("Reviews");
+  
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({ status: "success", reviews: [] })).setMimeType(ContentService.MimeType.JSON);
+  
+  var data = sheet.getDataRange().getValues();
+  var reviews = [];
+  
+  // Skip header
+  for (var i = 1; i < data.length; i++) {
+    // Column 1: Coach Email
+    if (String(data[i][1] || "").toLowerCase().trim() === email) {
+      reviews.push({
+        date: data[i][2], // Date
+        opponent: data[i][3], // Opponent
+        reviewed: data[i][9] === true || String(data[i][9]).toLowerCase() === 'true' // Reviewed Checkbox
+      });
+    }
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify({ status: "success", reviews: reviews })).setMimeType(ContentService.MimeType.JSON);
 }
 
 
@@ -182,7 +226,17 @@ function handleApproval(email) {
   var pendingSheet = ss.getSheetByName("Pending Requests");
   var coachSheet = ss.getSheetByName("Coaches");
   
-  if (!pendingSheet || !coachSheet) return HtmlService.createHtmlOutput("<h1>Error: Sheets not found.</h1>");
+  if (!pendingSheet) return HtmlService.createHtmlOutput("<h1>Error: 'Pending Requests' sheet not found.</h1>");
+
+  if (!coachSheet) {
+    coachSheet = ss.insertSheet("Coaches");
+    coachSheet.appendRow([
+      "First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", 
+      "Film", "Platform", 
+      "Home Shirt", "Home Shorts", "Home Socks", "Home GK", 
+      "Away Shirt", "Away Shorts", "Away Socks", "Away GK"
+    ]);
+  }
   
   var data = pendingSheet.getDataRange().getValues();
   var rowIndex = -1;
@@ -238,82 +292,137 @@ function handleApproval(email) {
   return HtmlService.createHtmlOutput("<h1 style='color:green'>Coach Approved and Notified!</h1><p>" + email + "</p>");
 }
 
-function handleDenial(email, reason) {
-  // 1. If no reason is provided, show the input form first
-  if (!reason) {
-    var scriptUrl = ScriptApp.getService().getUrl();
-    var html = `
-      <div style="font-family: sans-serif; max-width: 500px; margin: 40px auto; text-align: center; border: 1px solid #ccc; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <h2 style="color: #c0392b; margin-top: 0;">Deny Access</h2>
-        <p style="color: #666;">You are denying access for:<br><strong>${email}</strong></p>
-        <form action="${scriptUrl}" method="get">
-          <input type="hidden" name="action" value="deny">
-          <input type="hidden" name="email" value="${email}">
-          <div style="margin-bottom: 20px; text-align: left;">
-            <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Reason for Denial:</label>
-            <textarea name="reason" rows="4" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ddd; font-family: inherit;" required placeholder="e.g. Incomplete information, Not a recognized school..."></textarea>
-          </div>
-          <button type="submit" style="background: #c0392b; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%;">Confirm Denial</button>
-        </form>
-      </div>
-    `;
-    return HtmlService.createHtmlOutput(html).setTitle("Deny Access Reason");
-  }
-
-  // 2. Process the denial with the provided reason
-  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
-  var pendingSheet = ss.getSheetByName("Pending Requests");
-  var deniedSheet = ss.getSheetByName("Denied Requests");
-  
-  if (!deniedSheet) {
-    deniedSheet = ss.insertSheet("Denied Requests");
-    // Header row: First, Last, Email, School, Mascot, Supervisor, Requested Date, Denied Date, Denial Reason
-    deniedSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", "Requested At", "Denied At", "Reason"]);
-  }
-  
-  if (!pendingSheet) return HtmlService.createHtmlOutput("<h1>Error: Sheets not found.</h1>");
-  
-  var data = pendingSheet.getDataRange().getValues();
-  var rowIndex = -1;
-  var rowData = [];
-  
-  email = email.toLowerCase().trim();
-  
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][2] || "").toLowerCase().trim() === email) {
-      rowIndex = i + 1;
-      rowData = data[i]; // Capture the data before deletion
-      break;
+function processDenial(email, reason) {
+  try {
+    var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+    var pendingSheet = ss.getSheetByName("Pending Requests");
+    var deniedSheet = ss.getSheetByName("Denied Requests");
+    
+    if (!deniedSheet) {
+      deniedSheet = ss.insertSheet("Denied Requests");
+      deniedSheet.appendRow([
+        "First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", 
+        "Film", "Platform", 
+        "Home Shirt", "Home Shorts", "Home Socks", "Home GK", 
+        "Away Shirt", "Away Shorts", "Away Socks", "Away GK",
+        "Requested At", "Denied At", "Reason"
+      ]);
     }
+    
+    if (!pendingSheet) return {status: "error", message: "'Pending Requests' sheet not found."};
+    
+    var data = pendingSheet.getDataRange().getValues();
+    var rowIndex = -1;
+    var rowData = [];
+    
+    email = email.toLowerCase().trim();
+    
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][2] || "").toLowerCase().trim() === email) {
+        rowIndex = i + 1;
+        rowData = data[i]; 
+        break;
+      }
+    }
+    
+    if (rowIndex === -1) {
+      return {status: "error", message: "Request not found or already processed."};
+    }
+
+    // Archive to "Denied Requests"
+    var outputRow = [];
+    for(var j=0; j<=15; j++) {
+        outputRow.push(rowData[j] || "");
+    }
+    outputRow.push(rowData[16] || ""); // Requested At
+    outputRow.push(new Date()); // Denied At
+    outputRow.push(reason); // Reason
+    
+    deniedSheet.appendRow(outputRow);
+    pendingSheet.deleteRow(rowIndex);
+    
+    // Email
+    try {
+        var subject = "Coach Portal Access Denied";
+        var body = "Your request to access the NC HS Coach Portal has been denied.\n\nReason: " + reason;
+        MailApp.sendEmail(email, subject, body, {name: 'NC HS Soccer Portal'});
+    } catch(e) {
+        console.error("Failed to send denial email: " + e.toString());
+    }
+    
+    return {status: "success", email: email, reason: reason};
+
+  } catch (err) {
+    return {status: "error", message: err.toString()};
   }
-  
-  if (rowIndex === -1) {
-    return HtmlService.createHtmlOutput("<h1>Request not found or already processed.</h1>");
+}
+
+function handleDenial(email, reason) {
+  // 1. If reason provided via GET (old way), verify and return HTML
+  if (reason) {
+     var result = processDenial(email, reason);
+     if (result.status === 'success') {
+         return HtmlService.createHtmlOutput("<h1 style='color:red'>Coach Request Denied.</h1><p>Email sent to: " + result.email + "</p><p>Reason: " + result.reason + "</p>");
+     } else {
+         return HtmlService.createHtmlOutput("<h1 style='color:red;'>Error</h1><p>" + result.message + "</p>");
+     }
   }
 
-  // Archive to "Denied Requests"
-  // pending: First Name(0), Last Name(1), Email(2), School(3), Mascot(4), Supervisor(5), Timestamp(6)
-  deniedSheet.appendRow([
-    rowData[0], 
-    rowData[1], 
-    rowData[2], 
-    rowData[3], 
-    rowData[4], 
-    rowData[5], 
-    rowData[6], 
-    new Date(), 
-    reason
-  ]);
-  
-  // Remove from Pending
-  pendingSheet.deleteRow(rowIndex);
-  
-  // Email Coach with Reason
-  var subject = "Coach Portal Access Denied";
-  var body = "Your request to access the NC HS Coach Portal has been denied.\n\nReason: " + reason;
-  MailApp.sendEmail(email, subject, body, {name: 'NC HS Soccer Portal'});
-  
-  return HtmlService.createHtmlOutput("<h1 style='color:red'>Coach Request Denied.</h1><p>Email sent to: " + email + "</p><p>Reason: " + reason + "</p>");
+  // 2. If no reason, show the Input Form (Client-Side Submission)
+  var html = `
+    <div style="font-family: sans-serif; max-width: 500px; margin: 40px auto; text-align: center; border: 1px solid #ccc; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+      <h2 style="color: #c0392b; margin-top: 0;">Deny Access</h2>
+      <p style="color: #666;">You are denying access for:<br><strong>${email}</strong></p>
+      
+      <div id="formContainer">
+        <input type="hidden" id="denyEmail" value="${email}">
+        <div style="margin-bottom: 20px; text-align: left;">
+          <label style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Reason for Denial:</label>
+          <textarea id="denyReason" rows="4" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ddd; font-family: inherit;" required placeholder="e.g. Incomplete information, Not a recognized school..."></textarea>
+        </div>
+        <button id="denyBtn" onclick="submitDenial()" style="background: #c0392b; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 4px; cursor: pointer; width: 100%;">Confirm Denial</button>
+      </div>
+      
+      <div id="msg" style="margin-top:20px; color:#c0392b; font-weight:bold;"></div>
+    </div>
+
+    <script>
+      function submitDenial() {
+        var email = document.getElementById('denyEmail').value;
+        var reason = document.getElementById('denyReason').value.trim();
+        
+        if(!reason) {
+           alert("Please enter a reason.");
+           return;
+        }
+
+        var btn = document.getElementById('denyBtn');
+        var msg = document.getElementById('msg');
+        
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+        msg.innerText = "";
+
+        google.script.run
+          .withSuccessHandler(function(res) {
+             if (res.status === 'success') {
+                document.body.innerHTML = "<div style='text-align:center; padding:50px; font-family:sans-serif;'><h1 style='color:red'>Request Denied</h1><p>Email verification sent to: " + res.email + "</p></div>";
+             } else {
+                msg.innerText = "Error: " + res.message;
+                btn.disabled = false;
+                btn.innerText = "Confirm Denial";
+             }
+          })
+          .withFailureHandler(function(err) {
+             msg.innerText = "System Error: " + err;
+             btn.disabled = false;
+             btn.innerText = "Confirm Denial";
+          })
+          .processDenial(email, reason);
+      }
+    </script>
+  `;
+  return HtmlService.createHtmlOutput(html).setTitle("Deny Access Reason");
 }
 
 function handleCoachLogin(email) {

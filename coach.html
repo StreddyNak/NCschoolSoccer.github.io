@@ -587,10 +587,27 @@
                     <button onclick="showReviewForm()">Start New Review</button>
                 </div>
 
+                <!-- Past Reviews Card -->
+                <div class="card">
+                    <h3>Past Reviews</h3>
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
+                        View the status of your submitted reviews.
+                    </p>
+                    <button onclick="loadPastReviews()" style="background-color:#2c3e50;">View History</button>
+                </div>
+
                 <!-- Future widgets could go here -->
             </div>
 
             <!-- Review Form (Hidden by default) -->
+            <div id="review-history" style="display:none; margin-top:30px;">
+                <h3 style="color:#2c3e50; border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:20px;">Review
+                    History</h3>
+                <div id="history-content" style="display:grid; gap:15px;"></div>
+                <button onclick="document.getElementById('review-history').style.display='none'"
+                    style="margin-top:20px; background:#95a5a6;">Close History</button>
+            </div>
+
             <div id="review-form">
                 <h2 style="margin-top:0;">Official Performance Review</h2>
                 <p style="color:#666; margin-bottom:25px;">Please provide honest feedback to help improve the quality of
@@ -730,6 +747,7 @@
                 .then(data => {
                     loadingDiv.style.display = 'none';
                     if (data.status === 'success') {
+                        currentUserEmail = email; // Set global session email
                         showDashboard(data);
                     } else {
                         showError(data.message || "Login failed. Please check your email.");
@@ -742,14 +760,32 @@
                 });
         }
 
+        let currentUserEmail = ''; // Global variable to store the logged-in user's email
+
         function showDashboard(data) {
             document.getElementById('login-view').style.display = 'none';
             document.getElementById('register-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'block';
 
-            document.getElementById('welcomeMsg').textContent = `Hello, Coach ${data.lastName}!`;
-            document.getElementById('schoolMsg').textContent = `${data.school} Soccer`;
-            document.getElementById('mascotMsg').textContent = data.mascot ? `Go ${data.mascot}!` : "";
+            document.getElementById('welcomeMsg').textContent = `Hello, ${data.firstName}!`;
+            document.getElementById('schoolMsg').textContent = data.school;
+            document.getElementById('mascotMsg').textContent = `Go ${data.mascot}!`;
+
+            document.getElementById('mascotMsg').textContent = `Go ${data.mascot}!`;
+
+            // currentUserEmail is already set in login() before calling this, or passed in data if we modify backend.
+            // Actually, let's just use the global variable we set in login() or set it here if data has it.
+            // But data doesn't have it based on previous backend code. 
+            // Better approach: In login(), set currentUserEmail = email; before calling showDashboard(data).
+            // But showDashboard uses 'data.email' right now in the code I inserted previously.
+            // Let's fix this function to NOT rely on data.email but rely on the global variable set by login().
+
+            // currentUserEmail is set in login function now (see below).
+
+            // The following lines are redundant if the above already set display properties
+            // document.getElementById('login-view').style.display = 'none';
+            // document.getElementById('dashboard-view').style.display = 'block';
+            // window.location.hash = 'review-form'; // This would immediately show the review form on login
         }
 
         function showReviewForm() {
@@ -1036,6 +1072,58 @@
         function logout() {
             location.reload();
         }
+
+        function loadPastReviews() {
+            const historyDiv = document.getElementById('history-content');
+            const historyContainer = document.getElementById('review-history');
+
+            historyDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Loading...</div>';
+            historyContainer.style.display = 'block';
+            document.getElementById('review-form').style.display = 'none';
+
+            // We need to use fetch/JSONP or just assume the user is logged in and we have their email.
+            // But wait, the backend needs the email as a parameter.
+            // We unfortunately don't have the email stored in a global variable easily accessible unless we saved it during login.
+            // Let's modify handleCoachLogin to save email to localStorage or similar, OR just ask user to re-enter if session lost.
+            // Actually, let's assume valid session = we have the email.
+            // I'll update the login function to save the email in a global variable `currentUserEmail`.
+
+            if (!currentUserEmail) {
+                historyDiv.innerHTML = '<div style="color:red; text-align:center;">Session lost. Please logout and login again.</div>';
+                return;
+            }
+
+            const url = SCRIPT_URL + "?action=getPastReviews&email=" + encodeURIComponent(currentUserEmail);
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    historyDiv.innerHTML = '';
+                    if (data.status === 'success' && data.reviews.length > 0) {
+                        data.reviews.forEach(r => {
+                            const date = new Date(r.date).toLocaleDateString();
+                            const statusColor = r.reviewed ? '#27ae60' : '#f39c12';
+                            const statusText = r.reviewed ? 'Reviewed by Admin' : 'Pending Review';
+
+                            const item = document.createElement('div');
+                            item.style.cssText = 'background:white; padding:15px; border-radius:8px; border-left:4px solid ' + statusColor + '; box-shadow:0 2px 5px rgba(0,0,0,0.05);';
+                            item.innerHTML = `
+                                <div style="font-weight:bold; color:#2c3e50;">Vs. ${r.opponent}</div>
+                                <div style="font-size:0.85rem; color:#7f8c8d; margin-top:5px;">Date: ${date}</div>
+                                <div style="font-size:0.8rem; color:${statusColor}; font-weight:600; margin-top:8px;">${statusText}</div>
+                            `;
+                            historyDiv.appendChild(item);
+                        });
+                    } else {
+                        historyDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#7f8c8d;">No reviews found.</div>';
+                    }
+                })
+                .catch(err => {
+                    historyDiv.innerHTML = '<div style="color:red; text-align:center;">Error loading history.</div>';
+                });
+        }
+
+
     </script>
 
     <!-- Success Modal -->
