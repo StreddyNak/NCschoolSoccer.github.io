@@ -89,7 +89,13 @@ function handleRegistration(data) {
   
   if (!pendingSheet) {
     pendingSheet = ss.insertSheet("Pending Requests");
-    pendingSheet.appendRow(["First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", "Film", "Platform", "Home Uniform", "Away Uniform", "Timestamp"]);
+    pendingSheet.appendRow([
+      "First Name", "Last Name", "Email", "School", "Mascot", "Supervisor", 
+      "Film", "Platform", 
+      "Home Shirt", "Home Shorts", "Home Socks", "Home GK",
+      "Away Shirt", "Away Shorts", "Away Socks", "Away GK",
+      "Timestamp"
+    ]);
   }
   
   var email = (data.email || "").toLowerCase().trim();
@@ -113,19 +119,38 @@ function handleRegistration(data) {
     }
   }
 
-  // Add to Pending
-  // Columns: First, Last, Email, School, Mascot, Supervisor, Film, Platform, Home Uniform, Away Uniform, Date
+  // Extract specific uniform parts if available
+  // Expected format if knowUniforms=Yes: "Home: Red/Red/Red (GK: Yellow)"
+  // But actually, client sends "Home: shirt/shorts/socks (GK: gk)" string.
+  // We should ideally change client to send specific fields, but for now let's parse or just update client to send object.
+  // UPDATE: Client sends simple strings currently. We need to update client to send structured data OR parse.
+  // BETTER: Let's assume we update client in next step. For now, let's just make placeholders if we can't parse easily without client update.
+  // WAIT: The user asked "headers are not correct... each column should correspond to each separate type of data".
+  // So I need to explode the current "Home Uniform" string into 4 columns.
+  
+  // Actually, I can't easily parse "Home: Red/Red/Red (GK: Yellow)" reliably without regex.
+  // I will update the code to expect the client to send the separate fields, 
+  // BUT first I need to update the CLIENT (coach.html) to send them.
+  // Since I can only edit one file at a time or I am in the backend file now, I will update backend to EXPECT separate fields.
+  
+  // Columns: First, Last, Email, School, Mascot, Supervisor, Film, Platform, H-Shirt, H-Shorts, H-Socks, H-GK, A-Shirt, A-Shorts, A-Socks, A-GK, Date
   pendingSheet.appendRow([
     data.firstName,
     data.lastName,
     email,
     data.school,
-    "", // Mascot is manually entered later
+    "", // Mascot
     data.supervisor || "Unknown",
     data.film || "No",
     data.platform || "",
-    data.homeUniform || "N/A",
-    data.awayUniform || "N/A",
+    data.homeShirt || "",
+    data.homeShorts || "",
+    data.homeSocks || "",
+    data.homeGK || "",
+    data.awayShirt || "",
+    data.awayShorts || "",
+    data.awaySocks || "",
+    data.awayGK || "",
     new Date()
   ]);
 
@@ -178,15 +203,31 @@ function handleApproval(email) {
   }
   
   // Move to Coaches
-  // Pending: First(0), Last(1), Email(2), School(3), Mascot(4), Supervisor(5), Film(6), Platform(7), Home Uniform(8), Away Uniform(9), Timestamp(10)
+  // Pending: First(0), Last(1), Email(2), School(3), Mascot(4), Supervisor(5), Film(6), Platform(7), 
+  //          H-Shirt(8), H-Shorts(9), H-Socks(10), H-GK(11), 
+  //          A-Shirt(12), A-Shorts(13), A-Socks(14), A-GK(15), Timestamp(16)
+  
   var supervisor = rowData[5] || ""; 
   var film = rowData[6] || "";
   var platform = rowData[7] || "";
-  var homeUni = rowData[8] || "";
-  var awayUni = rowData[9] || "";
   
-  // Coaches Sheet: First, Last, Email, School, Mascot, Supervisor, Film, Platform, Home Uni, Away Uni
-  coachSheet.appendRow([rowData[0], rowData[1], rowData[2], rowData[3], rowData[4], supervisor, film, platform, homeUni, awayUni]);
+  // Uniforms
+  var hShirt = rowData[8] || "";
+  var hShorts = rowData[9] || "";
+  var hSocks = rowData[10] || "";
+  var hGK = rowData[11] || "";
+  
+  var aShirt = rowData[12] || "";
+  var aShorts = rowData[13] || "";
+  var aSocks = rowData[14] || "";
+  var aGK = rowData[15] || "";
+  
+  // Coaches Sheet: First, Last, Email, School, Mascot, Supervisor, Film, Platform, H-Shirt, H-Shorts, H-Socks, H-GK, A-Shirt, A-Shorts, A-Socks, A-GK
+  coachSheet.appendRow([
+    rowData[0], rowData[1], rowData[2], rowData[3], rowData[4], supervisor, film, platform,
+    hShirt, hShorts, hSocks, hGK,
+    aShirt, aShorts, aSocks, aGK
+  ]);
   
   // Remove from Pending
   pendingSheet.deleteRow(rowIndex);

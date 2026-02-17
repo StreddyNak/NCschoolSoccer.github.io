@@ -319,6 +319,76 @@
             cursor: pointer;
             font-size: 0.95rem;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .modal-text {
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .modal-btn:hover {
+            background: #2980b9;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 
@@ -899,7 +969,8 @@
                 return;
             }
 
-            loadingDiv.style.display = 'block';
+            loadingDiv.style.display = 'none';
+            showModal("Submitting Request...", "Please wait while we process your registration.", "⏳", false);
 
             const payload = {
                 type: 'register',
@@ -911,7 +982,15 @@
                 film: film,
                 platform: platformString,
                 homeUniform: homeUniform,
-                awayUniform: awayUniform
+                awayUniform: awayUniform,
+                homeShirt: document.getElementById('regHomeShirt').value.trim(),
+                homeShorts: document.getElementById('regHomeShorts').value.trim(),
+                homeSocks: document.getElementById('regHomeSocks').value.trim(),
+                homeGK: document.getElementById('regHomeGK').value.trim(),
+                awayShirt: document.getElementById('regAwayShirt').value.trim(),
+                awayShorts: document.getElementById('regAwayShorts').value.trim(),
+                awaySocks: document.getElementById('regAwaySocks').value.trim(),
+                awayGK: document.getElementById('regAwayGK').value.trim()
             };
 
             fetch(SCRIPT_URL, {
@@ -920,29 +999,29 @@
             })
                 .then(res => res.json())
                 .then(data => {
-                    loadingDiv.style.display = 'none';
                     if (data.status === 'success') {
-                        // Show success message instead of auto-login
-                        alert("Request submitted! You will receive an email once approved.");
+                        // Show Success Modal
+                        showModal("Request Submitted!", "Your account request has been sent successfully. You will receive an email once approved.", "✅", true);
+
+                        // Reset Form in background
                         showLogin();
-                        // Reset inputs
                         document.getElementById('regFirstName').value = '';
                         document.getElementById('regLastName').value = '';
                         document.getElementById('regEmail').value = '';
                         document.getElementById('regSchool').value = '';
                         document.getElementById('regSupervisor').value = '';
-                        // Reset Radios and Checkboxes
                         document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
                         document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
                         toggleFilmAndPlatforms(false);
                         toggleUniforms(false);
                     } else {
+                        closeModal();
                         errorDiv.textContent = data.message || "Registration failed.";
                         errorDiv.style.display = 'block';
                     }
                 })
                 .catch(err => {
-                    loadingDiv.style.display = 'none';
+                    closeModal();
                     errorDiv.textContent = "Error: " + err.toString();
                     errorDiv.style.display = 'block';
                 });
@@ -956,6 +1035,30 @@
 
         function logout() {
             location.reload();
+        }
+    </script>
+
+    <!-- Success Modal -->
+    <div id="statusModal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="modalIcon" class="modal-icon">⏳</div>
+            <div id="modalTitle" class="modal-title">Submitting Request...</div>
+            <div id="modalText" class="modal-text">Please wait while we process your registration.</div>
+            <button id="modalBtn" class="modal-btn" onclick="closeModal()" style="display:none;">OK</button>
+        </div>
+    </div>
+
+    <script>
+        function showModal(title, text, icon, showButton) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalText').textContent = text;
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalBtn').style.display = showButton ? 'block' : 'none';
+            document.getElementById('statusModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('statusModal').style.display = 'none';
         }
     </script>
 </body>
