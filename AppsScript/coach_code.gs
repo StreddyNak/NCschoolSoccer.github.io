@@ -20,6 +20,10 @@ function doPost(e) {
       return handleReviewSubmission(data);
     }
 
+    if (data.type === 'clip_submission') {
+      return handleClipSubmission(data);
+    }
+
     if (data.type === 'register') {
       return handleRegistration(data);
     }
@@ -96,6 +100,45 @@ function handleReviewSubmission(data) {
   MailApp.sendEmail(ADMIN_EMAIL, subject, body, {name: 'NC HS Soccer Portal'});
   
   return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleClipSubmission(data) {
+  try {
+    var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+    var sheet = ss.getSheetByName("Clip Discussions");
+
+    if (!sheet) {
+      sheet = ss.insertSheet("Clip Discussions");
+      sheet.appendRow(["Timestamp", "Coach Email", "Game Date", "Opponent", "Level", "Clip Location", "Notes"]);
+    }
+
+    sheet.appendRow([
+      new Date(),
+      data.coachEmail || "",
+      data.date || "",
+      data.opponent || "",
+      data.level || "",
+      data.clipLocation || "",
+      data.notes || ""
+    ]);
+
+    // Email Admin
+    var subject = "New Clip Discussion Submitted";
+    var body = "A coach has submitted a clip for review.\n\n" +
+               "Coach: " + (data.coachEmail || "Unknown") + "\n" +
+               "Date: " + (data.date || "") + "\n" +
+               "Opponent: " + (data.opponent || "") + "\n" +
+               "Level: " + (data.level || "") + "\n\n" +
+               "Clip Location:\n" + (data.clipLocation || "Not provided") + "\n\n" +
+               "Notes:\n" + (data.notes || "None") + "\n\n" +
+               "Please check the 'Clip Discussions' sheet for details.";
+
+    MailApp.sendEmail(ADMIN_EMAIL, subject, body, { name: 'NC HS Soccer Portal' });
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
 }
 
 function getPastReviews(email) {

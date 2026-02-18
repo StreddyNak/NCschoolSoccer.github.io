@@ -5,39 +5,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coach Portal - NC HS Soccer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <style>
+        :root {
+            --navy: #0d1b2a;
+            --navy-mid: #1b2d42;
+            --navy-light: #243b55;
+            --green: #00e676;
+            --green-dark: #00c853;
+            --white: #ffffff;
+            --gray-light: #f0f4f8;
+            --gray: #8a9bb0;
+            --text: #1a2a3a;
+            --card-shadow: 0 4px 24px rgba(13, 27, 42, 0.10);
+        }
+
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 0;
-            color: #333;
+            font-family: 'Barlow', sans-serif;
+            background: var(--gray-light);
+            color: var(--text);
+            min-height: 100vh;
         }
 
-        /* Partnership Header */
-        .partnership-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            padding: 15px 20px;
+        /* ── Header ── */
+        .site-header {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            padding: 14px 30px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 30px;
             flex-wrap: wrap;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .site-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
         }
 
         .logo-img {
-            height: 50px;
+            height: 48px;
             width: auto;
             object-fit: contain;
             background: white;
@@ -46,159 +70,447 @@
         }
 
         .partnership-text {
-            color: white;
-            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
             font-weight: 600;
-            text-align: center;
-            padding: 0 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            text-align: center;
+        /* ── Page wrapper ── */
+        .page {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px 40px;
         }
 
-        /* Card Style */
-        .login-card {
+        /* ── Auth cards (login / register) ── */
+        .auth-card {
             background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            max-width: 500px;
-            margin: 40px auto;
-        }
-
-        h1 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-
-        input[type="email"] {
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 44px 40px;
             width: 100%;
-            padding: 12px;
-            margin: 20px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            max-width: 520px;
+            border-top: 4px solid var(--green);
         }
 
-        input[type="email"]:focus {
-            border-color: #3498db;
-            outline: none;
+        .auth-card h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
-            font-size: 16px;
+        .auth-card p.sub {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+
+        .auth-card.wide {
+            max-width: 640px;
+        }
+
+        /* ── Form elements ── */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
             font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.3s;
+            color: var(--navy-mid);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        button:hover {
-            background: #2980b9;
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid #dde4ed;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Barlow', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+            color: var(--text);
+        }
+
+        .form-control:focus {
+            border-color: var(--green-dark);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.12);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        @media(max-width:600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ── Buttons ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: var(--green);
+            color: var(--navy);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--green-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-dark {
+            background: var(--navy);
+            color: white;
+        }
+
+        .btn-dark:hover {
+            background: var(--navy-mid);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--gray);
+            border: 2px solid #dde4ed;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--navy);
+            color: var(--navy);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .link-btn {
+            background: none;
+            border: none;
+            color: #3498db;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0;
+            font-family: 'Barlow', sans-serif;
+            text-decoration: underline;
         }
 
         .error-msg {
             color: #e74c3c;
-            margin-top: 15px;
+            margin-top: 12px;
             display: none;
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
-        /* Dashboard Styles */
-        .dashboard {
+        .helper-text {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 6px;
+        }
+
+        .helper-text a {
+            color: #3498db;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        hr.divider {
+            border: 0;
+            border-top: 1px solid #e8edf3;
+            margin: 22px 0;
+        }
+
+        /* ── Dashboard ── */
+        #dashboard-view {
             display: none;
-            /* Hidden by default */
-            background: white;
-            padding: 50px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-top: 30px;
+            width: 100%;
+            max-width: 1000px;
         }
 
-        .welcome-text {
-            font-size: 2.5rem;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .school-text {
-            font-size: 1.5rem;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-        }
-
-        .mascot-text {
-            font-size: 2rem;
-            color: #27ae60;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin-bottom: 40px;
-        }
-
-        .logout-btn {
-            background: #95a5a6;
-            margin-top: 20px;
-            width: auto;
-        }
-
-        .logout-btn:hover {
-            background: #7f8c8d;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* Card Grid for Dashboard */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        .dash-hero {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+            border-radius: 16px;
+            padding: 30px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 20px;
-            margin-top: 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(13, 27, 42, 0.2);
         }
 
-        .card {
+        .dash-hero::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 200px;
+            height: 200px;
+            background: rgba(0, 230, 118, 0.07);
+            border-radius: 50%;
+        }
+
+        .dash-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -60px;
+            right: 80px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 230, 118, 0.05);
+            border-radius: 50%;
+        }
+
+        .hero-left {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-greeting {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hero-greeting span {
+            color: var(--green);
+        }
+
+        .hero-school {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mascot-badge {
+            background: rgba(0, 230, 118, 0.15);
+            border: 1px solid rgba(0, 230, 118, 0.3);
+            color: var(--green);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        /* ── Card Grid ── */
+        #card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .portal-card {
             background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            text-align: left;
-            border-top: 4px solid #3498db;
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+            border-top: 4px solid var(--green);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
 
-        .card h3 {
-            margin-top: 0;
-            color: #2c3e50;
-            font-size: 1.2rem;
+        .portal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(13, 27, 42, 0.13);
         }
 
-        /* Star Ratings */
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .portal-card h3 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .portal-card p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* ── Sub-views ── */
+        .sub-view {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+        }
+
+        .sub-view.active {
+            display: block;
+        }
+
+        .sub-view-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e8edf3;
+        }
+
+        .sub-view-header h2 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-family: 'Barlow', sans-serif;
+        }
+
+        .back-btn:hover {
+            background: var(--gray-light);
+            color: var(--navy);
+        }
+
+        /* ── Star Ratings ── */
         .rating-group {
-            margin: 15px 0;
+            margin: 16px 0;
         }
 
         .stars {
             display: flex;
-            gap: 5px;
-            margin-top: 5px;
+            gap: 6px;
+            margin-top: 6px;
         }
 
         .star {
-            font-size: 1.5rem;
-            color: #ddd;
+            font-size: 1.6rem;
+            color: #dde4ed;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: color 0.15s;
         }
 
         .star.active {
@@ -209,125 +521,79 @@
             color: #f39c12;
         }
 
-        /* Review Form Styling */
-        #review-form {
-            display: none;
-            background: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            margin-top: 30px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+        /* ── Review History Items ── */
+        .history-item {
+            background: var(--gray-light);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* Form Groups and Inputs */
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+        .history-item .hi-left strong {
+            color: var(--navy);
+            font-size: 1rem;
         }
 
-        .form-label {
+        .history-item .hi-left span {
             display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #555;
+            color: var(--gray);
+            font-size: 0.82rem;
+            margin-top: 2px;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-reviewed {
+            background: #d1f2eb;
+            color: #0e6655;
+        }
+
+        /* ── Clip upload area ── */
+        .clip-drop-area {
+            border: 2px dashed #dde4ed;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .clip-drop-area:hover {
+            border-color: var(--green-dark);
+            background: rgba(0, 200, 83, 0.03);
+        }
+
+        .clip-drop-area .drop-icon {
+            font-size: 2rem;
             margin-bottom: 8px;
         }
 
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            background: #fff;
-        }
-
-        .form-control:focus {
-            border-color: #3498db;
-            outline: none;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        @media (max-width: 600px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 30px 20px;
-            color: #999;
-            font-size: 0.85rem;
-            border-top: 1px solid #e5e7eb;
-            margin-top: 40px;
-        }
-
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .grid-4 {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .helper-text {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 8px;
-        }
-
-        .helper-text a {
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        .helper-text a:hover {
-            text-decoration: underline;
-        }
-
-        .helper-text a:hover {
-            text-decoration: underline;
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        /* Modal Styles */
+        /* ── Modal ── */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(13, 27, 42, 0.6);
             display: none;
             justify-content: center;
             align-items: center;
@@ -336,129 +602,184 @@
 
         .modal-card {
             background: white;
-            padding: 40px;
-            border-radius: 12px;
+            padding: 44px 36px;
+            border-radius: 16px;
             text-align: center;
             max-width: 400px;
             width: 90%;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.3s ease-out;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .modal-icon {
             font-size: 3rem;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .modal-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-weight: 700;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 8px;
         }
 
         .modal-text {
-            color: #666;
-            margin-bottom: 25px;
+            color: var(--gray);
+            margin-bottom: 24px;
             line-height: 1.5;
         }
 
         .modal-btn {
-            background: #3498db;
-            color: white;
+            background: var(--green);
+            color: var(--navy);
             border: none;
             padding: 12px 30px;
-            border-radius: 6px;
+            border-radius: 8px;
+            font-family: 'Barlow Condensed', sans-serif;
             font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
             width: 100%;
+            text-transform: uppercase;
         }
 
         .modal-btn:hover {
-            background: #2980b9;
+            background: var(--green-dark);
         }
 
-        @keyframes fadeIn {
+        @keyframes popIn {
             from {
                 opacity: 0;
-                transform: translateY(-20px);
+                transform: scale(0.85);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1);
             }
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: var(--gray);
+            font-size: 0.82rem;
+            border-top: 1px solid #dde4ed;
+            margin-top: 50px;
+            width: 100%;
+        }
+
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        /* ── Misc ── */
+        .section-label {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--navy-mid);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e8edf3;
+        }
+
+        .history-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
-    <!-- Partnership Header with Logos -->
-    <div class="partnership-header">
-        <div class="logo-container">
-            <img src="assets/NickNak_logo.svg" alt="Organization 1" class="logo-img"
-                onerror="this.style.display='none'">
+    <!-- Header -->
+    <div class="site-header">
+        <div>
+            <img src="assets/NickNak_logo.svg" alt="NC HS Soccer" class="logo-img" onerror="this.style.display='none'">
         </div>
-        <div class="partnership-text">
-            A Partnership Initiative
-        </div>
-        <div class="logo-container">
-            <a href="https://www.trianglerefs.org/"><img src="assets/TSOA_logo.svg" alt="Organization 2"
-                    class="logo-img" onerror="this.style.display='none'"></a>
+        <div class="partnership-text">Coach Portal</div>
+        <div>
+            <a href="https://www.trianglerefs.org/"><img src="assets/TSOA_logo.svg" alt="TSOA" class="logo-img"
+                    onerror="this.style.display='none'"></a>
         </div>
     </div>
 
-    <div class="container">
-        <!-- Login View -->
-        <div id="login-view" class="login-card">
+    <div class="page">
+
+        <!-- ══ LOGIN VIEW ══ -->
+        <div id="login-view" class="auth-card">
             <h1>Coach Portal</h1>
-            <p style="color:#666; margin-bottom:20px;">Please enter your email to access your dashboard.</p>
+            <p class="sub">Enter your email to access your dashboard.</p>
 
             <div class="form-group">
                 <label class="form-label" for="coachEmail">Email Address</label>
-                <input type="email" id="coachEmail" class="form-control" placeholder="Enter your email address"
+                <input type="email" id="coachEmail" class="form-control" placeholder="coach@school.edu"
                     onkeypress="handleEnter(event)">
             </div>
 
-            <button onclick="login()">Login</button>
+            <button class="btn btn-primary" onclick="login()">Login</button>
 
             <div id="error-msg" class="error-msg"></div>
-            <div id="loading" style="display:none; margin-top:15px; color:#666;">Verifying...</div>
+            <div id="loading" style="display:none; margin-top:14px; color:var(--gray); font-size:0.9rem;">Verifying...
+            </div>
 
-            <p style="margin-top:15px; font-size:0.9rem;">
-                Need an account? <a href="#" onclick="showRegister(); return false;" style="color:#3498db;">Request
-                    Access Here</a>
+            <p style="margin-top:18px; font-size:0.9rem; color:var(--gray);">
+                Need an account? <button class="link-btn" onclick="showRegister()">Request Access</button>
             </p>
         </div>
 
-        <!-- Request Access View -->
-        <div id="register-view" class="login-card" style="display:none; max-width:600px;">
+        <!-- ══ REGISTER VIEW ══ -->
+        <div id="register-view" class="auth-card wide" style="display:none;">
             <h1>Request Access</h1>
-            <p style="color:#666; margin-bottom:20px;">Submit your details for approval.</p>
+            <p class="sub">Submit your details for admin approval.</p>
 
             <div class="grid-2">
                 <div class="form-group">
-                    <label class="form-label" for="regFirstName">First Name</label>
+                    <label class="form-label">First Name</label>
                     <input type="text" id="regFirstName" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="regLastName">Last Name</label>
+                    <label class="form-label">Last Name</label>
                     <input type="text" id="regLastName" class="form-control">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="regEmail">Email Address</label>
+                <label class="form-label">Email Address</label>
                 <input type="email" id="regEmail" class="form-control">
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="regSchool">School Affiliation</label>
+                <label class="form-label">School Affiliation</label>
                 <input type="text" id="regSchool" class="form-control" placeholder="Enter High School Name">
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="regSupervisor">Regional Supervisor</label>
+                <label class="form-label">Regional Supervisor</label>
                 <select id="regSupervisor" class="form-control">
                     <option value="">Select your area's Regional Supervisor...</option>
                     <option value="Ben Wooten - Foothills">Ben Wooten - Foothills</option>
@@ -471,17 +792,15 @@
                     <option value="Roger Morgan - Albemarle">Roger Morgan - Albemarle</option>
                     <option value="Roger Morton - Piedmont">Roger Morton - Piedmont</option>
                 </select>
-                <div class="helper-text">
-                    Don't know who your regional supervisor is? <a href="https://www.nchsaa.org/regional-supervisors/"
-                        target="_blank">Click here</a>
-                </div>
+                <div class="helper-text">Don't know your supervisor? <a
+                        href="https://www.nchsaa.org/regional-supervisors/" target="_blank">Click here</a></div>
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+            <hr class="divider">
 
             <div class="form-group">
                 <label class="form-label">Does your team film/record games?</label>
-                <div style="display:flex; gap:20px; margin-top:5px;">
+                <div style="display:flex; gap:20px; margin-top:8px;">
                     <label style="cursor:pointer;"><input type="radio" name="regFilm" value="Yes"
                             onclick="toggleFilmAndPlatforms(true)"> Yes</label>
                     <label style="cursor:pointer;"><input type="radio" name="regFilm" value="No"
@@ -490,7 +809,7 @@
             </div>
 
             <div id="film-platforms" style="display:none;" class="form-group">
-                <label class="form-label">What platform do you utilize?</label>
+                <label class="form-label">What platform do you use?</label>
                 <div class="checkbox-group">
                     <label><input type="checkbox" name="regPlatform" value="NFHS Network"> NFHS Network</label>
                     <label><input type="checkbox" name="regPlatform" value="Veo"> Veo</label>
@@ -503,12 +822,11 @@
                     placeholder="Please specify platform...">
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+            <hr class="divider">
 
             <div class="form-group">
-                <label class="form-label">Do you know what color uniforms your team is going to wear this
-                    season?</label>
-                <div style="display:flex; gap:20px; margin-top:5px;">
+                <label class="form-label">Do you know your team's uniform colors this season?</label>
+                <div style="display:flex; gap:20px; margin-top:8px;">
                     <label style="cursor:pointer;"><input type="radio" name="regUniformsKV" value="Yes"
                             onclick="toggleUniforms(true)"> Yes</label>
                     <label style="cursor:pointer;"><input type="radio" name="regUniformsKV" value="No"
@@ -517,101 +835,112 @@
             </div>
 
             <div id="uniform-details" style="display:none;">
-                <h4 style="margin-bottom:10px; color:#2c3e50;">Home Uniforms</h4>
+                <div class="section-label">Home Uniforms</div>
                 <div class="grid-4">
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">Shirt</label>
+                        <label class="form-label" style="font-size:0.75rem;">Shirt</label>
                         <input type="text" id="regHomeShirt" class="form-control" placeholder="Color">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">Shorts</label>
+                        <label class="form-label" style="font-size:0.75rem;">Shorts</label>
                         <input type="text" id="regHomeShorts" class="form-control" placeholder="Color">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">Socks</label>
+                        <label class="form-label" style="font-size:0.75rem;">Socks</label>
                         <input type="text" id="regHomeSocks" class="form-control" placeholder="Color">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">GK</label>
+                        <label class="form-label" style="font-size:0.75rem;">GK</label>
                         <input type="text" id="regHomeGK" class="form-control" placeholder="Color">
                     </div>
                 </div>
 
-                <h4 style="margin-bottom:10px; color:#2c3e50; margin-top:15px;">Away Uniforms</h4>
+                <div class="section-label" style="margin-top:10px;">Away Uniforms</div>
                 <div class="grid-4">
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">Shirt</label>
+                        <label class="form-label" style="font-size:0.75rem;">Shirt</label>
                         <input type="text" id="regAwayShirt" class="form-control" placeholder="Color">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">Shorts</label>
+                        <label class="form-label" style="font-size:0.75rem;">Shorts</label>
                         <input type="text" id="regAwayShorts" class="form-control" placeholder="Color">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">Socks</label>
+                        <label class="form-label" style="font-size:0.75rem;">Socks</label>
                         <input type="text" id="regAwaySocks" class="form-control" placeholder="Color">
                     </div>
                     <div class="form-group">
-                        <label class="form-label" style="font-size:0.8rem;">GK</label>
+                        <label class="form-label" style="font-size:0.75rem;">GK</label>
                         <input type="text" id="regAwayGK" class="form-control" placeholder="Color">
                     </div>
                 </div>
             </div>
 
-            <button onclick="register()" style="margin-top:10px;">Request Access</button>
+            <button class="btn btn-primary" onclick="register()" style="margin-top:16px;">Request Access</button>
 
-            <p style="margin-top:20px; font-size:0.9rem;">
-                Already have an account? <a href="#" onclick="showLogin(); return false;" style="color:#3498db;">Login
-                    Here</a>
+            <p style="margin-top:16px; font-size:0.9rem; color:var(--gray);">
+                Already have an account? <button class="link-btn" onclick="showLogin()">Login Here</button>
             </p>
 
             <div id="reg-error-msg" class="error-msg"></div>
-            <div id="reg-loading" style="display:none; margin-top:15px; color:#666;">Submitting Request...</div>
+            <div id="reg-loading" style="display:none; margin-top:14px; color:var(--gray); font-size:0.9rem;">Submitting
+                Request...</div>
         </div>
 
-        <!-- Dashboard View -->
-        <div id="dashboard-view" class="dashboard" style="max-width: 1000px; width: 95%;">
-            <div style="text-align: left; margin-bottom: 30px;">
-                <div class="welcome-text" id="welcomeMsg">Hello, Coach!</div>
-                <div class="school-text" id="schoolMsg">School Affiliation</div>
-                <div class="mascot-text" id="mascotMsg">Go Team!</div>
+        <!-- ══ DASHBOARD VIEW ══ -->
+        <div id="dashboard-view">
+
+            <!-- Hero Banner -->
+            <div class="dash-hero">
+                <div class="hero-left">
+                    <div class="hero-greeting">Welcome back, <span id="welcomeMsg">Coach</span>!</div>
+                    <div class="hero-school" id="schoolMsg">School Affiliation</div>
+                </div>
+                <div class="hero-right">
+                    <div class="mascot-badge" id="mascotMsg">Go Team!</div>
+                    <button class="btn-logout" onclick="logout()">⏻ Logout</button>
+                </div>
             </div>
 
-            <div class="card-grid">
-                <!-- Performance Review Card -->
-                <div class="card">
-                    <h3>Performance Review</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-                        Submit a post-game review for your match officials.
-                    </p>
-                    <button onclick="showReviewForm()">Start New Review</button>
+            <!-- Card Grid -->
+            <div id="card-grid">
+
+                <!-- Performance Reviews Card -->
+                <div class="portal-card">
+                    <div class="card-icon">📋</div>
+                    <h3>Performance Reviews</h3>
+                    <p>Submit post-game feedback for match officials or view the status of your past submissions.</p>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-sm" onclick="showSubView('review-form-view')">+ New
+                            Review</button>
+                        <button class="btn btn-ghost btn-sm"
+                            onclick="showSubView('review-history-view'); loadPastReviews();">View History</button>
+                    </div>
                 </div>
 
-                <!-- Past Reviews Card -->
-                <div class="card">
-                    <h3>Past Reviews</h3>
-                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">
-                        View the status of your submitted reviews.
+                <!-- Clip Discussion Card -->
+                <div class="portal-card">
+                    <div class="card-icon">🎬</div>
+                    <h3>Clip Discussion</h3>
+                    <p>Submit a game clip for our team to review and provide officiating feedback on specific moments.
                     </p>
-                    <button onclick="loadPastReviews()" style="background-color:#2c3e50;">View History</button>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-sm" onclick="showSubView('clip-form-view')">Submit a
+                            Clip</button>
+                    </div>
                 </div>
 
-                <!-- Future widgets could go here -->
             </div>
 
-            <!-- Review Form (Hidden by default) -->
-            <div id="review-history" style="display:none; margin-top:30px;">
-                <h3 style="color:#2c3e50; border-bottom:2px solid #eee; padding-bottom:10px; margin-bottom:20px;">Review
-                    History</h3>
-                <div id="history-content" style="display:grid; gap:15px;"></div>
-                <button onclick="document.getElementById('review-history').style.display='none'"
-                    style="margin-top:20px; background:#95a5a6;">Close History</button>
-            </div>
+            <!-- ── Sub-view: New Review Form ── -->
+            <div id="review-form-view" class="sub-view">
+                <div class="sub-view-header">
+                    <button class="back-btn" onclick="showCardGrid()">← Back</button>
+                    <h2>Official Performance Review</h2>
+                </div>
 
-            <div id="review-form">
-                <h2 style="margin-top:0;">Official Performance Review</h2>
-                <p style="color:#666; margin-bottom:25px;">Please provide honest feedback to help improve the quality of
-                    officiating.</p>
+                <p style="color:var(--gray); margin-bottom:24px; font-size:0.95rem;">Provide honest feedback to help
+                    improve the quality of officiating.</p>
 
                 <div class="grid-2">
                     <div class="form-group">
@@ -633,293 +962,272 @@
                     <input type="text" id="opponent" class="form-control" placeholder="Enter school name">
                 </div>
 
-                <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;">
+                <hr class="divider">
 
-                <!-- JV Ratings Template -->
+                <!-- JV Ratings -->
                 <div id="jv-ratings" style="display:none;">
-                    <h3>JV Official (Center)</h3>
+                    <div class="section-label">JV Official (Center)</div>
                     <div class="rating-group" data-metric="jv_home_ref_movement">
                         <label class="form-label">Movement / Positioning</label>
                         <div class="stars">
-                            <span class="star" onclick="rate(this, 1)">★</span>
-                            <span class="star" onclick="rate(this, 2)">★</span>
-                            <span class="star" onclick="rate(this, 3)">★</span>
-                            <span class="star" onclick="rate(this, 4)">★</span>
-                            <span class="star" onclick="rate(this, 5)">★</span>
+                            <span class="star" onclick="rate(this,1)">★</span>
+                            <span class="star" onclick="rate(this,2)">★</span>
+                            <span class="star" onclick="rate(this,3)">★</span>
+                            <span class="star" onclick="rate(this,4)">★</span>
+                            <span class="star" onclick="rate(this,5)">★</span>
                         </div>
                     </div>
                     <div class="rating-group" data-metric="jv_home_ref_comms">
                         <label class="form-label">Communication & Appearance</label>
                         <div class="stars">
-                            <span class="star" onclick="rate(this, 1)">★</span>
-                            <span class="star" onclick="rate(this, 2)">★</span>
-                            <span class="star" onclick="rate(this, 3)">★</span>
-                            <span class="star" onclick="rate(this, 4)">★</span>
-                            <span class="star" onclick="rate(this, 5)">★</span>
+                            <span class="star" onclick="rate(this,1)">★</span>
+                            <span class="star" onclick="rate(this,2)">★</span>
+                            <span class="star" onclick="rate(this,3)">★</span>
+                            <span class="star" onclick="rate(this,4)">★</span>
+                            <span class="star" onclick="rate(this,5)">★</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Varsity Ratings Template -->
+                <!-- Varsity Ratings -->
                 <div id="varsity-ratings" style="display:none;">
+                    <div class="section-label">Center Referee</div>
                     <div class="rating-group" data-metric="varsity_ref_movement">
-                        <label class="form-label">Center Ref: Movement & Fitness</label>
+                        <label class="form-label">Movement & Fitness</label>
                         <div class="stars">
-                            <span class="star" onclick="rate(this, 1)">★</span>
-                            <span class="star" onclick="rate(this, 2)">★</span>
-                            <span class="star" onclick="rate(this, 3)">★</span>
-                            <span class="star" onclick="rate(this, 4)">★</span>
-                            <span class="star" onclick="rate(this, 5)">★</span>
+                            <span class="star" onclick="rate(this,1)">★</span>
+                            <span class="star" onclick="rate(this,2)">★</span>
+                            <span class="star" onclick="rate(this,3)">★</span>
+                            <span class="star" onclick="rate(this,4)">★</span>
+                            <span class="star" onclick="rate(this,5)">★</span>
                         </div>
                     </div>
                     <div class="rating-group" data-metric="varsity_ref_control">
-                        <label class="form-label">Center Ref: Game Control</label>
+                        <label class="form-label">Game Control</label>
                         <div class="stars">
-                            <span class="star" onclick="rate(this, 1)">★</span>
-                            <span class="star" onclick="rate(this, 2)">★</span>
-                            <span class="star" onclick="rate(this, 3)">★</span>
-                            <span class="star" onclick="rate(this, 4)">★</span>
-                            <span class="star" onclick="rate(this, 5)">★</span>
+                            <span class="star" onclick="rate(this,1)">★</span>
+                            <span class="star" onclick="rate(this,2)">★</span>
+                            <span class="star" onclick="rate(this,3)">★</span>
+                            <span class="star" onclick="rate(this,4)">★</span>
+                            <span class="star" onclick="rate(this,5)">★</span>
                         </div>
                     </div>
-                    <div class="grid-2" style="margin-top:20px;">
+                    <div class="grid-2" style="margin-top:16px;">
                         <div class="rating-group" data-metric="varsity_home_ar_pos">
                             <label class="form-label">Home Side AR: Positioning</label>
                             <div class="stars">
-                                <span class="star" onclick="rate(this, 1)">★</span>
-                                <span class="star" onclick="rate(this, 2)">★</span>
-                                <span class="star" onclick="rate(this, 3)">★</span>
-                                <span class="star" onclick="rate(this, 4)">★</span>
-                                <span class="star" onclick="rate(this, 5)">★</span>
+                                <span class="star" onclick="rate(this,1)">★</span>
+                                <span class="star" onclick="rate(this,2)">★</span>
+                                <span class="star" onclick="rate(this,3)">★</span>
+                                <span class="star" onclick="rate(this,4)">★</span>
+                                <span class="star" onclick="rate(this,5)">★</span>
                             </div>
                         </div>
                         <div class="rating-group" data-metric="varsity_away_ar_pos">
                             <label class="form-label">Away Side AR: Positioning</label>
                             <div class="stars">
-                                <span class="star" onclick="rate(this, 1)">★</span>
-                                <span class="star" onclick="rate(this, 2)">★</span>
-                                <span class="star" onclick="rate(this, 3)">★</span>
-                                <span class="star" onclick="rate(this, 4)">★</span>
-                                <span class="star" onclick="rate(this, 5)">★</span>
+                                <span class="star" onclick="rate(this,1)">★</span>
+                                <span class="star" onclick="rate(this,2)">★</span>
+                                <span class="star" onclick="rate(this,3)">★</span>
+                                <span class="star" onclick="rate(this,4)">★</span>
+                                <span class="star" onclick="rate(this,5)">★</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div style="margin-top: 30px; display: flex; gap: 10px;">
-                    <button onclick="submitReview()" style="flex:2;">Submit Review</button>
-                    <button onclick="hideReviewForm()" class="logout-btn" style="flex:1; margin-top:0;">Cancel</button>
+                <div style="display:flex; gap:12px; margin-top:28px;">
+                    <button class="btn btn-primary" onclick="submitReview()" style="flex:2;">Submit Review</button>
+                    <button class="btn btn-ghost" onclick="showCardGrid()" style="flex:1;">Cancel</button>
                 </div>
             </div>
 
-            <button class="logout-btn" onclick="logout()" style="margin-top: 50px;">Logout</button>
-        </div>
+            <!-- ── Sub-view: Review History ── -->
+            <div id="review-history-view" class="sub-view">
+                <div class="sub-view-header">
+                    <button class="back-btn" onclick="showCardGrid()">← Back</button>
+                    <h2>Review History</h2>
+                </div>
+                <div id="history-content" class="history-grid">
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Sub-view: Clip Discussion Form ── -->
+            <div id="clip-form-view" class="sub-view">
+                <div class="sub-view-header">
+                    <button class="back-btn" onclick="showCardGrid()">← Back</button>
+                    <h2>🎬 Clip Discussion</h2>
+                </div>
+
+                <p style="color:var(--gray); margin-bottom:24px; font-size:0.95rem;">Submit a clip for our officiating
+                    team to review. We'll provide feedback on the specific moment you'd like discussed.</p>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Game Date</label>
+                        <input type="date" id="clipDate" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Level</label>
+                        <select id="clipLevel" class="form-control">
+                            <option value="">Select Level...</option>
+                            <option value="JV">JV</option>
+                            <option value="Varsity">Varsity</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Opponent</label>
+                    <input type="text" id="clipOpponent" class="form-control" placeholder="Enter school name">
+                </div>
+
+                <hr class="divider">
+
+                <div class="form-group">
+                    <label class="form-label">Where can we find this clip?</label>
+                    <textarea id="clipLocation" class="form-control" rows="3"
+                        placeholder="e.g. HUDL link, NFHS Network URL, Veo clip link, YouTube link, or describe where to find it (platform + timestamp)..."></textarea>
+                    <div class="helper-text">Paste a direct link or describe how to access the clip (platform, game,
+                        timestamp).</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">What would you like us to look at?</label>
+                    <textarea id="clipNotes" class="form-control" rows="3"
+                        placeholder="Describe the specific moment or decision you'd like feedback on..."></textarea>
+                </div>
+
+                <div id="clip-error" class="error-msg"></div>
+
+                <div style="display:flex; gap:12px; margin-top:24px;">
+                    <button class="btn btn-primary" onclick="submitClip()" style="flex:2;">Submit Clip</button>
+                    <button class="btn btn-ghost" onclick="showCardGrid()" style="flex:1;">Cancel</button>
+                </div>
+            </div>
+
+        </div><!-- /dashboard-view -->
 
         <div class="footer">
-            <p><a href="index.html" style="color:#3498db; text-decoration:none;">&larr; Back to Home</a></p>
-            <p>© 2026 All Rights Reserved</p>
+            <p><a href="index.html">← Back to Home</a> &nbsp;|&nbsp; © 2026 NC HS Soccer. All Rights Reserved.</p>
+        </div>
+
+    </div><!-- /page -->
+
+    <!-- ══ STATUS MODAL ══ -->
+    <div id="statusModal" class="modal-overlay">
+        <div class="modal-card">
+            <div id="modalIcon" class="modal-icon">⏳</div>
+            <div id="modalTitle" class="modal-title">Please Wait</div>
+            <div id="modalText" class="modal-text">Processing your request...</div>
+            <button id="modalBtn" class="modal-btn" onclick="closeModal()" style="display:none;">OK</button>
         </div>
     </div>
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxybcAnWIZ-6s2cBAAKpGRFh4fWrQegDULwY5bb5dfPhaNVWOS_rc0hP-uCHUt3r5td/exec";
+        let currentUserEmail = '';
+        const ratings = {};
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') login();
+        // ── Modal ──
+        function showModal(title, text, icon, showButton) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalText').textContent = text;
+            document.getElementById('modalIcon').textContent = icon;
+            document.getElementById('modalBtn').style.display = showButton ? 'block' : 'none';
+            document.getElementById('statusModal').style.display = 'flex';
+        }
+        function closeModal() {
+            document.getElementById('statusModal').style.display = 'none';
         }
 
+        // ── Navigation ──
+        function showView(id) {
+            ['login-view', 'register-view', 'dashboard-view'].forEach(v => {
+                document.getElementById(v).style.display = 'none';
+            });
+            document.getElementById(id).style.display = (id === 'dashboard-view') ? 'block' : 'flex';
+            if (id !== 'dashboard-view') document.getElementById(id).style.display = 'block';
+        }
+
+        function showSubView(id) {
+            // Hide card grid, show sub-view
+            document.getElementById('card-grid').style.display = 'none';
+            document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showCardGrid() {
+            document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
+            document.getElementById('card-grid').style.display = 'grid';
+        }
+
+        function showLogin() {
+            showView('login-view');
+            document.getElementById('error-msg').style.display = 'none';
+        }
+
+        function showRegister() {
+            showView('register-view');
+            document.getElementById('reg-error-msg').style.display = 'none';
+        }
+
+        function handleEnter(e) { if (e.key === 'Enter') login(); }
+
+        // ── Login ──
         function login() {
             const email = document.getElementById('coachEmail').value.trim();
             const errorDiv = document.getElementById('error-msg');
             const loadingDiv = document.getElementById('loading');
 
-            if (!email) {
-                showError("Please enter an email address.");
-                return;
-            }
+            if (!email) { errorDiv.textContent = 'Please enter an email address.'; errorDiv.style.display = 'block'; return; }
 
             errorDiv.style.display = 'none';
             loadingDiv.style.display = 'block';
 
-            // Call Backend
             fetch(`${SCRIPT_URL}?action=coachLogin&email=${encodeURIComponent(email)}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     loadingDiv.style.display = 'none';
                     if (data.status === 'success') {
-                        currentUserEmail = email; // Set global session email
+                        currentUserEmail = email;
                         showDashboard(data);
                     } else {
-                        showError(data.message || "Login failed. Please check your email.");
+                        errorDiv.textContent = data.message || 'Login failed. Please check your email.';
+                        errorDiv.style.display = 'block';
                     }
                 })
                 .catch(err => {
                     loadingDiv.style.display = 'none';
-                    showError("Start-up error: " + err.toString());
-                    console.error(err);
+                    errorDiv.textContent = 'Connection error: ' + err.toString();
+                    errorDiv.style.display = 'block';
                 });
         }
 
-        let currentUserEmail = ''; // Global variable to store the logged-in user's email
-
         function showDashboard(data) {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('register-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'block';
-
-            document.getElementById('welcomeMsg').textContent = `Hello, ${data.firstName}!`;
-            document.getElementById('schoolMsg').textContent = data.school;
-            document.getElementById('mascotMsg').textContent = `Go ${data.mascot}!`;
-
-            document.getElementById('mascotMsg').textContent = `Go ${data.mascot}!`;
-
-            // currentUserEmail is already set in login() before calling this, or passed in data if we modify backend.
-            // Actually, let's just use the global variable we set in login() or set it here if data has it.
-            // But data doesn't have it based on previous backend code. 
-            // Better approach: In login(), set currentUserEmail = email; before calling showDashboard(data).
-            // But showDashboard uses 'data.email' right now in the code I inserted previously.
-            // Let's fix this function to NOT rely on data.email but rely on the global variable set by login().
-
-            // currentUserEmail is set in login function now (see below).
-
-            // The following lines are redundant if the above already set display properties
-            // document.getElementById('login-view').style.display = 'none';
-            // document.getElementById('dashboard-view').style.display = 'block';
-            // window.location.hash = 'review-form'; // This would immediately show the review form on login
+            showView('dashboard-view');
+            document.getElementById('welcomeMsg').textContent = data.firstName || 'Coach';
+            document.getElementById('schoolMsg').textContent = data.school || '';
+            document.getElementById('mascotMsg').textContent = data.mascot ? `Go ${data.mascot}!` : '';
         }
 
-        function showReviewForm() {
-            document.getElementById('review-form').style.display = 'block';
-            window.location.hash = 'review-form';
-        }
+        function logout() { location.reload(); }
 
-        function hideReviewForm() {
-            document.getElementById('review-form').style.display = 'none';
-        }
-
-        function toggleLevelRatings() {
-            const level = document.getElementById('gameLevel').value;
-            document.getElementById('jv-ratings').style.display = level === 'JV' ? 'block' : 'none';
-            document.getElementById('varsity-ratings').style.display = level === 'Varsity' ? 'block' : 'none';
-        }
-
-        const ratings = {};
-
-        function rate(star, value) {
-            const group = star.closest('.rating-group');
-            const metric = group.dataset.metric;
-
-            // Set internal value
-            ratings[metric] = value;
-
-            // Update UI
-            const stars = group.querySelectorAll('.star');
-            stars.forEach((s, index) => {
-                if (index < value) s.classList.add('active');
-                else s.classList.remove('active');
-            });
-        }
-
+        // ── Registration ──
         function toggleFilmAndPlatforms(isYes) {
             document.getElementById('film-platforms').style.display = isYes ? 'block' : 'none';
         }
-
         function toggleUniforms(isYes) {
             document.getElementById('uniform-details').style.display = isYes ? 'block' : 'none';
         }
-
         function toggleOtherFilm(checkbox) {
             document.getElementById('regPlatformOther').style.display = checkbox.checked ? 'block' : 'none';
             if (!checkbox.checked) document.getElementById('regPlatformOther').value = '';
-        }
-
-
-        function submitReview() {
-            const date = document.getElementById('gameDate').value;
-            const opponent = document.getElementById('opponent').value;
-            const level = document.getElementById('gameLevel').value;
-
-            if (!date || !opponent || !level) {
-                alert("Please fill in all game details.");
-                return;
-            }
-
-            // Gather ratings based on level
-            const payload = {
-                type: 'review_submission', // Tag for backend
-                coachEmail: document.getElementById('coachEmail').value.trim(), // Need to persist this
-                date: date,
-                opponent: opponent,
-                level: level,
-                ratings: {}
-            };
-
-            // Collect relevant ratings
-            if (level === 'JV') {
-                if (!ratings['jv_home_ref_movement'] || !ratings['jv_home_ref_comms']) {
-                    alert("Please rate all JV categories.");
-                    return;
-                }
-                payload.ratings = {
-                    movement: ratings['jv_home_ref_movement'],
-                    communication: ratings['jv_home_ref_comms']
-                };
-            } else if (level === 'Varsity') {
-                if (!ratings['varsity_ref_movement'] || !ratings['varsity_ref_control'] ||
-                    !ratings['varsity_home_ar_pos'] || !ratings['varsity_away_ar_pos']) {
-                    alert("Please rate all Varsity categories.");
-                    return;
-                }
-                payload.ratings = {
-                    movement: ratings['varsity_ref_movement'],
-                    control: ratings['varsity_ref_control'],
-                    home_ar: ratings['varsity_home_ar_pos'],
-                    away_ar: ratings['varsity_away_ar_pos']
-                };
-            }
-
-            // Submit
-            const loadingDiv = document.getElementById('loading');
-            loadingDiv.style.display = 'block';
-            loadingDiv.textContent = "Submitting Review...";
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            })
-                .then(res => res.json())
-                .then(data => {
-                    loadingDiv.style.display = 'none';
-                    if (data.status === 'success') {
-                        alert("Review Submitted Successfully!");
-                        hideReviewForm();
-                        // Reset form
-                        document.getElementById('gameDate').value = '';
-                        document.getElementById('opponent').value = '';
-                        document.getElementById('gameLevel').value = '';
-                        toggleLevelRatings();
-                        // Clear stars
-                        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-                    } else {
-                        alert("Submission failed: " + data.message);
-                    }
-                })
-                .catch(err => {
-                    loadingDiv.style.display = 'none';
-                    alert("Error submitting: " + err.toString());
-                });
-        }
-
-        function showRegister() {
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('register-view').style.display = 'block';
-            document.getElementById('reg-error-msg').style.display = 'none';
-        }
-
-        function showLogin() {
-            document.getElementById('register-view').style.display = 'none';
-            document.getElementById('login-view').style.display = 'block';
-            document.getElementById('error-msg').style.display = 'none';
         }
 
         function register() {
@@ -928,97 +1236,66 @@
             const email = document.getElementById('regEmail').value.trim();
             const school = document.getElementById('regSchool').value.trim();
             const supervisor = document.getElementById('regSupervisor').value;
+            const errorDiv = document.getElementById('reg-error-msg');
 
-            // Filming Logic
             const filmRadio = document.querySelector('input[name="regFilm"]:checked');
-            const film = filmRadio ? filmRadio.value : "";
+            const film = filmRadio ? filmRadio.value : '';
             let platforms = [];
-
-            if (film === "Yes") {
+            if (film === 'Yes') {
                 document.querySelectorAll('input[name="regPlatform"]:checked').forEach(cb => {
-                    if (cb.value === "Other") {
-                        const otherText = document.getElementById('regPlatformOther').value.trim();
-                        if (otherText) platforms.push("Other: " + otherText);
-                    } else {
-                        platforms.push(cb.value);
-                    }
+                    if (cb.value === 'Other') {
+                        const t = document.getElementById('regPlatformOther').value.trim();
+                        if (t) platforms.push('Other: ' + t);
+                    } else { platforms.push(cb.value); }
                 });
             }
-            const platformString = platforms.join(", ");
 
-            // Uniform Logic
             const uniformRadio = document.querySelector('input[name="regUniformsKV"]:checked');
-            const knowUniforms = uniformRadio ? uniformRadio.value : "";
-
-            let homeUniform = "N/A";
-            let awayUniform = "N/A";
-
-
-
-            const errorDiv = document.getElementById('reg-error-msg');
-            const loadingDiv = document.getElementById('reg-loading');
+            const knowUniforms = uniformRadio ? uniformRadio.value : '';
 
             errorDiv.style.display = 'none';
 
-            if (knowUniforms === "Yes") {
+            if (!firstName || !lastName || !email || !school || !supervisor) {
+                errorDiv.textContent = 'Please fill in all required fields including Supervisor.';
+                errorDiv.style.display = 'block'; return;
+            }
+            if (!film) {
+                errorDiv.textContent = 'Please select whether you film games.';
+                errorDiv.style.display = 'block'; return;
+            }
+            if (film === 'Yes' && platforms.length === 0) {
+                errorDiv.textContent = 'Please select at least one platform.';
+                errorDiv.style.display = 'block'; return;
+            }
+            if (!knowUniforms) {
+                errorDiv.textContent = 'Please select whether you know your uniform colors.';
+                errorDiv.style.display = 'block'; return;
+            }
+
+            let homeUniform = 'N/A', awayUniform = 'N/A';
+            if (knowUniforms === 'Yes') {
                 const h1 = document.getElementById('regHomeShirt').value.trim();
                 const h2 = document.getElementById('regHomeShorts').value.trim();
                 const h3 = document.getElementById('regHomeSocks').value.trim();
                 const h4 = document.getElementById('regHomeGK').value.trim();
-
                 const a1 = document.getElementById('regAwayShirt').value.trim();
                 const a2 = document.getElementById('regAwayShorts').value.trim();
                 const a3 = document.getElementById('regAwaySocks').value.trim();
                 const a4 = document.getElementById('regAwayGK').value.trim();
-
                 if (!h1 || !h2 || !h3 || !h4 || !a1 || !a2 || !a3 || !a4) {
-                    errorDiv.textContent = "Please fill in all uniform colors.";
-                    errorDiv.style.display = 'block';
-                    return;
+                    errorDiv.textContent = 'Please fill in all uniform colors.';
+                    errorDiv.style.display = 'block'; return;
                 }
-
                 homeUniform = `Home: ${h1}/${h2}/${h3} (GK: ${h4})`;
                 awayUniform = `Away: ${a1}/${a2}/${a3} (GK: ${a4})`;
             }
 
-            if (!firstName || !lastName || !email || !school || !supervisor) {
-                errorDiv.textContent = "Please fill in all required fields including Supervisor.";
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (!knowUniforms) {
-                errorDiv.textContent = "Please select whether you know your uniform colors.";
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (!film) {
-                errorDiv.textContent = "Please select whether you film games.";
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (film === "Yes" && platforms.length === 0) {
-                errorDiv.textContent = "Please select at least one platform.";
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            loadingDiv.style.display = 'none';
-            showModal("Submitting Request...", "Please wait while we process your registration.", "⏳", false);
+            showModal('Submitting Request...', 'Please wait while we process your registration.', '⏳', false);
 
             const payload = {
-                type: 'register',
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                school: school,
-                supervisor: supervisor,
-                film: film,
-                platform: platformString,
-                homeUniform: homeUniform,
-                awayUniform: awayUniform,
+                type: 'register', firstName, lastName, email, school, supervisor,
+                film, platform: platforms.join(', '),
+                homeUniform, awayUniform,
                 homeShirt: document.getElementById('regHomeShirt').value.trim(),
                 homeShorts: document.getElementById('regHomeShorts').value.trim(),
                 homeSocks: document.getElementById('regHomeSocks').value.trim(),
@@ -1029,17 +1306,11 @@
                 awayGK: document.getElementById('regAwayGK').value.trim()
             };
 
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            })
-                .then(res => res.json())
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+                .then(r => r.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // Show Success Modal
-                        showModal("Request Submitted!", "Your account request has been sent successfully. You will receive an email once approved.", "✅", true);
-
-                        // Reset Form in background
+                        showModal('Request Submitted!', 'Your account request has been sent. You will receive an email once approved.', '✅', true);
                         showLogin();
                         document.getElementById('regFirstName').value = '';
                         document.getElementById('regLastName').value = '';
@@ -1052,101 +1323,172 @@
                         toggleUniforms(false);
                     } else {
                         closeModal();
-                        errorDiv.textContent = data.message || "Registration failed.";
+                        errorDiv.textContent = data.message || 'Registration failed.';
                         errorDiv.style.display = 'block';
                     }
                 })
                 .catch(err => {
                     closeModal();
-                    errorDiv.textContent = "Error: " + err.toString();
+                    errorDiv.textContent = 'Error: ' + err.toString();
                     errorDiv.style.display = 'block';
                 });
         }
 
-        function showError(msg) {
-            const el = document.getElementById('error-msg');
-            el.textContent = msg;
-            el.style.display = 'block';
+        // ── Performance Review ──
+        function toggleLevelRatings() {
+            const level = document.getElementById('gameLevel').value;
+            document.getElementById('jv-ratings').style.display = level === 'JV' ? 'block' : 'none';
+            document.getElementById('varsity-ratings').style.display = level === 'Varsity' ? 'block' : 'none';
         }
 
-        function logout() {
-            location.reload();
+        function rate(star, value) {
+            const group = star.closest('.rating-group');
+            const metric = group.dataset.metric;
+            ratings[metric] = value;
+            group.querySelectorAll('.star').forEach((s, i) => {
+                s.classList.toggle('active', i < value);
+            });
         }
 
+        function submitReview() {
+            const date = document.getElementById('gameDate').value;
+            const opponent = document.getElementById('opponent').value.trim();
+            const level = document.getElementById('gameLevel').value;
+
+            if (!date || !opponent || !level) { alert('Please fill in all game details.'); return; }
+
+            const payload = {
+                type: 'review_submission',
+                coachEmail: currentUserEmail,
+                date, opponent, level, ratings: {}
+            };
+
+            if (level === 'JV') {
+                if (!ratings['jv_home_ref_movement'] || !ratings['jv_home_ref_comms']) {
+                    alert('Please rate all JV categories.'); return;
+                }
+                payload.ratings = { movement: ratings['jv_home_ref_movement'], communication: ratings['jv_home_ref_comms'] };
+            } else if (level === 'Varsity') {
+                if (!ratings['varsity_ref_movement'] || !ratings['varsity_ref_control'] ||
+                    !ratings['varsity_home_ar_pos'] || !ratings['varsity_away_ar_pos']) {
+                    alert('Please rate all Varsity categories.'); return;
+                }
+                payload.ratings = {
+                    movement: ratings['varsity_ref_movement'],
+                    control: ratings['varsity_ref_control'],
+                    home_ar: ratings['varsity_home_ar_pos'],
+                    away_ar: ratings['varsity_away_ar_pos']
+                };
+            }
+
+            showModal('Submitting Review...', 'Please wait...', '⏳', false);
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showModal('Review Submitted!', 'Thank you for your feedback. We will review it shortly.', '✅', true);
+                        document.getElementById('gameDate').value = '';
+                        document.getElementById('opponent').value = '';
+                        document.getElementById('gameLevel').value = '';
+                        toggleLevelRatings();
+                        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+                        Object.keys(ratings).forEach(k => delete ratings[k]);
+                        showCardGrid();
+                    } else {
+                        closeModal();
+                        alert('Submission failed: ' + data.message);
+                    }
+                })
+                .catch(err => { closeModal(); alert('Error: ' + err.toString()); });
+        }
+
+        // ── Review History ──
         function loadPastReviews() {
             const historyDiv = document.getElementById('history-content');
-            const historyContainer = document.getElementById('review-history');
-
-            historyDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Loading...</div>';
-            historyContainer.style.display = 'block';
-            document.getElementById('review-form').style.display = 'none';
-
-            // We need to use fetch/JSONP or just assume the user is logged in and we have their email.
-            // But wait, the backend needs the email as a parameter.
-            // We unfortunately don't have the email stored in a global variable easily accessible unless we saved it during login.
-            // Let's modify handleCoachLogin to save email to localStorage or similar, OR just ask user to re-enter if session lost.
-            // Actually, let's assume valid session = we have the email.
-            // I'll update the login function to save the email in a global variable `currentUserEmail`.
+            historyDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
 
             if (!currentUserEmail) {
-                historyDiv.innerHTML = '<div style="color:red; text-align:center;">Session lost. Please logout and login again.</div>';
+                historyDiv.innerHTML = '<div class="empty-state"><p style="color:red;">Session lost. Please logout and login again.</p></div>';
                 return;
             }
 
-            const url = SCRIPT_URL + "?action=getPastReviews&email=" + encodeURIComponent(currentUserEmail);
-
-            fetch(url)
-                .then(res => res.json())
+            fetch(`${SCRIPT_URL}?action=getPastReviews&email=${encodeURIComponent(currentUserEmail)}`)
+                .then(r => r.json())
                 .then(data => {
                     historyDiv.innerHTML = '';
                     if (data.status === 'success' && data.reviews.length > 0) {
                         data.reviews.forEach(r => {
-                            const date = new Date(r.date).toLocaleDateString();
-                            const statusColor = r.reviewed ? '#27ae60' : '#f39c12';
-                            const statusText = r.reviewed ? 'Reviewed by Admin' : 'Pending Review';
-
+                            const date = new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            const reviewed = r.reviewed;
                             const item = document.createElement('div');
-                            item.style.cssText = 'background:white; padding:15px; border-radius:8px; border-left:4px solid ' + statusColor + '; box-shadow:0 2px 5px rgba(0,0,0,0.05);';
+                            item.className = 'history-item';
                             item.innerHTML = `
-                                <div style="font-weight:bold; color:#2c3e50;">Vs. ${r.opponent}</div>
-                                <div style="font-size:0.85rem; color:#7f8c8d; margin-top:5px;">Date: ${date}</div>
-                                <div style="font-size:0.8rem; color:${statusColor}; font-weight:600; margin-top:8px;">${statusText}</div>
+                                <div class="hi-left">
+                                    <strong>vs. ${r.opponent}</strong>
+                                    <span>${date}</span>
+                                </div>
+                                <span class="status-badge ${reviewed ? 'status-reviewed' : 'status-pending'}">${reviewed ? '✓ Reviewed' : 'Pending'}</span>
                             `;
                             historyDiv.appendChild(item);
                         });
                     } else {
-                        historyDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#7f8c8d;">No reviews found.</div>';
+                        historyDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No reviews submitted yet.</p></div>';
                     }
                 })
-                .catch(err => {
-                    historyDiv.innerHTML = '<div style="color:red; text-align:center;">Error loading history.</div>';
+                .catch(() => {
+                    historyDiv.innerHTML = '<div class="empty-state"><p style="color:red;">Error loading history.</p></div>';
                 });
         }
 
+        // ── Clip Discussion ──
+        function submitClip() {
+            const date = document.getElementById('clipDate').value;
+            const level = document.getElementById('clipLevel').value;
+            const opponent = document.getElementById('clipOpponent').value.trim();
+            const location = document.getElementById('clipLocation').value.trim();
+            const notes = document.getElementById('clipNotes').value.trim();
+            const errDiv = document.getElementById('clip-error');
 
-    </script>
+            errDiv.style.display = 'none';
 
-    <!-- Success Modal -->
-    <div id="statusModal" class="modal-overlay">
-        <div class="modal-card">
-            <div id="modalIcon" class="modal-icon">⏳</div>
-            <div id="modalTitle" class="modal-title">Submitting Request...</div>
-            <div id="modalText" class="modal-text">Please wait while we process your registration.</div>
-            <button id="modalBtn" class="modal-btn" onclick="closeModal()" style="display:none;">OK</button>
-        </div>
-    </div>
+            if (!date || !level || !opponent || !location) {
+                errDiv.textContent = 'Please fill in all required fields (Date, Level, Opponent, and Clip Location).';
+                errDiv.style.display = 'block'; return;
+            }
 
-    <script>
-        function showModal(title, text, icon, showButton) {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalText').textContent = text;
-            document.getElementById('modalIcon').textContent = icon;
-            document.getElementById('modalBtn').style.display = showButton ? 'block' : 'none';
-            document.getElementById('statusModal').style.display = 'flex';
-        }
+            showModal('Submitting Clip...', 'Please wait...', '⏳', false);
 
-        function closeModal() {
-            document.getElementById('statusModal').style.display = 'none';
+            const payload = {
+                type: 'clip_submission',
+                coachEmail: currentUserEmail,
+                date, level, opponent,
+                clipLocation: location,
+                notes
+            };
+
+            fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showModal('Clip Submitted!', 'We received your clip and will provide feedback soon.', '🎬', true);
+                        document.getElementById('clipDate').value = '';
+                        document.getElementById('clipLevel').value = '';
+                        document.getElementById('clipOpponent').value = '';
+                        document.getElementById('clipLocation').value = '';
+                        document.getElementById('clipNotes').value = '';
+                        showCardGrid();
+                    } else {
+                        closeModal();
+                        errDiv.textContent = data.message || 'Submission failed.';
+                        errDiv.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    closeModal();
+                    errDiv.textContent = 'Error: ' + err.toString();
+                    errDiv.style.display = 'block';
+                });
         }
     </script>
 </body>
