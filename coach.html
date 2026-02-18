@@ -521,40 +521,115 @@
             color: #f39c12;
         }
 
-        /* ── Review History Items ── */
+        /* ── Expandable History Rows ── */
         .history-item {
             background: var(--gray-light);
             border-radius: 10px;
-            padding: 16px 20px;
+            overflow: hidden;
+            border-left: 4px solid #dde4ed;
+            transition: border-color 0.2s;
+        }
+
+        .history-item.reviewed {
+            border-left-color: #00c853;
+        }
+
+        .history-item.pending {
+            border-left-color: #f39c12;
+        }
+
+        .history-item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 16px 20px;
+            cursor: pointer;
             gap: 12px;
+            user-select: none;
         }
 
-        .history-item .hi-left strong {
+        .history-item-header:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .hi-left strong {
             color: var(--navy);
             font-size: 1rem;
         }
 
-        .history-item .hi-left span {
+        .hi-left span {
             display: block;
             color: var(--gray);
             font-size: 0.82rem;
             margin-top: 2px;
         }
 
-        .status-badge {
+        .hi-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .expand-icon {
+            color: var(--gray);
             font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+
+        .history-item.open .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        .history-item-body {
+            display: none;
+            padding: 0 20px 18px;
+            border-top: 1px solid #e8edf3;
+        }
+
+        .history-item.open .history-item-body {
+            display: block;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .detail-cell {
+            background: white;
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+
+        .detail-cell .dc-label {
+            font-size: 0.72rem;
             font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 20px;
-            white-space: nowrap;
+            color: var(--gray);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .status-pending {
+        .detail-cell .dc-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--navy);
+            margin-top: 2px;
+        }
+
+        .star-display {
+            color: #f1c40f;
+            letter-spacing: 1px;
+        }
+
+        /* Clip status badges */
+        .status-submitted {
+            background: #e8f4fd;
+            color: #1a6fa8;
+        }
+
+        .status-received {
             background: #fff3cd;
             color: #856404;
         }
@@ -562,6 +637,60 @@
         .status-reviewed {
             background: #d1f2eb;
             color: #0e6655;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .discussion-btn {
+            margin-top: 14px;
+            background: var(--navy);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 7px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .discussion-btn:hover {
+            background: var(--navy-mid);
+        }
+
+        .discussion-panel {
+            display: none;
+            margin-top: 12px;
+            background: white;
+            border-radius: 8px;
+            padding: 14px 16px;
+            border-left: 3px solid var(--green);
+        }
+
+        .discussion-panel.open {
+            display: block;
+        }
+
+        .discussion-panel .dp-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .discussion-panel p {
+            color: var(--navy);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0;
         }
 
         /* ── Clip upload area ── */
@@ -893,7 +1022,7 @@
             <!-- Hero Banner -->
             <div class="dash-hero">
                 <div class="hero-left">
-                    <div class="hero-greeting">Welcome back, <span id="welcomeMsg">Coach</span>!</div>
+                    <div class="hero-greeting">Hi, Coach <span id="welcomeMsg">—</span>!</div>
                     <div class="hero-school" id="schoolMsg">School Affiliation</div>
                 </div>
                 <div class="hero-right">
@@ -922,11 +1051,13 @@
                 <div class="portal-card">
                     <div class="card-icon">🎬</div>
                     <h3>Clip Discussion</h3>
-                    <p>Submit a game clip for our team to review and provide officiating feedback on specific moments.
+                    <p>Submit a game clip for our officiating team to review and provide feedback on specific moments.
                     </p>
                     <div class="card-actions">
                         <button class="btn btn-primary btn-sm" onclick="showSubView('clip-form-view')">Submit a
                             Clip</button>
+                        <button class="btn btn-ghost btn-sm"
+                            onclick="showSubView('clip-history-view'); loadPastClips();">Past Submissions</button>
                     </div>
                 </div>
 
@@ -1051,6 +1182,20 @@
                 <div id="history-content" class="history-grid">
                     <div class="empty-state">
                         <div class="empty-icon">📋</div>
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Sub-view: Clip History ── -->
+            <div id="clip-history-view" class="sub-view">
+                <div class="sub-view-header">
+                    <button class="back-btn" onclick="showCardGrid()">← Back</button>
+                    <h2>🎬 Past Clip Submissions</h2>
+                </div>
+                <div id="clip-history-content" class="history-grid">
+                    <div class="empty-state">
+                        <div class="empty-icon">⏳</div>
                         <p>Loading...</p>
                     </div>
                 </div>
@@ -1211,7 +1356,7 @@
 
         function showDashboard(data) {
             showView('dashboard-view');
-            document.getElementById('welcomeMsg').textContent = data.firstName || 'Coach';
+            document.getElementById('welcomeMsg').textContent = data.lastName || data.firstName || 'Coach';
             document.getElementById('schoolMsg').textContent = data.school || '';
             document.getElementById('mascotMsg').textContent = data.mascot ? `Go ${data.mascot}!` : '';
         }
@@ -1418,17 +1563,45 @@
                 .then(data => {
                     historyDiv.innerHTML = '';
                     if (data.status === 'success' && data.reviews.length > 0) {
-                        data.reviews.forEach(r => {
-                            const date = new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        data.reviews.forEach((r, idx) => {
+                            const date = r.date ? new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
                             const reviewed = r.reviewed;
+                            const statusClass = reviewed ? 'status-reviewed' : 'status-pending';
+                            const statusText = reviewed ? '✓ Reviewed' : 'Pending';
+                            const borderClass = reviewed ? 'reviewed' : 'pending';
+
+                            // Build star display helper
+                            const stars = (n) => n ? '★'.repeat(Math.min(5, parseInt(n))) + '☆'.repeat(Math.max(0, 5 - parseInt(n))) : '—';
+
                             const item = document.createElement('div');
-                            item.className = 'history-item';
+                            item.className = `history-item ${borderClass}`;
+                            item.id = `review-item-${idx}`;
+
+                            // Build detail rows based on level
+                            let detailsHtml = `
+                                <div class="detail-grid">
+                                    <div class="detail-cell"><div class="dc-label">Level</div><div class="dc-value">${r.level || '—'}</div></div>
+                                    <div class="detail-cell"><div class="dc-label">Movement</div><div class="dc-value"><span class="star-display">${stars(r.movement)}</span></div></div>
+                                    <div class="detail-cell"><div class="dc-label">${r.level === 'JV' ? 'Communication' : 'Game Control'}</div><div class="dc-value"><span class="star-display">${stars(r.control)}</span></div></div>`;
+                            if (r.level === 'Varsity') {
+                                detailsHtml += `
+                                    <div class="detail-cell"><div class="dc-label">Home AR</div><div class="dc-value"><span class="star-display">${stars(r.homeAR)}</span></div></div>
+                                    <div class="detail-cell"><div class="dc-label">Away AR</div><div class="dc-value"><span class="star-display">${stars(r.awayAR)}</span></div></div>`;
+                            }
+                            detailsHtml += '</div>';
+
                             item.innerHTML = `
-                                <div class="hi-left">
-                                    <strong>vs. ${r.opponent}</strong>
-                                    <span>${date}</span>
+                                <div class="history-item-header" onclick="toggleHistoryItem('review-item-${idx}')">
+                                    <div class="hi-left">
+                                        <strong>vs. ${r.opponent || 'Unknown'}</strong>
+                                        <span>${date}</span>
+                                    </div>
+                                    <div class="hi-right">
+                                        <span class="status-badge ${statusClass}">${statusText}</span>
+                                        <span class="expand-icon">▼</span>
+                                    </div>
                                 </div>
-                                <span class="status-badge ${reviewed ? 'status-reviewed' : 'status-pending'}">${reviewed ? '✓ Reviewed' : 'Pending'}</span>
+                                <div class="history-item-body">${detailsHtml}</div>
                             `;
                             historyDiv.appendChild(item);
                         });
@@ -1439,6 +1612,87 @@
                 .catch(() => {
                     historyDiv.innerHTML = '<div class="empty-state"><p style="color:red;">Error loading history.</p></div>';
                 });
+        }
+
+        function toggleHistoryItem(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('open');
+        }
+
+        // ── Clip History ──
+        function loadPastClips() {
+            const historyDiv = document.getElementById('clip-history-content');
+            historyDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading...</p></div>';
+
+            if (!currentUserEmail) {
+                historyDiv.innerHTML = '<div class="empty-state"><p style="color:red;">Session lost. Please logout and login again.</p></div>';
+                return;
+            }
+
+            fetch(`${SCRIPT_URL}?action=getPastClips&email=${encodeURIComponent(currentUserEmail)}`)
+                .then(r => r.json())
+                .then(data => {
+                    historyDiv.innerHTML = '';
+                    if (data.status === 'success' && data.clips.length > 0) {
+                        data.clips.forEach((c, idx) => {
+                            const date = c.date ? new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+                            const status = c.status || 'Submitted';
+                            const statusKey = status.toLowerCase().replace(/\s+/g, '-');
+                            const statusClass = statusKey === 'reviewed' ? 'status-reviewed' : statusKey === 'received' ? 'status-received' : 'status-submitted';
+                            const borderClass = statusKey === 'reviewed' ? 'reviewed' : 'pending';
+                            const hasAdminNotes = c.adminNotes && c.adminNotes.trim().length > 0;
+
+                            const item = document.createElement('div');
+                            item.className = `history-item ${borderClass}`;
+                            item.id = `clip-item-${idx}`;
+
+                            const discussionSection = hasAdminNotes ? `
+                                <button class="discussion-btn" onclick="toggleDiscussion('clip-disc-${idx}', event)">💬 See Referee Discussion</button>
+                                <div class="discussion-panel" id="clip-disc-${idx}">
+                                    <div class="dp-label">Referee Discussion Notes</div>
+                                    <p>${c.adminNotes}</p>
+                                </div>` : '';
+
+                            item.innerHTML = `
+                                <div class="history-item-header" onclick="toggleHistoryItem('clip-item-${idx}')">
+                                    <div class="hi-left">
+                                        <strong>vs. ${c.opponent || 'Unknown'}</strong>
+                                        <span>${date} · ${c.level || ''}</span>
+                                    </div>
+                                    <div class="hi-right">
+                                        <span class="status-badge ${statusClass}">${status}</span>
+                                        <span class="expand-icon">▼</span>
+                                    </div>
+                                </div>
+                                <div class="history-item-body">
+                                    <div class="detail-grid">
+                                        <div class="detail-cell" style="grid-column:1/-1">
+                                            <div class="dc-label">Clip Location</div>
+                                            <div class="dc-value" style="font-size:0.85rem; font-weight:500; word-break:break-all;">${c.clipLocation || '—'}</div>
+                                        </div>
+                                        <div class="detail-cell" style="grid-column:1/-1">
+                                            <div class="dc-label">Your Notes</div>
+                                            <div class="dc-value" style="font-size:0.85rem; font-weight:500;">${c.notes || '—'}</div>
+                                        </div>
+                                    </div>
+                                    ${discussionSection}
+                                </div>
+                            `;
+                            historyDiv.appendChild(item);
+                        });
+                    } else {
+                        historyDiv.innerHTML = '<div class="empty-state"><div class="empty-icon">🎬</div><p>No clip submissions yet.</p></div>';
+                    }
+                })
+                .catch(() => {
+                    historyDiv.innerHTML = '<div class="empty-state"><p style="color:red;">Error loading clip submissions.</p></div>';
+                });
+        }
+
+        function toggleDiscussion(id, event) {
+            event.stopPropagation(); // don't collapse the row
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('open');
         }
 
         // ── Clip Discussion ──

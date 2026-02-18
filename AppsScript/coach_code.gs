@@ -55,6 +55,10 @@ function handleGet(e) {
     return getPastReviews(params.email);
   }
 
+  if (action === 'getPastClips') {
+    return getPastClips(params.email);
+  }
+
   return ContentService.createTextOutput(JSON.stringify({
     status: "ready", message: "Coach Portal Backend Online"
   })).setMimeType(ContentService.MimeType.JSON);
@@ -109,7 +113,7 @@ function handleClipSubmission(data) {
 
     if (!sheet) {
       sheet = ss.insertSheet("Clip Discussions");
-      sheet.appendRow(["Timestamp", "Coach Email", "Game Date", "Opponent", "Level", "Clip Location", "Notes"]);
+      sheet.appendRow(["Timestamp", "Coach Email", "Game Date", "Opponent", "Level", "Clip Location", "Notes", "Status", "Admin Notes"]);
     }
 
     sheet.appendRow([
@@ -119,7 +123,9 @@ function handleClipSubmission(data) {
       data.opponent || "",
       data.level || "",
       data.clipLocation || "",
-      data.notes || ""
+      data.notes || "",
+      "Submitted", // Status (col 7, index 7)
+      ""           // Admin Notes (col 8, index 8)
     ]);
 
     // Email Admin
@@ -153,19 +159,53 @@ function getPastReviews(email) {
   var data = sheet.getDataRange().getValues();
   var reviews = [];
   
-  // Skip header
   for (var i = 1; i < data.length; i++) {
     // Column 1: Coach Email
     if (String(data[i][1] || "").toLowerCase().trim() === email) {
       reviews.push({
-        date: data[i][2], // Date
-        opponent: data[i][3], // Opponent
-        reviewed: data[i][9] === true || String(data[i][9]).toLowerCase() === 'true' // Reviewed Checkbox
+        date: data[i][2],       // Date
+        opponent: data[i][3],   // Opponent
+        level: data[i][4],      // Level
+        movement: data[i][5],   // Movement
+        control: data[i][6],    // Communication/Control
+        homeAR: data[i][7],     // Home AR
+        awayAR: data[i][8],     // Away AR
+        reviewed: data[i][9] === true || String(data[i][9]).toLowerCase() === 'true'
       });
     }
   }
   
   return ContentService.createTextOutput(JSON.stringify({ status: "success", reviews: reviews })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getPastClips(email) {
+  if (!email) return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Email required" })).setMimeType(ContentService.MimeType.JSON);
+
+  email = email.toLowerCase().trim();
+  var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
+  var sheet = ss.getSheetByName("Clip Discussions");
+
+  if (!sheet) return ContentService.createTextOutput(JSON.stringify({ status: "success", clips: [] })).setMimeType(ContentService.MimeType.JSON);
+
+  var data = sheet.getDataRange().getValues();
+  var clips = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][1] || "").toLowerCase().trim() === email) {
+      clips.push({
+        timestamp: data[i][0],
+        date: data[i][2],
+        opponent: data[i][3],
+        level: data[i][4],
+        clipLocation: data[i][5],
+        notes: data[i][6],
+        status: data[i][7] || "Submitted",
+        adminNotes: data[i][8] || ""
+      });
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({ status: "success", clips: clips })).setMimeType(ContentService.MimeType.JSON);
 }
 
 
