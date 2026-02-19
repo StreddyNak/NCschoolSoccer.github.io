@@ -1895,8 +1895,8 @@
                             const date = c.date ? new Date(c.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
                             const status = c.status || 'Submitted';
                             const statusKey = status.toLowerCase().replace(/\s+/g, '-');
-                            const statusClass = statusKey === 'reviewed' ? 'status-reviewed' : statusKey === 'received' ? 'status-received' : 'status-submitted';
-                            const borderClass = statusKey === 'reviewed' ? 'reviewed' : 'pending';
+                            const statusClass = (statusKey === 'reviewed' || statusKey === 'discussed') ? 'status-reviewed' : (statusKey === 'received' || statusKey === 'reviewing') ? 'status-received' : 'status-submitted';
+                            const borderClass = (statusKey === 'reviewed' || statusKey === 'discussed') ? 'reviewed' : 'pending';
                             const hasAdminNotes = c.adminNotes && c.adminNotes.trim().length > 0;
 
                             const item = document.createElement('div');

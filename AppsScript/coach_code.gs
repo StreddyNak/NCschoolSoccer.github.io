@@ -59,6 +59,72 @@ function handleGet(e) {
     return getPastClips(params.email);
   }
 
+  if (action === 'markReviewed') {
+    var tab = params.tab;
+    var row = parseInt(params.row, 10);
+    if (!tab || !row) return ContentService.createTextOutput("Invalid parameters.");
+    var sheet = SpreadsheetApp.openById(COACH_SHEET_ID).getSheetByName(tab);
+    if (sheet) {
+      if (tab === "Reviews_JV") {
+        sheet.getRange(row, 34).setValue(true);
+      } else if (tab === "Reviews_Varsity") {
+        sheet.getRange(row, 43).setValue(true);
+      }
+      return ContentService.createTextOutput("Success! Row " + row + " in " + tab + " has been marked as Reviewed.");
+    }
+    return ContentService.createTextOutput("Sheet not found.");
+  }
+
+  if (action === 'markReviewing') {
+    var tab = params.tab;
+    var row = parseInt(params.row, 10);
+    if (!tab || !row) return ContentService.createTextOutput("Invalid parameters.");
+    var sheet = SpreadsheetApp.openById(COACH_SHEET_ID).getSheetByName(tab);
+    if (sheet) {
+      if (tab === "Clip Discussions") {
+        sheet.getRange(row, 10).setValue("Reviewing");
+      }
+      return ContentService.createTextOutput("Success! Clip has been marked as Reviewing.");
+    }
+    return ContentService.createTextOutput("Sheet not found.");
+  }
+
+  if (action === 'clipDiscussForm') {
+    var tab = params.tab;
+    var row = params.row;
+    if (!tab || !row) return ContentService.createTextOutput("Invalid parameters.");
+    
+    // Return HTML form
+    var html = "<html><body style='font-family:sans-serif; padding: 20px; max-width: 600px; margin: auto;'>" +
+               "<h2>Mark Clip as Discussed</h2>" +
+               "<form action='" + ScriptApp.getService().getUrl() + "' method='GET'>" +
+               "<input type='hidden' name='action' value='submitClipDiscussion'>" +
+               "<input type='hidden' name='tab' value='" + tab + "'>" +
+               "<input type='hidden' name='row' value='" + row + "'>" +
+               "<label for='notes' style='font-weight:bold;'>Admin Notes / Reason:</label><br><br>" +
+               "<textarea name='notes' id='notes' rows='5' style='width:100%; padding:8px; font-family:inherit;' required></textarea><br><br>" +
+               "<button type='submit' style='background:#0d47a1; color:white; padding:10px 20px; border:none; cursor:pointer; font-size: 16px; border-radius: 4px;'>Submit & Mark Discussed</button>" +
+               "</form></body></html>";
+    return HtmlService.createHtmlOutput(html);
+  }
+
+  if (action === 'submitClipDiscussion') {
+    var tab = params.tab;
+    var row = parseInt(params.row, 10);
+    var notes = params.notes;
+    if (!tab || !row || !notes) return ContentService.createTextOutput("Invalid parameters.");
+    
+    var sheet = SpreadsheetApp.openById(COACH_SHEET_ID).getSheetByName(tab);
+    if (sheet) {
+      if (tab === "Clip Discussions") {
+        sheet.getRange(row, 10).setValue("Discussed"); // Status is col J (10)
+        sheet.getRange(row, 11).setValue(notes); // Admin Notes is col K (11)
+      }
+      return ContentService.createTextOutput("Success! Clip Discussion marked as Discussed, and your notes were saved.");
+    }
+    return ContentService.createTextOutput("Sheet not found.");
+  }
+
   return ContentService.createTextOutput(JSON.stringify({
     status: "ready", message: "Coach Portal Backend Online"
   })).setMimeType(ContentService.MimeType.JSON);
@@ -199,7 +265,11 @@ function handleReviewSubmission(data) {
     body += sectionBlock("AWAY SIDE AR", "v_away_ar", AR_M);
   }
 
+  var insertedRow = sheet.getLastRow();
+  var markUrl = ScriptApp.getService().getUrl() + "?action=markReviewed&tab=" + encodeURIComponent(tabName) + "&row=" + insertedRow;
+
   body += "\n\n— Open in Google Sheets —\n" + sheetUrl + "#gid=" + tabName + "\n";
+  body += "\n— Mark as Reviewed (Direct Link) —\n" + markUrl + "\n";
 
   MailApp.sendEmail(ADMIN_EMAIL, "New Performance Review — " + level + " vs " + data.opponent + " (" + coachName + ")", body, {name: 'NC HS Soccer Portal'});
 
@@ -232,7 +302,10 @@ function handleClipSubmission(data) {
       ""
     ]);
 
+    var insertedRow = sheet.getLastRow();
     var sheetUrl = "https://docs.google.com/spreadsheets/d/" + COACH_SHEET_ID + "/edit#gid=Clip%20Discussions";
+    var markReviewingUrl = ScriptApp.getService().getUrl() + "?action=markReviewing&tab=Clip%20Discussions&row=" + insertedRow;
+    var markDiscussedUrl = ScriptApp.getService().getUrl() + "?action=clipDiscussForm&tab=Clip%20Discussions&row=" + insertedRow;
 
     // Email Admin
     var subject = "New Clip Discussion — " + (data.level || "") + " vs " + (data.opponent || "") + " (" + coachName + ")";
@@ -246,7 +319,9 @@ function handleClipSubmission(data) {
                "Level:        " + (data.level || "") + "\n\n" +
                "Clip Location:\n  " + (data.clipLocation || "Not provided") + "\n\n" +
                "Notes:\n  " + (data.notes || "None") + "\n\n" +
-               "— Open in Google Sheets —\n" + sheetUrl + "\n";
+               "— Open in Google Sheets —\n" + sheetUrl + "\n" +
+               "\n— Mark as Reviewing (Direct Link) —\n" + markReviewingUrl + "\n" +
+               "\n— Mark as Discussed (Direct Link) —\n" + markDiscussedUrl + "\n";
 
     MailApp.sendEmail(ADMIN_EMAIL, subject, body, { name: 'NC HS Soccer Portal' });
 
@@ -264,40 +339,69 @@ function getPastReviews(email) {
   var reviews = [];
 
   // Helper: read a sheet and map rows to review objects
-  function readSheet(sheetName, level, mapper) {
+  function readSheet(sheetName, level, newMapper, oldMapper) {
     var s = ss.getSheetByName(sheetName);
     if (!s) return;
     var rows = s.getDataRange().getValues();
     for (var i = 1; i < rows.length; i++) {
-      // Check Coach Email at index 2 (Col C)
-      if (String(rows[i][2] || "").toLowerCase().trim() === email) {
-        reviews.push(mapper(rows[i], level));
+      var emailNew = String(rows[i][2] || "").toLowerCase().trim();
+      var emailOld = String(rows[i][1] || "").toLowerCase().trim();
+      
+      if (emailNew === email) {
+        reviews.push(newMapper(rows[i], level));
+      } else if (emailOld === email) {
+        reviews.push(oldMapper(rows[i], level));
       }
     }
   }
 
-  readSheet("Reviews_JV", "JV", function(d) {
-    return {
-      date: d[4], opponent: d[5], level: "JV",
-      reviewed: d[33] === true || String(d[33]).toLowerCase() === 'true',
-      ratings: {
-        jv_home_ref: { pregame_comm: d[7],  appearance: d[8],  fitness: d[9],  game_mgmt: d[10],  ingame_comm: d[11],  teamwork: d[12] },
-        jv_away_ref: { pregame_comm: d[20], appearance: d[21], fitness: d[22], game_mgmt: d[23], ingame_comm: d[24], teamwork: d[25] }
-      }
-    };
-  });
+  readSheet("Reviews_JV", "JV", 
+    function(d) {
+      return {
+        date: d[4], opponent: d[5], level: "JV",
+        reviewed: d[33] === true || String(d[33]).toLowerCase() === 'true',
+        ratings: {
+          jv_home_ref: { pregame_comm: d[7],  appearance: d[8],  fitness: d[9],  game_mgmt: d[10],  ingame_comm: d[11],  teamwork: d[12] },
+          jv_away_ref: { pregame_comm: d[20], appearance: d[21], fitness: d[22], game_mgmt: d[23], ingame_comm: d[24], teamwork: d[25] }
+        }
+      };
+    },
+    function(d) {
+      return {
+        date: d[2], opponent: d[3], level: "JV",
+        reviewed: d[17] === true || String(d[17]).toLowerCase() === 'true',
+        ratings: {
+          jv_home_ref: { pregame_comm: d[5],  appearance: d[6],  fitness: d[7],  game_mgmt: d[8],  ingame_comm: d[9],  teamwork: d[10] },
+          jv_away_ref: { pregame_comm: d[11], appearance: d[12], fitness: d[13], game_mgmt: d[14], ingame_comm: d[15], teamwork: d[16] }
+        }
+      };
+    }
+  );
 
-  readSheet("Reviews_Varsity", "Varsity", function(d) {
-    return {
-      date: d[4], opponent: d[5], level: "Varsity",
-      reviewed: d[42] === true || String(d[42]).toLowerCase() === 'true',
-      ratings: {
-        v_ref:     { pregame_comm: d[7],  appearance: d[8],  movement: d[9],    teamwork: d[10],    game_mgmt: d[11],    ingame_comm: d[12] },
-        v_home_ar: { appearance: d[20],   fitness: d[21],    positioning: d[22], communication: d[23], teamwork: d[24] },
-        v_away_ar: { appearance: d[31],   fitness: d[32],    positioning: d[33], communication: d[34], teamwork: d[35] }
-      }
-    };
-  });
+  readSheet("Reviews_Varsity", "Varsity", 
+    function(d) {
+      return {
+        date: d[4], opponent: d[5], level: "Varsity",
+        reviewed: d[42] === true || String(d[42]).toLowerCase() === 'true',
+        ratings: {
+          v_ref:     { pregame_comm: d[7],  appearance: d[8],  movement: d[9],    teamwork: d[10],    game_mgmt: d[11],    ingame_comm: d[12] },
+          v_home_ar: { appearance: d[20],   fitness: d[21],    positioning: d[22], communication: d[23], teamwork: d[24] },
+          v_away_ar: { appearance: d[31],   fitness: d[32],    positioning: d[33], communication: d[34], teamwork: d[35] }
+        }
+      };
+    },
+    function(d) {
+      return {
+        date: d[2], opponent: d[3], level: "Varsity",
+        reviewed: d[21] === true || String(d[21]).toLowerCase() === 'true',
+        ratings: {
+          v_ref:     { pregame_comm: d[5],  appearance: d[6],  movement: d[7],    teamwork: d[8],    game_mgmt: d[9],    ingame_comm: d[10] },
+          v_home_ar: { appearance: d[11],   fitness: d[12],    positioning: d[13], communication: d[14], teamwork: d[15] },
+          v_away_ar: { appearance: d[16],   fitness: d[17],    positioning: d[18], communication: d[19], teamwork: d[20] }
+        }
+      };
+    }
+  );
 
   // Sort newest first by date
   reviews.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
@@ -318,8 +422,10 @@ function getPastClips(email) {
   var clips = [];
 
   for (var i = 1; i < data.length; i++) {
-    // Check Coach Email at index 2 (Col C)
-    if (String(data[i][2] || "").toLowerCase().trim() === email) {
+    var emailNew = String(data[i][2] || "").toLowerCase().trim();
+    var emailOld = String(data[i][1] || "").toLowerCase().trim();
+
+    if (emailNew === email) {
       clips.push({
         timestamp: data[i][0],
         date: data[i][4],
@@ -329,6 +435,17 @@ function getPastClips(email) {
         notes: data[i][8],
         status: data[i][9] || "Submitted",
         adminNotes: data[i][10] || ""
+      });
+    } else if (emailOld === email) {
+      clips.push({
+        timestamp: data[i][0],
+        date: data[i][2],
+        opponent: data[i][3],
+        level: data[i][4],
+        clipLocation: data[i][5],
+        notes: data[i][6],
+        status: data[i][7] || "Submitted",
+        adminNotes: data[i][8] || ""
       });
     }
   }
@@ -373,20 +490,7 @@ function handleRegistration(data) {
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Request already pending approval." })).setMimeType(ContentService.MimeType.JSON);
     }
   }
-
-  // Extract specific uniform parts if available
-  // Expected format if knowUniforms=Yes: "Home: Red/Red/Red (GK: Yellow)"
-  // But actually, client sends "Home: shirt/shorts/socks (GK: gk)" string.
-  // We should ideally change client to send specific fields, but for now let's parse or just update client to send object.
-  // UPDATE: Client sends simple strings currently. We need to update client to send structured data OR parse.
-  // BETTER: Let's assume we update client in next step. For now, let's just make placeholders if we can't parse easily without client update.
-  // WAIT: The user asked "headers are not correct... each column should correspond to each separate type of data".
-  // So I need to explode the current "Home Uniform" string into 4 columns.
   
-  // Actually, I can't easily parse "Home: Red/Red/Red (GK: Yellow)" reliably without regex.
-  // I will update the code to expect the client to send the separate fields, 
-  // BUT first I need to update the CLIENT (coach.html) to send them.
-  // Since I can only edit one file at a time or I am in the backend file now, I will update backend to EXPECT separate fields.
   
   // Columns: First, Last, Email, School, Mascot, Supervisor, Film, Platform, H-Shirt, H-Shorts, H-Socks, H-GK, A-Shirt, A-Shorts, A-Socks, A-GK, Date
   pendingSheet.appendRow([
