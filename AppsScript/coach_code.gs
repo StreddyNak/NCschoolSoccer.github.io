@@ -64,45 +64,101 @@ function handleGet(e) {
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
-// ... handleReviewSubmission ...
+// ── Review Submission ──
 function handleReviewSubmission(data) {
   var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
-  var sheet = ss.getSheetByName("Reviews");
-  
-  if (!sheet) {
-    sheet = ss.insertSheet("Reviews");
-    sheet.appendRow(["Timestamp", "Coach Email", "Date", "Opponent", "Level", "Movement", "Communication/Control", "Home AR", "Away AR", "Reviewed"]);
-  }
-  
+  var level = data.level || "";
   var r = data.ratings || {};
-  var m1 = r.movement || "";
-  var m2 = r.communication || r.control || "";
-  var m3 = r.home_ar || "";
-  var m4 = r.away_ar || "";
-  
-  sheet.appendRow([
-    new Date(),
-    data.coachEmail,
-    data.date,
-    data.opponent,
-    data.level,
-    m1,
-    m2,
-    m3,
-    m4,
-    false // Reviewed Checkbox (initially false)
-  ]);
-  
-  // Email Admin
-  var subject = "New Performance Review Submitted";
-  var body = "A new performance review has been submitted by " + data.coachEmail + ".\n\n" +
+
+  // Helper to extract a metric value from a section object
+  function v(section, key) { return (r[section] && r[section][key] !== undefined && r[section][key] !== null) ? String(r[section][key]) : ""; }
+
+  var sheet;
+  var row;
+
+  if (level === "JV") {
+    sheet = ss.getSheetByName("Reviews_JV");
+    if (!sheet) {
+      sheet = ss.insertSheet("Reviews_JV");
+      sheet.appendRow([
+        "Timestamp", "Coach Email", "Date", "Opponent", "Level",
+        // Home Ref (6)
+        "HR: Pre-Game Comm", "HR: Appearance", "HR: Fitness/Movement", "HR: Game Mgmt", "HR: In-Game Comm", "HR: Teamwork",
+        // Away Ref (6)
+        "AR: Pre-Game Comm", "AR: Appearance", "AR: Fitness/Movement", "AR: Game Mgmt", "AR: In-Game Comm", "AR: Teamwork",
+        "Reviewed"
+      ]);
+    }
+    row = [
+      new Date(), data.coachEmail, data.date, data.opponent, level,
+      v("jv_home_ref","pregame_comm"), v("jv_home_ref","appearance"), v("jv_home_ref","fitness"),
+      v("jv_home_ref","game_mgmt"),    v("jv_home_ref","ingame_comm"), v("jv_home_ref","teamwork"),
+      v("jv_away_ref","pregame_comm"), v("jv_away_ref","appearance"), v("jv_away_ref","fitness"),
+      v("jv_away_ref","game_mgmt"),    v("jv_away_ref","ingame_comm"), v("jv_away_ref","teamwork"),
+      false
+    ];
+  } else {
+    // Varsity
+    sheet = ss.getSheetByName("Reviews_Varsity");
+    if (!sheet) {
+      sheet = ss.insertSheet("Reviews_Varsity");
+      sheet.appendRow([
+        "Timestamp", "Coach Email", "Date", "Opponent", "Level",
+        // Referee (6)
+        "REF: Pre-Game Comm", "REF: Appearance", "REF: Movement/Fitness", "REF: Teamwork", "REF: Game Mgmt", "REF: In-Game Comm",
+        // Home AR (5)
+        "Home AR: Appearance", "Home AR: Fitness", "Home AR: Positioning", "Home AR: Communication", "Home AR: Teamwork",
+        // Away AR (5)
+        "Away AR: Appearance", "Away AR: Fitness", "Away AR: Positioning", "Away AR: Communication", "Away AR: Teamwork",
+        "Reviewed"
+      ]);
+    }
+    row = [
+      new Date(), data.coachEmail, data.date, data.opponent, level,
+      v("v_ref","pregame_comm"), v("v_ref","appearance"), v("v_ref","movement"),
+      v("v_ref","teamwork"),      v("v_ref","game_mgmt"),  v("v_ref","ingame_comm"),
+      v("v_home_ar","appearance"), v("v_home_ar","fitness"), v("v_home_ar","positioning"),
+      v("v_home_ar","communication"), v("v_home_ar","teamwork"),
+      v("v_away_ar","appearance"), v("v_away_ar","fitness"), v("v_away_ar","positioning"),
+      v("v_away_ar","communication"), v("v_away_ar","teamwork"),
+      false
+    ];
+  }
+
+  sheet.appendRow(row);
+
+  // ── Email Admin with full details ──
+  function sectionBlock(title, section, metrics) {
+    var lines = title + "\n";
+    metrics.forEach(function(m) {
+      var val = (r[section] && r[section][m.key] !== undefined && r[section][m.key] !== null) ? String(r[section][m.key]) : "—";
+      lines += "  " + m.label + ": " + val + "\n";
+    });
+    return lines;
+  }
+
+  var JV_METRICS  = [{key:"pregame_comm",label:"Pre-Game Communication"},{key:"appearance",label:"Appearance"},{key:"fitness",label:"Fitness/Movement"},{key:"game_mgmt",label:"Game Management"},{key:"ingame_comm",label:"In-Game Communication"},{key:"teamwork",label:"Teamwork"}];
+  var V_REF_M     = [{key:"pregame_comm",label:"Pre-Game Communication"},{key:"appearance",label:"Appearance"},{key:"movement",label:"Movement/Fitness"},{key:"teamwork",label:"Teamwork"},{key:"game_mgmt",label:"Game Management"},{key:"ingame_comm",label:"In-Game Communication"}];
+  var AR_M        = [{key:"appearance",label:"Appearance"},{key:"fitness",label:"Fitness"},{key:"positioning",label:"Positioning"},{key:"communication",label:"Communication"},{key:"teamwork",label:"Teamwork"}];
+
+  var body = "New Performance Review Submitted\n" +
+             "====================================\n" +
+             "Coach: " + data.coachEmail + "\n" +
              "Date: " + data.date + "\n" +
              "Opponent: " + data.opponent + "\n" +
-             "Level: " + data.level + "\n\n" +
-             "Please check the 'Reviews' sheet to mark it as reviewed.";
-             
-  MailApp.sendEmail(ADMIN_EMAIL, subject, body, {name: 'NC HS Soccer Portal'});
-  
+             "Level: " + level + "\n\n";
+
+  if (level === "JV") {
+    body += sectionBlock("HOME SIDE REFEREE", "jv_home_ref", JV_METRICS) + "\n";
+    body += sectionBlock("AWAY SIDE REFEREE", "jv_away_ref", JV_METRICS);
+  } else {
+    body += sectionBlock("REFEREE", "v_ref", V_REF_M) + "\n";
+    body += sectionBlock("HOME SIDE AR", "v_home_ar", AR_M) + "\n";
+    body += sectionBlock("AWAY SIDE AR", "v_away_ar", AR_M);
+  }
+
+  MailApp.sendEmail(ADMIN_EMAIL, "New Performance Review — " + level + " vs " + data.opponent, body, {name: 'NC HS Soccer Portal'});
+
   return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -149,32 +205,49 @@ function handleClipSubmission(data) {
 
 function getPastReviews(email) {
   if (!email) return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Email required" })).setMimeType(ContentService.MimeType.JSON);
-  
+
   email = email.toLowerCase().trim();
   var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
-  var sheet = ss.getSheetByName("Reviews");
-  
-  if (!sheet) return ContentService.createTextOutput(JSON.stringify({ status: "success", reviews: [] })).setMimeType(ContentService.MimeType.JSON);
-  
-  var data = sheet.getDataRange().getValues();
   var reviews = [];
-  
-  for (var i = 1; i < data.length; i++) {
-    // Column 1: Coach Email
-    if (String(data[i][1] || "").toLowerCase().trim() === email) {
-      reviews.push({
-        date: data[i][2],       // Date
-        opponent: data[i][3],   // Opponent
-        level: data[i][4],      // Level
-        movement: data[i][5],   // Movement
-        control: data[i][6],    // Communication/Control
-        homeAR: data[i][7],     // Home AR
-        awayAR: data[i][8],     // Away AR
-        reviewed: data[i][9] === true || String(data[i][9]).toLowerCase() === 'true'
-      });
+
+  // Helper: read a sheet and map rows to review objects
+  function readSheet(sheetName, level, mapper) {
+    var s = ss.getSheetByName(sheetName);
+    if (!s) return;
+    var rows = s.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (String(rows[i][1] || "").toLowerCase().trim() === email) {
+        reviews.push(mapper(rows[i], level));
+      }
     }
   }
-  
+
+  readSheet("Reviews_JV", "JV", function(d) {
+    return {
+      date: d[2], opponent: d[3], level: "JV",
+      reviewed: d[17] === true || String(d[17]).toLowerCase() === 'true',
+      ratings: {
+        jv_home_ref: { pregame_comm: d[5],  appearance: d[6],  fitness: d[7],  game_mgmt: d[8],  ingame_comm: d[9],  teamwork: d[10] },
+        jv_away_ref: { pregame_comm: d[11], appearance: d[12], fitness: d[13], game_mgmt: d[14], ingame_comm: d[15], teamwork: d[16] }
+      }
+    };
+  });
+
+  readSheet("Reviews_Varsity", "Varsity", function(d) {
+    return {
+      date: d[2], opponent: d[3], level: "Varsity",
+      reviewed: d[21] === true || String(d[21]).toLowerCase() === 'true',
+      ratings: {
+        v_ref:     { pregame_comm: d[5],  appearance: d[6],  movement: d[7],    teamwork: d[8],    game_mgmt: d[9],    ingame_comm: d[10] },
+        v_home_ar: { appearance: d[11],   fitness: d[12],    positioning: d[13], communication: d[14], teamwork: d[15] },
+        v_away_ar: { appearance: d[16],   fitness: d[17],    positioning: d[18], communication: d[19], teamwork: d[20] }
+      }
+    };
+  });
+
+  // Sort newest first by date
+  reviews.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
   return ContentService.createTextOutput(JSON.stringify({ status: "success", reviews: reviews })).setMimeType(ContentService.MimeType.JSON);
 }
 

@@ -623,6 +623,79 @@
             letter-spacing: 1px;
         }
 
+        /* ── Review Sections ── */
+        .review-section {
+            background: var(--gray-light);
+            border-radius: 12px;
+            padding: 20px 22px;
+        }
+
+        .review-section-title {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8edf3;
+        }
+
+        .rating-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e8edf3;
+        }
+
+        .rating-row:last-child {
+            border-bottom: none;
+        }
+
+        .rating-row-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--navy-mid);
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .rating-row-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .na-btn {
+            background: none;
+            border: 2px solid #dde4ed;
+            color: var(--gray);
+            border-radius: 6px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+            width: auto;
+        }
+
+        .na-btn.active {
+            background: #f0f0f0;
+            border-color: #aaa;
+            color: #555;
+        }
+
+        .na-btn.active~.stars {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
         /* Clip status badges */
         .status-submitted {
             background: #e8f4fd;
@@ -1095,76 +1168,39 @@
 
                 <hr class="divider">
 
-                <!-- JV Ratings -->
+                <!-- ═══ JV Ratings ═══ -->
                 <div id="jv-ratings" style="display:none;">
-                    <div class="section-label">JV Official (Center)</div>
-                    <div class="rating-group" data-metric="jv_home_ref_movement">
-                        <label class="form-label">Movement / Positioning</label>
-                        <div class="stars">
-                            <span class="star" onclick="rate(this,1)">★</span>
-                            <span class="star" onclick="rate(this,2)">★</span>
-                            <span class="star" onclick="rate(this,3)">★</span>
-                            <span class="star" onclick="rate(this,4)">★</span>
-                            <span class="star" onclick="rate(this,5)">★</span>
-                        </div>
+
+                    <div class="review-section">
+                        <div class="review-section-title">🟦 Home Side Referee</div>
+                        <div id="jv-home-ref-rows"></div>
                     </div>
-                    <div class="rating-group" data-metric="jv_home_ref_comms">
-                        <label class="form-label">Communication & Appearance</label>
-                        <div class="stars">
-                            <span class="star" onclick="rate(this,1)">★</span>
-                            <span class="star" onclick="rate(this,2)">★</span>
-                            <span class="star" onclick="rate(this,3)">★</span>
-                            <span class="star" onclick="rate(this,4)">★</span>
-                            <span class="star" onclick="rate(this,5)">★</span>
-                        </div>
+
+                    <div class="review-section" style="margin-top:24px;">
+                        <div class="review-section-title">🟧 Away Side Referee</div>
+                        <div id="jv-away-ref-rows"></div>
                     </div>
+
                 </div>
 
-                <!-- Varsity Ratings -->
+                <!-- ═══ Varsity Ratings ═══ -->
                 <div id="varsity-ratings" style="display:none;">
-                    <div class="section-label">Center Referee</div>
-                    <div class="rating-group" data-metric="varsity_ref_movement">
-                        <label class="form-label">Movement & Fitness</label>
-                        <div class="stars">
-                            <span class="star" onclick="rate(this,1)">★</span>
-                            <span class="star" onclick="rate(this,2)">★</span>
-                            <span class="star" onclick="rate(this,3)">★</span>
-                            <span class="star" onclick="rate(this,4)">★</span>
-                            <span class="star" onclick="rate(this,5)">★</span>
-                        </div>
+
+                    <div class="review-section">
+                        <div class="review-section-title">⚽ Referee</div>
+                        <div id="v-ref-rows"></div>
                     </div>
-                    <div class="rating-group" data-metric="varsity_ref_control">
-                        <label class="form-label">Game Control</label>
-                        <div class="stars">
-                            <span class="star" onclick="rate(this,1)">★</span>
-                            <span class="star" onclick="rate(this,2)">★</span>
-                            <span class="star" onclick="rate(this,3)">★</span>
-                            <span class="star" onclick="rate(this,4)">★</span>
-                            <span class="star" onclick="rate(this,5)">★</span>
-                        </div>
+
+                    <div class="review-section" style="margin-top:24px;">
+                        <div class="review-section-title">🟦 Home Side AR</div>
+                        <div id="v-home-ar-rows"></div>
                     </div>
-                    <div class="grid-2" style="margin-top:16px;">
-                        <div class="rating-group" data-metric="varsity_home_ar_pos">
-                            <label class="form-label">Home Side AR: Positioning</label>
-                            <div class="stars">
-                                <span class="star" onclick="rate(this,1)">★</span>
-                                <span class="star" onclick="rate(this,2)">★</span>
-                                <span class="star" onclick="rate(this,3)">★</span>
-                                <span class="star" onclick="rate(this,4)">★</span>
-                                <span class="star" onclick="rate(this,5)">★</span>
-                            </div>
-                        </div>
-                        <div class="rating-group" data-metric="varsity_away_ar_pos">
-                            <label class="form-label">Away Side AR: Positioning</label>
-                            <div class="stars">
-                                <span class="star" onclick="rate(this,1)">★</span>
-                                <span class="star" onclick="rate(this,2)">★</span>
-                                <span class="star" onclick="rate(this,3)">★</span>
-                                <span class="star" onclick="rate(this,4)">★</span>
-                                <span class="star" onclick="rate(this,5)">★</span>
-                            </div>
-                        </div>
+
+                    <div class="review-section" style="margin-top:24px;">
+                        <div class="review-section-title">🟧 Away Side AR</div>
+                        <div id="v-away-ar-rows"></div>
                     </div>
+
                 </div>
 
                 <div style="display:flex; gap:12px; margin-top:28px;">
@@ -1480,19 +1516,133 @@
         }
 
         // ── Performance Review ──
-        function toggleLevelRatings() {
-            const level = document.getElementById('gameLevel').value;
-            document.getElementById('jv-ratings').style.display = level === 'JV' ? 'block' : 'none';
-            document.getElementById('varsity-ratings').style.display = level === 'Varsity' ? 'block' : 'none';
+
+        // Metric definitions
+        const JV_REF_METRICS = [
+            { key: 'pregame_comm', label: 'Pre-Game Communication' },
+            { key: 'appearance', label: 'Appearance' },
+            { key: 'fitness', label: 'Fitness / Movement' },
+            { key: 'game_mgmt', label: 'Game Management' },
+            { key: 'ingame_comm', label: 'In-Game Communication' },
+            { key: 'teamwork', label: 'Teamwork' }
+        ];
+        const V_REF_METRICS = [
+            { key: 'pregame_comm', label: 'Pre-Game Communication' },
+            { key: 'appearance', label: 'Appearance' },
+            { key: 'movement', label: 'Movement / Fitness' },
+            { key: 'teamwork', label: 'Teamwork' },
+            { key: 'game_mgmt', label: 'Game Management' },
+            { key: 'ingame_comm', label: 'In-Game Communication' }
+        ];
+        const AR_METRICS = [
+            { key: 'appearance', label: 'Appearance' },
+            { key: 'fitness', label: 'Fitness' },
+            { key: 'positioning', label: 'Positioning' },
+            { key: 'communication', label: 'Communication' },
+            { key: 'teamwork', label: 'Teamwork' }
+        ];
+
+        // Build a rating row element; prefix ensures unique metric keys per section
+        function buildRatingRow(prefix, metric) {
+            const fullKey = prefix + '_' + metric.key;
+            const row = document.createElement('div');
+            row.className = 'rating-row';
+            row.dataset.metric = fullKey;
+
+            const label = document.createElement('div');
+            label.className = 'rating-row-label';
+            label.textContent = metric.label;
+
+            const controls = document.createElement('div');
+            controls.className = 'rating-row-controls';
+
+            const naBtn = document.createElement('button');
+            naBtn.className = 'na-btn';
+            naBtn.type = 'button';
+            naBtn.textContent = 'N/A';
+            naBtn.onclick = () => toggleNA(naBtn, fullKey);
+
+            const starsDiv = document.createElement('div');
+            starsDiv.className = 'stars';
+            for (let i = 1; i <= 5; i++) {
+                const s = document.createElement('span');
+                s.className = 'star';
+                s.textContent = '★';
+                s.onclick = function () { rate(s, i, fullKey); };
+                starsDiv.appendChild(s);
+            }
+
+            controls.appendChild(naBtn);
+            controls.appendChild(starsDiv);
+            row.appendChild(label);
+            row.appendChild(controls);
+            return row;
         }
 
-        function rate(star, value) {
-            const group = star.closest('.rating-group');
-            const metric = group.dataset.metric;
-            ratings[metric] = value;
-            group.querySelectorAll('.star').forEach((s, i) => {
-                s.classList.toggle('active', i < value);
+        function buildSection(containerId, prefix, metrics) {
+            const el = document.getElementById(containerId);
+            el.innerHTML = '';
+            metrics.forEach(m => el.appendChild(buildRatingRow(prefix, m)));
+        }
+
+        function toggleLevelRatings() {
+            const level = document.getElementById('gameLevel').value;
+            const jv = document.getElementById('jv-ratings');
+            const v = document.getElementById('varsity-ratings');
+
+            // Reset ratings
+            Object.keys(ratings).forEach(k => delete ratings[k]);
+
+            if (level === 'JV') {
+                jv.style.display = 'block';
+                v.style.display = 'none';
+                buildSection('jv-home-ref-rows', 'jv_home_ref', JV_REF_METRICS);
+                buildSection('jv-away-ref-rows', 'jv_away_ref', JV_REF_METRICS);
+            } else if (level === 'Varsity') {
+                jv.style.display = 'none';
+                v.style.display = 'block';
+                buildSection('v-ref-rows', 'v_ref', V_REF_METRICS);
+                buildSection('v-home-ar-rows', 'v_home_ar', AR_METRICS);
+                buildSection('v-away-ar-rows', 'v_away_ar', AR_METRICS);
+            } else {
+                jv.style.display = 'none';
+                v.style.display = 'none';
+            }
+        }
+
+        function rate(star, value, fullKey) {
+            ratings[fullKey] = value;
+            // Un-NA the row
+            const row = star.closest('.rating-row');
+            const naBtn = row.querySelector('.na-btn');
+            if (naBtn) naBtn.classList.remove('active');
+            row.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('active', i < value));
+        }
+
+        function toggleNA(btn, fullKey) {
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) {
+                ratings[fullKey] = 'N/A';
+                // Clear star highlights
+                btn.nextElementSibling.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+            } else {
+                delete ratings[fullKey];
+            }
+        }
+
+        // Collect all keys for a prefix group
+        function collectGroup(prefix, metrics) {
+            const result = {};
+            metrics.forEach(m => {
+                const k = prefix + '_' + m.key;
+                result[m.key] = ratings[k] !== undefined ? ratings[k] : null;
             });
+            return result;
+        }
+
+        // Check that every key in a group has been rated (either 1-5 or 'N/A')
+        function groupComplete(prefix, metrics) {
+            return metrics.every(m => ratings[prefix + '_' + m.key] !== undefined);
         }
 
         function submitReview() {
@@ -1502,29 +1652,36 @@
 
             if (!date || !opponent || !level) { alert('Please fill in all game details.'); return; }
 
+            let ratingPayload = {};
+
+            if (level === 'JV') {
+                if (!groupComplete('jv_home_ref', JV_REF_METRICS) ||
+                    !groupComplete('jv_away_ref', JV_REF_METRICS)) {
+                    alert('Please rate all categories for both referees (or mark N/A).'); return;
+                }
+                ratingPayload = {
+                    jv_home_ref: collectGroup('jv_home_ref', JV_REF_METRICS),
+                    jv_away_ref: collectGroup('jv_away_ref', JV_REF_METRICS)
+                };
+            } else if (level === 'Varsity') {
+                if (!groupComplete('v_ref', V_REF_METRICS) ||
+                    !groupComplete('v_home_ar', AR_METRICS) ||
+                    !groupComplete('v_away_ar', AR_METRICS)) {
+                    alert('Please rate all categories for all officials (or mark N/A).'); return;
+                }
+                ratingPayload = {
+                    v_ref: collectGroup('v_ref', V_REF_METRICS),
+                    v_home_ar: collectGroup('v_home_ar', AR_METRICS),
+                    v_away_ar: collectGroup('v_away_ar', AR_METRICS)
+                };
+            }
+
             const payload = {
                 type: 'review_submission',
                 coachEmail: currentUserEmail,
-                date, opponent, level, ratings: {}
+                date, opponent, level,
+                ratings: ratingPayload
             };
-
-            if (level === 'JV') {
-                if (!ratings['jv_home_ref_movement'] || !ratings['jv_home_ref_comms']) {
-                    alert('Please rate all JV categories.'); return;
-                }
-                payload.ratings = { movement: ratings['jv_home_ref_movement'], communication: ratings['jv_home_ref_comms'] };
-            } else if (level === 'Varsity') {
-                if (!ratings['varsity_ref_movement'] || !ratings['varsity_ref_control'] ||
-                    !ratings['varsity_home_ar_pos'] || !ratings['varsity_away_ar_pos']) {
-                    alert('Please rate all Varsity categories.'); return;
-                }
-                payload.ratings = {
-                    movement: ratings['varsity_ref_movement'],
-                    control: ratings['varsity_ref_control'],
-                    home_ar: ratings['varsity_home_ar_pos'],
-                    away_ar: ratings['varsity_away_ar_pos']
-                };
-            }
 
             showModal('Submitting Review...', 'Please wait...', '⏳', false);
 
@@ -1537,8 +1694,6 @@
                         document.getElementById('opponent').value = '';
                         document.getElementById('gameLevel').value = '';
                         toggleLevelRatings();
-                        document.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
-                        Object.keys(ratings).forEach(k => delete ratings[k]);
                         showCardGrid();
                     } else {
                         closeModal();
@@ -1547,6 +1702,7 @@
                 })
                 .catch(err => { closeModal(); alert('Error: ' + err.toString()); });
         }
+
 
         // ── Review History ──
         function loadPastReviews() {
@@ -1570,31 +1726,50 @@
                             const statusText = reviewed ? '✓ Reviewed' : 'Pending';
                             const borderClass = reviewed ? 'reviewed' : 'pending';
 
-                            // Build star display helper
-                            const stars = (n) => n ? '★'.repeat(Math.min(5, parseInt(n))) + '☆'.repeat(Math.max(0, 5 - parseInt(n))) : '—';
+                            // Render a value: star string or 'N/A' or '—'
+                            const display = (val) => {
+                                if (val === 'N/A' || val === null || val === undefined || val === '') return '<span style="color:#aaa;font-size:0.8rem;">N/A</span>';
+                                const n = parseInt(val);
+                                return `<span class="star-display">${'★'.repeat(Math.min(5, n))}${'☆'.repeat(Math.max(0, 5 - n))}</span>`;
+                            };
+
+                            // Build a mini section table
+                            const sectionHtml = (title, secObj, keys) => {
+                                if (!secObj) return '';
+                                let h = `<div style="margin-top:12px;">
+                                    <div style="font-size:0.72rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">${title}</div>
+                                    <div class="detail-grid">`;
+                                keys.forEach(({ key, label }) => {
+                                    h += `<div class="detail-cell"><div class="dc-label">${label}</div><div class="dc-value">${display(secObj[key])}</div></div>`;
+                                });
+                                h += '</div></div>';
+                                return h;
+                            };
+
+                            const JV_KEYS = [{ key: 'pregame_comm', label: 'Pre-Game Comm' }, { key: 'appearance', label: 'Appearance' }, { key: 'fitness', label: 'Fitness/Movement' }, { key: 'game_mgmt', label: 'Game Mgmt' }, { key: 'ingame_comm', label: 'In-Game Comm' }, { key: 'teamwork', label: 'Teamwork' }];
+                            const VREF_KEYS = [{ key: 'pregame_comm', label: 'Pre-Game Comm' }, { key: 'appearance', label: 'Appearance' }, { key: 'movement', label: 'Movement/Fitness' }, { key: 'teamwork', label: 'Teamwork' }, { key: 'game_mgmt', label: 'Game Mgmt' }, { key: 'ingame_comm', label: 'In-Game Comm' }];
+                            const AR_KEYS = [{ key: 'appearance', label: 'Appearance' }, { key: 'fitness', label: 'Fitness' }, { key: 'positioning', label: 'Positioning' }, { key: 'communication', label: 'Communication' }, { key: 'teamwork', label: 'Teamwork' }];
+
+                            let detailsHtml = `<div class="detail-grid"><div class="detail-cell"><div class="dc-label">Level</div><div class="dc-value">${r.level || '—'}</div></div></div>`;
+
+                            const rt = r.ratings || {};
+                            if (r.level === 'JV') {
+                                detailsHtml += sectionHtml('🟦 Home Side Referee', rt.jv_home_ref, JV_KEYS);
+                                detailsHtml += sectionHtml('🟧 Away Side Referee', rt.jv_away_ref, JV_KEYS);
+                            } else {
+                                detailsHtml += sectionHtml('⚽ Referee', rt.v_ref, VREF_KEYS);
+                                detailsHtml += sectionHtml('🟦 Home Side AR', rt.v_home_ar, AR_KEYS);
+                                detailsHtml += sectionHtml('🟧 Away Side AR', rt.v_away_ar, AR_KEYS);
+                            }
 
                             const item = document.createElement('div');
                             item.className = `history-item ${borderClass}`;
                             item.id = `review-item-${idx}`;
-
-                            // Build detail rows based on level
-                            let detailsHtml = `
-                                <div class="detail-grid">
-                                    <div class="detail-cell"><div class="dc-label">Level</div><div class="dc-value">${r.level || '—'}</div></div>
-                                    <div class="detail-cell"><div class="dc-label">Movement</div><div class="dc-value"><span class="star-display">${stars(r.movement)}</span></div></div>
-                                    <div class="detail-cell"><div class="dc-label">${r.level === 'JV' ? 'Communication' : 'Game Control'}</div><div class="dc-value"><span class="star-display">${stars(r.control)}</span></div></div>`;
-                            if (r.level === 'Varsity') {
-                                detailsHtml += `
-                                    <div class="detail-cell"><div class="dc-label">Home AR</div><div class="dc-value"><span class="star-display">${stars(r.homeAR)}</span></div></div>
-                                    <div class="detail-cell"><div class="dc-label">Away AR</div><div class="dc-value"><span class="star-display">${stars(r.awayAR)}</span></div></div>`;
-                            }
-                            detailsHtml += '</div>';
-
                             item.innerHTML = `
                                 <div class="history-item-header" onclick="toggleHistoryItem('review-item-${idx}')">
                                     <div class="hi-left">
                                         <strong>vs. ${r.opponent || 'Unknown'}</strong>
-                                        <span>${date}</span>
+                                        <span>${date} · ${r.level || ''}</span>
                                     </div>
                                     <div class="hi-right">
                                         <span class="status-badge ${statusClass}">${statusText}</span>
