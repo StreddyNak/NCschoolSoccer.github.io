@@ -269,7 +269,8 @@ function getPastReviews(email) {
     if (!s) return;
     var rows = s.getDataRange().getValues();
     for (var i = 1; i < rows.length; i++) {
-      if (String(rows[i][1] || "").toLowerCase().trim() === email) {
+      // Check Coach Email at index 2 (Col C)
+      if (String(rows[i][2] || "").toLowerCase().trim() === email) {
         reviews.push(mapper(rows[i], level));
       }
     }
@@ -277,23 +278,23 @@ function getPastReviews(email) {
 
   readSheet("Reviews_JV", "JV", function(d) {
     return {
-      date: d[2], opponent: d[3], level: "JV",
-      reviewed: d[17] === true || String(d[17]).toLowerCase() === 'true',
+      date: d[4], opponent: d[5], level: "JV",
+      reviewed: d[33] === true || String(d[33]).toLowerCase() === 'true',
       ratings: {
-        jv_home_ref: { pregame_comm: d[5],  appearance: d[6],  fitness: d[7],  game_mgmt: d[8],  ingame_comm: d[9],  teamwork: d[10] },
-        jv_away_ref: { pregame_comm: d[11], appearance: d[12], fitness: d[13], game_mgmt: d[14], ingame_comm: d[15], teamwork: d[16] }
+        jv_home_ref: { pregame_comm: d[7],  appearance: d[8],  fitness: d[9],  game_mgmt: d[10],  ingame_comm: d[11],  teamwork: d[12] },
+        jv_away_ref: { pregame_comm: d[20], appearance: d[21], fitness: d[22], game_mgmt: d[23], ingame_comm: d[24], teamwork: d[25] }
       }
     };
   });
 
   readSheet("Reviews_Varsity", "Varsity", function(d) {
     return {
-      date: d[2], opponent: d[3], level: "Varsity",
-      reviewed: d[21] === true || String(d[21]).toLowerCase() === 'true',
+      date: d[4], opponent: d[5], level: "Varsity",
+      reviewed: d[42] === true || String(d[42]).toLowerCase() === 'true',
       ratings: {
-        v_ref:     { pregame_comm: d[5],  appearance: d[6],  movement: d[7],    teamwork: d[8],    game_mgmt: d[9],    ingame_comm: d[10] },
-        v_home_ar: { appearance: d[11],   fitness: d[12],    positioning: d[13], communication: d[14], teamwork: d[15] },
-        v_away_ar: { appearance: d[16],   fitness: d[17],    positioning: d[18], communication: d[19], teamwork: d[20] }
+        v_ref:     { pregame_comm: d[7],  appearance: d[8],  movement: d[9],    teamwork: d[10],    game_mgmt: d[11],    ingame_comm: d[12] },
+        v_home_ar: { appearance: d[20],   fitness: d[21],    positioning: d[22], communication: d[23], teamwork: d[24] },
+        v_away_ar: { appearance: d[31],   fitness: d[32],    positioning: d[33], communication: d[34], teamwork: d[35] }
       }
     };
   });
@@ -317,16 +318,17 @@ function getPastClips(email) {
   var clips = [];
 
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][1] || "").toLowerCase().trim() === email) {
+    // Check Coach Email at index 2 (Col C)
+    if (String(data[i][2] || "").toLowerCase().trim() === email) {
       clips.push({
         timestamp: data[i][0],
-        date: data[i][2],
-        opponent: data[i][3],
-        level: data[i][4],
-        clipLocation: data[i][5],
-        notes: data[i][6],
-        status: data[i][7] || "Submitted",
-        adminNotes: data[i][8] || ""
+        date: data[i][4],
+        opponent: data[i][5],
+        level: data[i][6],
+        clipLocation: data[i][7],
+        notes: data[i][8],
+        status: data[i][9] || "Submitted",
+        adminNotes: data[i][10] || ""
       });
     }
   }

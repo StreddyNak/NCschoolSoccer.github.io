@@ -1494,7 +1494,7 @@
                 .then(r => r.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        showModal('Request Submitted!', 'Your account request has been sent. You will receive an email once approved.', '✅', true);
+                        showModal('Request Submitted!', 'Your account request has been sent and will be reviewed. You will receive an email once approved, at which time you can log in to the Coaches Portal.', '✅', true);
                         showLogin();
                         document.getElementById('regFirstName').value = '';
                         document.getElementById('regLastName').value = '';
@@ -1665,6 +1665,9 @@
                 ratings[fullKey] = 'N/A';
                 // Clear star highlights
                 btn.nextElementSibling.querySelectorAll('.star').forEach(s => s.classList.remove('active'));
+                // Hide reason box if open
+                const reasonBox = document.getElementById(fullKey + '_reason')?.parentElement;
+                if (reasonBox) reasonBox.style.display = 'none';
             } else {
                 delete ratings[fullKey];
             }
@@ -1693,6 +1696,21 @@
             return metrics.every(m => ratings[prefix + '_' + m.key] !== undefined);
         }
 
+        // Check if any low ratings (<=2) are missing a reason
+        function checkLowRatingsWithReason(prefix, metrics) {
+            for (let m of metrics) {
+                const k = prefix + '_' + m.key;
+                const val = ratings[k];
+                if (typeof val === 'number' && val <= 2) {
+                    const reasonEl = document.getElementById(k + '_reason');
+                    if (!reasonEl || !reasonEl.value.trim()) {
+                        return { valid: false, label: m.label };
+                    }
+                }
+            }
+            return { valid: true };
+        }
+
         function submitReview() {
             const date = document.getElementById('gameDate').value;
             const opponent = document.getElementById('opponent').value.trim();
@@ -1707,6 +1725,12 @@
                     !groupComplete('jv_away_ref', JV_REF_METRICS)) {
                     alert('Please rate all categories for both referees (or mark N/A).'); return;
                 }
+                // Validate reasons
+                let v1 = checkLowRatingsWithReason('jv_home_ref', JV_REF_METRICS);
+                if (!v1.valid) { alert(`Please provide a reason for the low rating in "${v1.label}" (Home Ref).`); return; }
+                let v2 = checkLowRatingsWithReason('jv_away_ref', JV_REF_METRICS);
+                if (!v2.valid) { alert(`Please provide a reason for the low rating in "${v2.label}" (Away Ref).`); return; }
+
                 ratingPayload = {
                     jv_home_ref: collectGroup('jv_home_ref', JV_REF_METRICS),
                     jv_away_ref: collectGroup('jv_away_ref', JV_REF_METRICS)
@@ -1717,6 +1741,14 @@
                     !groupComplete('v_away_ar', AR_METRICS)) {
                     alert('Please rate all categories for all officials (or mark N/A).'); return;
                 }
+                // Validate reasons
+                let v1 = checkLowRatingsWithReason('v_ref', V_REF_METRICS);
+                if (!v1.valid) { alert(`Please provide a reason for the low rating in "${v1.label}" (Referee).`); return; }
+                let v2 = checkLowRatingsWithReason('v_home_ar', AR_METRICS);
+                if (!v2.valid) { alert(`Please provide a reason for the low rating in "${v2.label}" (Home AR).`); return; }
+                let v3 = checkLowRatingsWithReason('v_away_ar', AR_METRICS);
+                if (!v3.valid) { alert(`Please provide a reason for the low rating in "${v3.label}" (Away AR).`); return; }
+
                 ratingPayload = {
                     v_ref: collectGroup('v_ref', V_REF_METRICS),
                     v_home_ar: collectGroup('v_home_ar', AR_METRICS),
