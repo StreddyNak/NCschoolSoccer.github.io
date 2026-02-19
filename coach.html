@@ -1268,15 +1268,49 @@
                     <input type="text" id="clipOpponent" class="form-control" placeholder="Enter school name">
                 </div>
 
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Half</label>
+                        <select id="clipHalf" class="form-control">
+                            <option value="">Select Half...</option>
+                            <option value="1st Half">1st Half</option>
+                            <option value="2nd Half">2nd Half</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Time in Half</label>
+                        <input type="text" id="clipTime" class="form-control" placeholder="e.g. 15min or 15:00">
+                    </div>
+                </div>
+
                 <hr class="divider">
 
                 <div class="form-group">
-                    <label class="form-label">Where can we find this clip?</label>
-                    <textarea id="clipLocation" class="form-control" rows="3"
-                        placeholder="e.g. HUDL link, NFHS Network URL, Veo clip link, YouTube link, or describe where to find it (platform + timestamp)..."></textarea>
-                    <div class="helper-text">Paste a direct link or describe how to access the clip (platform, game,
-                        timestamp).</div>
+                    <label class="form-label">What Platform is the video on?</label>
+                    <div class="radio-group" style="display: flex; gap: 15px; margin-top: 8px;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="clipPlatform" value="NFHS Network"
+                                onchange="togglePlatformFields()"> NFHS Network
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="clipPlatform" value="VEO" onchange="togglePlatformFields()"> VEO
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="clipPlatform" value="HUDL" onchange="togglePlatformFields()"> HUDL
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="clipPlatform" value="Other" onchange="togglePlatformFields()">
+                            Other
+                        </label>
+                    </div>
                 </div>
+
+                <div id="platformDetails" class="form-group"
+                    style="display:none; border-left: 3px solid #ccc; padding-left: 10px; margin-left: 5px;">
+                    <label id="platformLabel" class="form-label">Details</label>
+                    <input type="text" id="clipLocation" class="form-control" placeholder="">
+                </div>
+
 
                 <div class="form-group">
                     <label class="form-label">What would you like us to look at?</label>
@@ -1925,7 +1959,7 @@
                                     <div class="detail-grid">
                                         <div class="detail-cell" style="grid-column:1/-1">
                                             <div class="dc-label">Clip Location</div>
-                                            <div class="dc-value" style="font-size:0.85rem; font-weight:500; word-break:break-all;">${c.clipLocation || '—'}</div>
+                                            <div class="dc-value" style="font-size:0.85rem; font-weight:500; word-break:break-all; white-space: pre-wrap;">${c.clipLocation || '—'}</div>
                                         </div>
                                         <div class="detail-cell" style="grid-column:1/-1">
                                             <div class="dc-label">Your Notes</div>
@@ -1952,21 +1986,53 @@
             if (el) el.classList.toggle('open');
         }
 
+        function togglePlatformFields() {
+            const plat = document.querySelector('input[name="clipPlatform"]:checked');
+            const container = document.getElementById('platformDetails');
+            const label = document.getElementById('platformLabel');
+            const input = document.getElementById('clipLocation');
+
+            if (plat) {
+                container.style.display = 'block';
+                if (plat.value === 'NFHS Network') {
+                    label.innerText = 'Timestamp';
+                    input.placeholder = 'e.g. 1 hour 45 mins';
+                } else if (plat.value === 'VEO') {
+                    label.innerText = 'VEO Game Link';
+                    input.placeholder = 'Paste the VEO link here';
+                } else if (plat.value === 'HUDL') {
+                    label.innerText = 'HUDL URL Link';
+                    input.placeholder = 'Paste the HUDL link here';
+                } else if (plat.value === 'Other') {
+                    label.innerText = 'URL or Download File Location';
+                    input.placeholder = 'Provide URL or instructions';
+                }
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
         // ── Clip Discussion ──
         function submitClip() {
             const date = document.getElementById('clipDate').value;
             const level = document.getElementById('clipLevel').value;
             const opponent = document.getElementById('clipOpponent').value.trim();
-            const location = document.getElementById('clipLocation').value.trim();
+            const half = document.getElementById('clipHalf').value;
+            const time = document.getElementById('clipTime').value.trim();
+            const platRadio = document.querySelector('input[name="clipPlatform"]:checked');
+            const platform = platRadio ? platRadio.value : '';
+            const locationDetail = document.getElementById('clipLocation').value.trim();
             const notes = document.getElementById('clipNotes').value.trim();
             const errDiv = document.getElementById('clip-error');
 
             errDiv.style.display = 'none';
 
-            if (!date || !level || !opponent || !location) {
-                errDiv.textContent = 'Please fill in all required fields (Date, Level, Opponent, and Clip Location).';
+            if (!date || !level || !opponent || !half || !time || !platform || !locationDetail) {
+                errDiv.textContent = 'Please fill in all required fields, including half, time, and platform details.';
                 errDiv.style.display = 'block'; return;
             }
+
+            const location = `Half: ${half} | Time: ${time}\nPlatform: ${platform}\nDetails: ${locationDetail}`;
 
             showModal('Submitting Clip...', 'Please wait...', '⏳', false);
 
@@ -1988,7 +2054,11 @@
                         document.getElementById('clipDate').value = '';
                         document.getElementById('clipLevel').value = '';
                         document.getElementById('clipOpponent').value = '';
+                        document.getElementById('clipHalf').value = '';
+                        document.getElementById('clipTime').value = '';
+                        document.querySelectorAll('input[name="clipPlatform"]').forEach(rb => rb.checked = false);
                         document.getElementById('clipLocation').value = '';
+                        document.getElementById('platformDetails').style.display = 'none';
                         document.getElementById('clipNotes').value = '';
                         showCardGrid();
                     } else {
