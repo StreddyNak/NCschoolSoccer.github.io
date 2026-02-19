@@ -75,6 +75,7 @@
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
+            text-align: center;
         }
 
         /* ── Page wrapper ── */
@@ -923,7 +924,7 @@
         <div>
             <img src="assets/NickNak_logo.svg" alt="NC HS Soccer" class="logo-img" onerror="this.style.display='none'">
         </div>
-        <div class="partnership-text">Coach Portal</div>
+        <div class="partnership-text">--A Partnership Initiative--<br>The North Carolina HS Coach's Portal</div>
         <div>
             <a href="https://www.trianglerefs.org/"><img src="assets/TSOA_logo.svg" alt="TSOA" class="logo-img"
                     onerror="this.style.display='none'"></a>
@@ -1312,6 +1313,7 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxybcAnWIZ-6s2cBAAKpGRFh4fWrQegDULwY5bb5dfPhaNVWOS_rc0hP-uCHUt3r5td/exec";
         let currentUserEmail = '';
+        let currentUserData = { firstName: '', lastName: '', school: '' };
         const ratings = {};
 
         // ── Modal ──
@@ -1392,6 +1394,7 @@
 
         function showDashboard(data) {
             showView('dashboard-view');
+            currentUserData = { firstName: data.firstName || '', lastName: data.lastName || '', school: data.school || '' };
             document.getElementById('welcomeMsg').textContent = data.lastName || data.firstName || 'Coach';
             document.getElementById('schoolMsg').textContent = data.school || '';
             document.getElementById('mascotMsg').textContent = data.mascot ? `Go ${data.mascot}!` : '';
@@ -1545,6 +1548,8 @@
         // Build a rating row element; prefix ensures unique metric keys per section
         function buildRatingRow(prefix, metric) {
             const fullKey = prefix + '_' + metric.key;
+            const wrapper = document.createElement('div');
+
             const row = document.createElement('div');
             row.className = 'rating-row';
             row.dataset.metric = fullKey;
@@ -1564,11 +1569,28 @@
 
             const starsDiv = document.createElement('div');
             starsDiv.className = 'stars';
+
+            // Low-rating reason box (shown when 1 or 2 stars)
+            const reasonBox = document.createElement('div');
+            reasonBox.style.cssText = 'display:none; padding: 8px 0 4px 0;';
+            const reasonTA = document.createElement('textarea');
+            reasonTA.id = fullKey + '_reason';
+            reasonTA.className = 'form-control';
+            reasonTA.placeholder = 'Please explain this rating...';
+            reasonTA.rows = 2;
+            reasonTA.style.cssText = 'font-size:0.85rem; resize:vertical; min-height:52px;';
+            reasonBox.appendChild(reasonTA);
+
             for (let i = 1; i <= 5; i++) {
                 const s = document.createElement('span');
                 s.className = 'star';
                 s.textContent = '★';
-                s.onclick = function () { rate(s, i, fullKey); };
+                s.onclick = function () {
+                    rate(s, i, fullKey);
+                    // Show/hide reason box
+                    reasonBox.style.display = i <= 2 ? 'block' : 'none';
+                    if (i > 2) reasonTA.value = '';
+                };
                 starsDiv.appendChild(s);
             }
 
@@ -1576,13 +1598,31 @@
             controls.appendChild(starsDiv);
             row.appendChild(label);
             row.appendChild(controls);
-            return row;
+            wrapper.appendChild(row);
+            wrapper.appendChild(reasonBox);
+            return wrapper;
         }
 
         function buildSection(containerId, prefix, metrics) {
             const el = document.getElementById(containerId);
             el.innerHTML = '';
             metrics.forEach(m => el.appendChild(buildRatingRow(prefix, m)));
+            // Section-level additional notes
+            const notesWrap = document.createElement('div');
+            notesWrap.style.cssText = 'margin-top:12px;';
+            const notesLabel = document.createElement('div');
+            notesLabel.className = 'rating-row-label';
+            notesLabel.style.cssText = 'margin-bottom:6px; font-weight:700;';
+            notesLabel.textContent = 'Additional Notes (optional)';
+            const notesTA = document.createElement('textarea');
+            notesTA.id = prefix + '_section_notes';
+            notesTA.className = 'form-control';
+            notesTA.placeholder = 'Any additional comments about this official...';
+            notesTA.rows = 3;
+            notesTA.style.cssText = 'font-size:0.875rem; resize:vertical;';
+            notesWrap.appendChild(notesLabel);
+            notesWrap.appendChild(notesTA);
+            el.appendChild(notesWrap);
         }
 
         function toggleLevelRatings() {
@@ -1630,13 +1670,21 @@
             }
         }
 
-        // Collect all keys for a prefix group
+        // Collect all keys for a prefix group, including low-rating reasons and section notes
         function collectGroup(prefix, metrics) {
             const result = {};
             metrics.forEach(m => {
                 const k = prefix + '_' + m.key;
                 result[m.key] = ratings[k] !== undefined ? ratings[k] : null;
+                // Collect low-rating reason if present
+                const reasonEl = document.getElementById(k + '_reason');
+                if (reasonEl && reasonEl.value.trim()) {
+                    result[m.key + '_reason'] = reasonEl.value.trim();
+                }
             });
+            // Section notes
+            const notesEl = document.getElementById(prefix + '_section_notes');
+            if (notesEl) result['_notes'] = notesEl.value.trim();
             return result;
         }
 
@@ -1679,6 +1727,8 @@
             const payload = {
                 type: 'review_submission',
                 coachEmail: currentUserEmail,
+                coachName: `${currentUserData.firstName} ${currentUserData.lastName}`.trim(),
+                coachSchool: currentUserData.school,
                 date, opponent, level,
                 ratings: ratingPayload
             };
@@ -1891,6 +1941,8 @@
             const payload = {
                 type: 'clip_submission',
                 coachEmail: currentUserEmail,
+                coachName: `${currentUserData.firstName} ${currentUserData.lastName}`.trim(),
+                coachSchool: currentUserData.school,
                 date, level, opponent,
                 clipLocation: location,
                 notes

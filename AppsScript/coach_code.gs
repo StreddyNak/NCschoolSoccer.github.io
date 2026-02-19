@@ -69,9 +69,13 @@ function handleReviewSubmission(data) {
   var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
   var level = data.level || "";
   var r = data.ratings || {};
+  var coachName   = data.coachName   || data.coachEmail || "";
+  var coachSchool = data.coachSchool || "";
 
   // Helper to extract a metric value from a section object
   function v(section, key) { return (r[section] && r[section][key] !== undefined && r[section][key] !== null) ? String(r[section][key]) : ""; }
+  function vReason(section, key) { return v(section, key + "_reason"); }
+  function vNotes(section) { return (r[section] && r[section]["_notes"]) ? String(r[section]["_notes"]) : ""; }
 
   var sheet;
   var row;
@@ -81,20 +85,32 @@ function handleReviewSubmission(data) {
     if (!sheet) {
       sheet = ss.insertSheet("Reviews_JV");
       sheet.appendRow([
-        "Timestamp", "Coach Email", "Date", "Opponent", "Level",
-        // Home Ref (6)
+        "Timestamp", "Coach Name", "Coach Email", "School", "Date", "Opponent", "Level",
+        // Home Ref scores (6)
         "HR: Pre-Game Comm", "HR: Appearance", "HR: Fitness/Movement", "HR: Game Mgmt", "HR: In-Game Comm", "HR: Teamwork",
-        // Away Ref (6)
+        // Home Ref low-rating reasons (6)
+        "HR Reason: Pre-Game Comm", "HR Reason: Appearance", "HR Reason: Fitness", "HR Reason: Game Mgmt", "HR Reason: In-Game Comm", "HR Reason: Teamwork",
+        "HR: Notes",
+        // Away Ref scores (6)
         "AR: Pre-Game Comm", "AR: Appearance", "AR: Fitness/Movement", "AR: Game Mgmt", "AR: In-Game Comm", "AR: Teamwork",
+        // Away Ref low-rating reasons (6)
+        "AR Reason: Pre-Game Comm", "AR Reason: Appearance", "AR Reason: Fitness", "AR Reason: Game Mgmt", "AR Reason: In-Game Comm", "AR Reason: Teamwork",
+        "AR: Notes",
         "Reviewed"
       ]);
     }
     row = [
-      new Date(), data.coachEmail, data.date, data.opponent, level,
+      new Date(), coachName, data.coachEmail, coachSchool, data.date, data.opponent, level,
       v("jv_home_ref","pregame_comm"), v("jv_home_ref","appearance"), v("jv_home_ref","fitness"),
       v("jv_home_ref","game_mgmt"),    v("jv_home_ref","ingame_comm"), v("jv_home_ref","teamwork"),
+      vReason("jv_home_ref","pregame_comm"), vReason("jv_home_ref","appearance"), vReason("jv_home_ref","fitness"),
+      vReason("jv_home_ref","game_mgmt"),    vReason("jv_home_ref","ingame_comm"), vReason("jv_home_ref","teamwork"),
+      vNotes("jv_home_ref"),
       v("jv_away_ref","pregame_comm"), v("jv_away_ref","appearance"), v("jv_away_ref","fitness"),
       v("jv_away_ref","game_mgmt"),    v("jv_away_ref","ingame_comm"), v("jv_away_ref","teamwork"),
+      vReason("jv_away_ref","pregame_comm"), vReason("jv_away_ref","appearance"), vReason("jv_away_ref","fitness"),
+      vReason("jv_away_ref","game_mgmt"),    vReason("jv_away_ref","ingame_comm"), vReason("jv_away_ref","teamwork"),
+      vNotes("jv_away_ref"),
       false
     ];
   } else {
@@ -103,24 +119,39 @@ function handleReviewSubmission(data) {
     if (!sheet) {
       sheet = ss.insertSheet("Reviews_Varsity");
       sheet.appendRow([
-        "Timestamp", "Coach Email", "Date", "Opponent", "Level",
-        // Referee (6)
+        "Timestamp", "Coach Name", "Coach Email", "School", "Date", "Opponent", "Level",
+        // Referee (6 scores + 6 reasons + notes)
         "REF: Pre-Game Comm", "REF: Appearance", "REF: Movement/Fitness", "REF: Teamwork", "REF: Game Mgmt", "REF: In-Game Comm",
-        // Home AR (5)
+        "REF Reason: Pre-Game Comm", "REF Reason: Appearance", "REF Reason: Movement", "REF Reason: Teamwork", "REF Reason: Game Mgmt", "REF Reason: In-Game Comm",
+        "REF: Notes",
+        // Home AR (5 scores + 5 reasons + notes)
         "Home AR: Appearance", "Home AR: Fitness", "Home AR: Positioning", "Home AR: Communication", "Home AR: Teamwork",
-        // Away AR (5)
+        "Home AR Reason: Appearance", "Home AR Reason: Fitness", "Home AR Reason: Positioning", "Home AR Reason: Communication", "Home AR Reason: Teamwork",
+        "Home AR: Notes",
+        // Away AR (5 scores + 5 reasons + notes)
         "Away AR: Appearance", "Away AR: Fitness", "Away AR: Positioning", "Away AR: Communication", "Away AR: Teamwork",
+        "Away AR Reason: Appearance", "Away AR Reason: Fitness", "Away AR Reason: Positioning", "Away AR Reason: Communication", "Away AR Reason: Teamwork",
+        "Away AR: Notes",
         "Reviewed"
       ]);
     }
     row = [
-      new Date(), data.coachEmail, data.date, data.opponent, level,
+      new Date(), coachName, data.coachEmail, coachSchool, data.date, data.opponent, level,
       v("v_ref","pregame_comm"), v("v_ref","appearance"), v("v_ref","movement"),
       v("v_ref","teamwork"),      v("v_ref","game_mgmt"),  v("v_ref","ingame_comm"),
+      vReason("v_ref","pregame_comm"), vReason("v_ref","appearance"), vReason("v_ref","movement"),
+      vReason("v_ref","teamwork"),     vReason("v_ref","game_mgmt"),  vReason("v_ref","ingame_comm"),
+      vNotes("v_ref"),
       v("v_home_ar","appearance"), v("v_home_ar","fitness"), v("v_home_ar","positioning"),
       v("v_home_ar","communication"), v("v_home_ar","teamwork"),
+      vReason("v_home_ar","appearance"), vReason("v_home_ar","fitness"), vReason("v_home_ar","positioning"),
+      vReason("v_home_ar","communication"), vReason("v_home_ar","teamwork"),
+      vNotes("v_home_ar"),
       v("v_away_ar","appearance"), v("v_away_ar","fitness"), v("v_away_ar","positioning"),
       v("v_away_ar","communication"), v("v_away_ar","teamwork"),
+      vReason("v_away_ar","appearance"), vReason("v_away_ar","fitness"), vReason("v_away_ar","positioning"),
+      vReason("v_away_ar","communication"), vReason("v_away_ar","teamwork"),
+      vNotes("v_away_ar"),
       false
     ];
   }
@@ -129,11 +160,17 @@ function handleReviewSubmission(data) {
 
   // ── Email Admin with full details ──
   function sectionBlock(title, section, metrics) {
-    var lines = title + "\n";
+    var lines = title + "\n" + "─".repeat(title.length) + "\n";
     metrics.forEach(function(m) {
       var val = (r[section] && r[section][m.key] !== undefined && r[section][m.key] !== null) ? String(r[section][m.key]) : "—";
-      lines += "  " + m.label + ": " + val + "\n";
+      lines += "  " + m.label + ": " + val;
+      // Append low-rating reason inline if present
+      var reason = r[section] && r[section][m.key + "_reason"];
+      if (reason) lines += "  ← " + reason;
+      lines += "\n";
     });
+    var notes = r[section] && r[section]["_notes"];
+    if (notes) lines += "  Notes: " + notes + "\n";
     return lines;
   }
 
@@ -141,12 +178,17 @@ function handleReviewSubmission(data) {
   var V_REF_M     = [{key:"pregame_comm",label:"Pre-Game Communication"},{key:"appearance",label:"Appearance"},{key:"movement",label:"Movement/Fitness"},{key:"teamwork",label:"Teamwork"},{key:"game_mgmt",label:"Game Management"},{key:"ingame_comm",label:"In-Game Communication"}];
   var AR_M        = [{key:"appearance",label:"Appearance"},{key:"fitness",label:"Fitness"},{key:"positioning",label:"Positioning"},{key:"communication",label:"Communication"},{key:"teamwork",label:"Teamwork"}];
 
+  var sheetUrl = "https://docs.google.com/spreadsheets/d/" + COACH_SHEET_ID + "/edit";
+  var tabName  = level === "JV" ? "Reviews_JV" : "Reviews_Varsity";
+
   var body = "New Performance Review Submitted\n" +
-             "====================================\n" +
-             "Coach: " + data.coachEmail + "\n" +
-             "Date: " + data.date + "\n" +
-             "Opponent: " + data.opponent + "\n" +
-             "Level: " + level + "\n\n";
+             "=====================================\n" +
+             "Coach Name:   " + coachName + "\n" +
+             "Coach Email:  " + data.coachEmail + "\n" +
+             "School:       " + coachSchool + "\n" +
+             "Date:         " + data.date + "\n" +
+             "Opponent:     " + data.opponent + "\n" +
+             "Level:        " + level + "\n\n";
 
   if (level === "JV") {
     body += sectionBlock("HOME SIDE REFEREE", "jv_home_ref", JV_METRICS) + "\n";
@@ -157,7 +199,9 @@ function handleReviewSubmission(data) {
     body += sectionBlock("AWAY SIDE AR", "v_away_ar", AR_M);
   }
 
-  MailApp.sendEmail(ADMIN_EMAIL, "New Performance Review — " + level + " vs " + data.opponent, body, {name: 'NC HS Soccer Portal'});
+  body += "\n\n— Open in Google Sheets —\n" + sheetUrl + "#gid=" + tabName + "\n";
+
+  MailApp.sendEmail(ADMIN_EMAIL, "New Performance Review — " + level + " vs " + data.opponent + " (" + coachName + ")", body, {name: 'NC HS Soccer Portal'});
 
   return ContentService.createTextOutput(JSON.stringify({ status: "success" })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -166,34 +210,43 @@ function handleClipSubmission(data) {
   try {
     var ss = SpreadsheetApp.openById(COACH_SHEET_ID);
     var sheet = ss.getSheetByName("Clip Discussions");
+    var coachName   = data.coachName   || data.coachEmail || "";
+    var coachSchool = data.coachSchool || "";
 
     if (!sheet) {
       sheet = ss.insertSheet("Clip Discussions");
-      sheet.appendRow(["Timestamp", "Coach Email", "Game Date", "Opponent", "Level", "Clip Location", "Notes", "Status", "Admin Notes"]);
+      sheet.appendRow(["Timestamp", "Coach Name", "Coach Email", "School", "Game Date", "Opponent", "Level", "Clip Location", "Notes", "Status", "Admin Notes"]);
     }
 
     sheet.appendRow([
       new Date(),
+      coachName,
       data.coachEmail || "",
+      coachSchool,
       data.date || "",
       data.opponent || "",
       data.level || "",
       data.clipLocation || "",
       data.notes || "",
-      "Submitted", // Status (col 7, index 7)
-      ""           // Admin Notes (col 8, index 8)
+      "Submitted",
+      ""
     ]);
 
+    var sheetUrl = "https://docs.google.com/spreadsheets/d/" + COACH_SHEET_ID + "/edit#gid=Clip%20Discussions";
+
     // Email Admin
-    var subject = "New Clip Discussion Submitted";
-    var body = "A coach has submitted a clip for review.\n\n" +
-               "Coach: " + (data.coachEmail || "Unknown") + "\n" +
-               "Date: " + (data.date || "") + "\n" +
-               "Opponent: " + (data.opponent || "") + "\n" +
-               "Level: " + (data.level || "") + "\n\n" +
-               "Clip Location:\n" + (data.clipLocation || "Not provided") + "\n\n" +
-               "Notes:\n" + (data.notes || "None") + "\n\n" +
-               "Please check the 'Clip Discussions' sheet for details.";
+    var subject = "New Clip Discussion — " + (data.level || "") + " vs " + (data.opponent || "") + " (" + coachName + ")";
+    var body = "New Clip Discussion Submitted\n" +
+               "=====================================\n" +
+               "Coach Name:   " + coachName + "\n" +
+               "Coach Email:  " + (data.coachEmail || "Unknown") + "\n" +
+               "School:       " + coachSchool + "\n" +
+               "Date:         " + (data.date || "") + "\n" +
+               "Opponent:     " + (data.opponent || "") + "\n" +
+               "Level:        " + (data.level || "") + "\n\n" +
+               "Clip Location:\n  " + (data.clipLocation || "Not provided") + "\n\n" +
+               "Notes:\n  " + (data.notes || "None") + "\n\n" +
+               "— Open in Google Sheets —\n" + sheetUrl + "\n";
 
     MailApp.sendEmail(ADMIN_EMAIL, subject, body, { name: 'NC HS Soccer Portal' });
 
